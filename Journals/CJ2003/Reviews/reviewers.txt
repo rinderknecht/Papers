@@ -1,0 +1,59 @@
+Name     : Paul Thorpe
+Position : Head of Research & Development
+Address  : OSS Nokalva, Inc.
+           34364 Via Buena Drive
+           Yucaipa, CA 92399
+Phone    : +1 732 302 0750
+Fax      : +1 732 302 0023
+E-mail   : thorpe@oss.com
+
+
+Name     : Michel Mauny
+Position : Scientific Leader
+Address  : Projet Cristal, INRIA-Rocquencourt
+           Domaine de Voluceau, B.P. 105
+           F-78153 Le Chesnay Cedex, France
+Phone    : +33 1 39 63 57 96 
+Fax      : +33 1 39 63 53 30
+E-mail   : Michel.Mauny@inria.fr
+
+
+Name     : Serge Abiteboul
+Position : Scientific Leader
+Address  : Projet Verso, INRIA-Rocquencourt,
+           Domaine de Voluceau, B.P. 105
+           F-78153 Le Chesnay Cedex, France  
+Phone    : +33 1 39 63 55 37 
+Fax      : +33 1 39 63 53 30 
+E-mail   : Serge.Abiteboul@inria.fr 
+
+
+Name     : Sophie Cluet
+Position : CTO
+Address  : Xyleme S.A.
+           6, Rue Emile Verhaeren
+           F-92210 Saint-Cloud, France
+Phone    : +33 1 55 39 33 33
+Fax      : +33 1 55 39 33 49
+E-mail   : Sophie.Cluet@xyleme.com
+
+
+Name     : Paul Gloess
+Position : International and Industrial Relationships
+Address  : ENSEIRB - Departement Informatique 
+           1, Avenue du Docteur Albert Schweitzer 
+           Domaine universitaire, B.P. 99 
+           F-33405 Talence Cedex, France 
+Phone    : +33 5 56 84 23 58 
+Fax      : +33 5 56 37 20 23 
+E-mail   : Paul.Gloess@enseirb.fr
+
+
+Name     : Jacques Guyard
+Position : Director
+Address  : ESIAL
+           B.P. 239
+           F-54506 Vandoeuvre-les-Nancy Cedex, France
+Phone    : +33 3 83 91 21 23
+Fax      : +33 3 83 91 21 23
+E-mail   : Jacques.Guyard@loria.fr 

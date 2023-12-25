@@ -1,0 +1,105 @@
+# Makefile trivial pour latex
+# Courtesy of patrick.duval@devinci.fr
+# include GPL
+
+# ---------------------- A configurer ----------------------#
+# Le papier a traiter par defaut (sans extension .tex)
+# hello
+paper = ithet04
+
+# La cible a faire par defaut (essayer $(paper).acro $(paper).gv2 ...)
+all: $(paper).pdf
+
+# Les inclusions .tex, et les images .eps a generer (de png, jpg...)
+
+$(paper).dvi: abstractSub.tex introduction.tex model.tex architecture.tex visualisation.tex \
+              petria.eps petrib.eps arch.eps LoginRule2.ps screenshot.eps
+
+###           caseS.tex conclusion.tex \
+
+# ----------------------  Generique... ----------------------#
+# Applications
+convert = convert
+latex = latex
+dvips = dvips -t a4
+psnup = psnup -pa4
+ps2pdf = ps2pdf
+# dvi2pdf = dvipdfm -p a4
+gv = gv -media A4
+gv_landscape = gv -media A4 -landscape
+
+# acroread on MacOSX: open "/Applications/Acrobat Reader 5.0/"
+acroread = acroread
+
+acroread_landscape = $(acroread)
+help = man -t convert | $(gv) -
+atops = /usr/bin/a2ps --medium=A4 --no-header --portrait -1 --borders=no --output=-
+lpr = lpr
+rm = rm -f
+
+
+# Regles
+.PHONY: rerun help clean real_clean
+.PRECIOUS: %.dvi %.ps %.pdf %.ps2 %.pdf2
+
+# Generation de .eps
+%.eps:%.jpg
+	$(convert) $*.jpg $*.eps
+%.eps:%.png
+	$(convert) $*.png $*.eps
+%.eps:%.gif
+	$(convert) $*.gif $*.eps
+%.eps:%.pict
+	$(convert) $*.pict $*.eps
+%.eps:%.bmp
+	$(convert) $*.bmp $*.eps
+
+# Generation dvi, ps, pdf
+%.dvi:%.tex
+	$(latex) $*.tex < /dev/null
+%.ps:%.dvi
+	$(dvips) -o $*.ps $*.dvi
+%.pdf:%.ps
+	$(ps2pdf) $*.ps $*.pdf
+#%.pdf:%.dvi
+#	$(dvi2pdf) -o $*.pdf $*.dvi
+
+# Deux pages par feuille
+%.ps2:%.ps
+	$(psnup) -2  $*.ps > $*.ps2 || $(rm) $*.ps2
+%.pdf2:%.ps2
+	$(ps2pdf) $*.ps2 $*.pdf2
+
+# Visualisation (ne cree pas de fichier)
+%.gv:%.ps
+	$(gv) $*.ps
+%.acro:%.pdf
+	$(acroread) $*.pdf
+%.gv2:%.ps2
+	$(gv_landscape) $*.ps2
+%.acro2:%.pdf2
+	$(acroread_landscape) $*.pdf2
+
+# Impression ps (ne cree pas de fichier)
+%.lp:%.ps
+	$(lpr) -h  $*.ps
+%.lp2:%.ps2
+	$(lpr) -h  $*.ps2
+
+# help
+help:
+	@$(help)
+
+# rerun
+rerun:
+	$(rm) $(paper).dvi
+	$(MAKE) all
+
+# Nettoyage
+clean:
+	$(rm) *~ *.log *.aux *.lof *.lot *.toc
+
+# Des images source sont parfois en .ps ou .pdf...
+moreclean: clean
+	$(rm) *.dvi *.ps2 *.pdf2
+#---------------------- end ----------------------#

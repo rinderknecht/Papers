@@ -1,0 +1,282 @@
+%%-*-latex-*-
+
+\section{Introduction}
+
+Pattern matching of source code is very useful for analysing and
+transforming programs, as in compilers, interpreters, tools for legacy
+program understanding, code inspectors, refactoring tools, model
+checkers, code translators etc. Source code matching is especially
+useful for building extensible versions of these tools with
+user\hyp{}defined behaviour~\cite{mc, mj, mops, blast}. As the problem
+of tree matching has been extensively studied, the problem of source
+code matching has usually been reduced to tree matching, following two
+different ways.
+
+\paragraph{Tree Patterns.}
+
+In the first approach, code patterns are written as trees, using a
+domain\hyp{}specific notation to describe an abstract syntax tree
+(AST). This approach based on tree patterns has been used for a long
+time, either by using pattern matching support available in the
+implementation language, for instance, for tools written in \ML, or
+otherwise by explicitly implementing a tree pattern matching
+mechanism, for instance in inspection tools such as
+\textsf{tawk}~\cite{tawk} or \Scruple~\cite{scruple} or in model
+checking tools such as \textsf{MOPS}~\cite{mops}. More recently, some
+extensible code inspectors such as
+\textsf{PMD}~\footnote{\url{http://pmd.sourceforge.net/}} represent
+ASTs in \XML (which can be considered, in general, as a standardised
+formal notation for trees). This allows to write tree patterns in
+standardised languages such as \XPath (and the languages embedding it,
+like \XQuery and \XSLT), and thus reuse existing tree pattern
+matchers.
+
+The main advantage of expressing patterns as trees is that the
+implementation of pattern matching is simple, because any appropriate
+tree\hyp{}matching algorithm can be directly used on this
+representation. However, an important shortcoming of this approach is
+that programmers writing patterns should be aware of the internal AST
+representation of programs, and also of a specific notation for it.
+
+\paragraph{Example.}
+
+As a motivating example, let us consider a very simple
+user\hyp{}defined inspection rule over \Clang programs that searches
+for code fragments resetting all the elements in an array to zero,
+such as the loop
+\begin{verbatim}
+for(i=0; i<100; ++i) a[i]=0;
+\end{verbatim}
+\noindent When such initialisation code is found, the code reviewer
+may suggest that the same operation would be implemented more
+efficiently using the \texttt{bzero()} standard library
+function. Alternatively, the same rule might be predefined in a
+compiler in order to recognise such initialisations and automatically
+implement them more efficiently using the \texttt{bzero()}
+function. Depending on the AST representation of the \Clang program
+in a particular tool, the tree pattern corresponding to the example
+above would typically be expressed as follows: 
+{\small
+\begin{verbatim}
+for_stmt(assign_expr(X,N),
+         less_expr(X,M),
+         preincr_expr(X),
+         expr_stmt(assign_expr(array_expr(Y,X),
+                               int_literal(0))))
+\end{verbatim}
+}
+\noindent The name of the array, its bound and its index have been
+abstracted as variables of the pattern, called
+\emph{meta\hyp{}variables}. As can be seen in the above tree pattern,
+the programmer writing the inspection rule must be aware of both the
+AST structure (for instance, that an assignment in \Clang is an
+expression embedded in a statement) and of a specific notation for it
+(for instance, that the assignment operator is called
+\texttt{assign\_expr}, that the \texttt{for\_stmt} operator takes four
+arguments in a given order, etc.). Writing the same pattern in a
+language such as \XPath does not solve any of these issues, and the
+pattern becomes even more verbose.
+
+\paragraph{Concrete\hyp{}Syntax Patterns.}
+
+In the second approach to source code matching, code patterns are
+expressed using the native syntax (i.e., the concrete syntax) of the
+subject programming language, augmented with meta\hyp{}variables. Then
+patterns are parsed to trees before being matched with the program
+AST. In this approach, the pattern to be searched can be written much
+more naturally and concisely as shown in
+figure~\ref{intro:concrete_pattern} (where meta\hyp{}variables are
+escaped by the special character \texttt{\%}).
+\begin{figure}[H]
+\framebox[\columnwidth]{%
+\texttt{for(\%x=0; \%x<\%n; ++\%x) \%y[\%x]=0;}
+}%
+\caption{A concrete\hyp{}syntax pattern\label{intro:concrete_pattern}}
+\end{figure}
+\noindent This second approach has been used, for instance, in several
+extensible model checkers~\cite{cecil, mc, mj, blast}, as well as
+extensible tools for legacy program understanding and
+transformation~\cite{native, behavioral}. The main advantage of
+concrete syntax patterns is that they are easy to write and read back
+by any programmer, without knowledge of the AST
+representation. However, as far as the implementation is concerned,
+parsing the pattern requires a modified parser of the programming
+language defining the application, extended to
+\begin{itemize}
+
+  \item allow meta\hyp{}variables, which, by definition, are variables
+    that are never found in the source code;
+
+  \item parse patterns that represent arbitrary program
+    \emph{fragments} (statements, expressions, declarations), whereas
+    the grammar specifies fixed syntactical subsets.
+\end{itemize}
+Extending the parser of a programming language in this way is a
+challenging task, even if some frameworks automate the addition of the
+extra grammar productions~\cite{refine}, because it entails usually
+many supplementary \emph{ad hoc} choices in the parser strategy, often
+called \emph{conflict resolutions}. These conflicts may correspond to
+real ambiguities in the extended language (for example, in \Clang, the
+pattern \texttt{f(\%x);} may represent either a function call or a
+function declaration with an implicit return type of \texttt{int}), or
+reveal a limited knowledge of the lexical context in the parsing
+algorithm. Indeed, existing parsers commonly use limited lexical
+lookahead, as those analysing LALR(1) or LL(1) grammars. In
+LALR(1)\hyp{}based parsers, the conflicts present themselves as
+dilemmas (reduce or reduce, shift or reduce) but choosing one option
+rather than the other cannot always preserve the syntactic coverage
+(i.e., some valid programs may be rejected), hence rewriting the
+underlying grammar becomes a necessity. Sometimes, this emendation
+itself leads to special pattern syntaxes (such as \texttt{\#stmt
+f(\%x);} in the previous example) that make the patterns look less
+similar to native code. This is the reason why most of the existing
+tools following this approach allow only restricted forms of concrete
+syntax patterns, described by a limited pattern grammar (for example,
+matching only assignments and function calls~\cite{blast-ql}).
+
+In theory, GLR (for Generalised LR) parsers~\cite{glr} can deal with
+both kinds of conflicts, because they compute all possible parses:
+conflicts due to a limited lookahead are solved later during the
+parsing and conflicts due to the ambiguity of the grammar itself
+result in several possible ASTs. However, mainstream GLR parsers such
+as \Bison\footnote{\url{http://www.gnu.org/software/bison/}} use an
+extremely inefficient, exponential\hyp{}time GLR algorithm, creating a
+new operating system process at each local ambiguity. This scheme may
+quickly prove infeasible when parsing even small fragments in a
+pattern grammar where conflicts are scattered everywhere.
+
+Alternatively, the polynomial\hyp{}time GLR parsing
+algorithm~\cite{glr} was used to implement tools such as
+\SDF~\cite{sdf}, used by \textsf{ASF+SDF}~\cite{asf+sdf} and
+\textsf{Stratego/XT}~\cite{metaprog} to implement concrete syntax
+rewriting rules, or very recently BRNGLR~\cite{brnglr}. Even so, there
+is still a performance issue, because GLR parsers are typically much
+less efficient than LALR(1) parsers (a factor of 10 is not
+uncommon~\cite{elkhound}). Also recently, a hybrid GLR/LALR parser
+called \textsf{Elkhound}~\cite{elkhound} has been released and its
+running time is close to that of a standard LALR(1) parser on all the
+portions of a grammar that are LALR(1). But as discussed above, an
+extended pattern grammar is highly ambiguous (unless we severely
+restrict the patterns), so then GLR parsing time would fall back to
+usual GLR\hyp{}class performance. Therefore, GLR parsing may not be in
+general an efficient, production\hyp{}quality, solution to the problem
+of parsing source code patterns. Other parsing algorithms covering all
+context\hyp{}free grammars, such as Earley's~\cite{earley}, may
+perform better on such highly ambiguous grammars. Anyway, besides this
+performance issue, porting an existing parser to a different
+technology, like GLR, may prove quite difficult and has profound
+impacts on the test of the tool, which is unaffordable in the case of
+legacy parsers.
+
+
+%% Indeed, for either performance or historical reasons,
+%% GLR parsers are very rarely used in existing tools. Porting an
+%% existing parser to a different technology may be extremely difficult
+%% (typically, the grammar has to be rewritten from scratch) and may
+%% profoundly impact the rest of the tool, which is simply unaffordable
+%% for most legacy tools.
+
+\paragraph{Our Proposal.}
+
+It is safe to say that there is no simple solution today for adding
+concrete\hyp{}syntax pattern matching to existing parsers without
+either profoundly restructuring the parser, rewriting it in another
+framework, severely restricting the patterns, or compromising
+performance. As a consequence, concrete patterns are rarely used in
+existing parser\hyp{}based tools such as mainstream compilers. The
+lack of concrete patterns is particularly limiting the implementation
+of convenient user extensions in tools such as extensible compilers,
+code inspectors, model checkers, etc.
+
+To solve this problem in a pragmatic way, we propose a pattern
+matching technique based on \emph{unparsed patterns}, which makes an
+efficient use of unrestricted concrete\hyp{}syntax patterns, while
+requiring at the same time no extension of the parser for the subject
+programming language. This method is applicable to legacy parsers,
+based on any parsing technology, without porting them to a different
+framework.
+
+In a previous paper~\cite{ppdp}, one of us showed some concrete
+applications of unparsed patterns within a checking compiler called
+\MyGCC. However, no details were published about their implementation,
+nor about their theoretical foundations; it introduced the idea of
+unparsed patterns and briefly mentioned that they work by unparsing
+the AST, rather than by parsing the pattern. The present article aims
+at a complete exposition of unparsed patterns.
+
+%% The following
+%% sections show that the mere idea of unparsing the AST must be cleverly
+%% combined with other features in order to obtain a practical pattern
+%% matching algorithm.
+
+%% Some of the work reported here has been previously published as a
+%% workshop paper~\cite{VolanschiRinderknecht:2008} which introduced
+%% informally the main concepts of unparsed patterns. The topic and the
+%% practical results are the same, but the present article differs on
+%% many points, amongst which the following.
+%% \begin{itemize}
+  
+%%   \item The approach is completely different. In the workshop paper,
+%%     several algorithms for matching unparsed patterns were presented
+%%     and compared to the classic (tree\hyp{}based) pattern
+%%     matching. Here, only two algorithms are presented, \emph{both}
+%%     matching unparsed patterns: one using backtracking and one with
+%%     limited lexical lookahead, called \textit{ES(1)}. The former is
+%%     proved to be sound and complete with respect to the general
+%%     concept of close-tree matching (defined operationally), which is a
+%%     special case of tree inclusion: this way, the backtracking
+%%     algorithm can serve as a convincing reference for
+%%     \textit{ES(1)}. So, strictly speaking, the properties in this new
+%%     paper are different.
+
+%%   \item This twofold presentation allows a didactic introduction to
+%%     the usefulness of formal methods (some classic techniques in usage
+%%     amongst programming language theorists) when building tools and
+%%     systems.
+
+%%   \item The formal logic is rigourous; there are no ellipsis in the
+%%     arguments or formulae. The \textit{ES(1)} algorithm has been
+%%     rewritten using only inference rules instead of guarded rewrite
+%%     rules and separate recursive equations for the lookahead. The new
+%%     version is not the same, because, for example, it fails sooner
+%%     than \textit{ES(1)} in~\cite{VolanschiRinderknecht:2008} does, but
+%%     the major improvements are compactness and structural induction on
+%%     only one relation, allowing completely detailed proofs.
+
+%%   \item We present two interfaces for using the pattern matchers
+%%     internally in a compiler and we give some real runs of our
+%%     prototype \Matchbox.
+
+%% \end{itemize}
+
+%% Other contributions of this paper are as follows.
+%% \begin{itemize}
+
+%%   \item We describe in detail our novel pattern matching based on
+%%     unparsing and show its run\hyp{}time cost is linear in the size of
+%%     the AST;
+
+%%   \item we show how our pattern matching technology can be implemented
+%%     in a completely language\hyp{}independent way;
+
+%%   \item from a practical point of view, we expect that our approach
+%%     will have an impact on existing parser\hyp{}based tools written in
+%%     imperative languages, by providing them pattern matching at a
+%%     minimal cost, as demonstrated by our very concise implementation
+%%     within the \GCC compiler.
+
+%% \end{itemize}
+The rest of this paper is organised as follows. The next section
+presents the formal model which we use later to define our algorithms
+and related proofs. The reader familiar with functional languages or
+logic programming can skip this section upon first reading.  Then,
+section~\ref{backtracking} describes a matching algorithm for unparsed
+patterns by means of backtracking. It allows the reader to become
+familiar with the issues at hand, without delving too much on the
+details. The following section~\ref{es1} presents our main
+contribution, that is, a deterministic, linear\hyp{}time matching
+algorithm, called \textit{ES}(1), together with some formal
+proofs. After, section~\ref{implementation} presents our
+implementation of our matching algorithm and discusses its strengths
+and limitations. The penultimate section~\ref{related_work} presents
+different related works and compares them to ours.

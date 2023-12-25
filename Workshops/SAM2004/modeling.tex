@@ -1,0 +1,247 @@
+%%-*-latex-*-
+
+\section{Modeling}
+\label{modeling}
+
+An \ASN compiler accepts a set of \ASN modules representing the
+\emph{Protocol Data Unit} (PDU) and, according to a given set of
+encoding rules and a peer-specific target programming language,
+produces a set of data type definitions in that programming language,
+together with a codec (encoder/decoder) for the values to be
+exchanged. Then these pieces of source code are compiled and linked
+separately against the communicating application. Let us make some
+remarks and assumptions.
+
+\begin{itemize}
+
+  \bitem The peers share a set of \ASN modules and the assumption that
+  the encoding rules are the BER. Without loss of generality, we can
+  reduce the common knowledge to one module and even a unique \ASN
+  type.
+
+  \bitem In order to be independent from the application programming
+  languages, we shall assume that both peers express directly their
+  values in \ASN (in reality they are produced in memory at run-time).
+
+  \bitem At this stage, it is important not to be drawn into too much
+  details due to encoding and decoding series of bits. Instead, we
+  chose to represent codes with a more abstract syntax than bits,
+  which will allow us to easily reason by induction. That way we can
+  convince ourselves that the underlying principles of the BER are
+  sound. In a second stage we can study separately the encoding and
+  decoding between our abstract codes and the transmitted bits.
+
+  \bitem The standard document specifying the BER~\cite{X.690:2002}
+  says nothing about the decoding procedure except ``It is implicit in
+  the specification of these encoding rules that they are also used
+  for decoding.'' We shall then explicitly propose a decoding from our
+  abstract codes to \ASN (accordingly with the two previous
+  assumptions).
+
+  \bitem \emph{The BER encodings may not be unique for a given
+  value}. Indeed the BER allow the sender to choose independently from
+  the receiver different encodings for a class of types. For instance,
+  the encoding of the boolean value \texttt{TRUE} can be any non-zero
+  octet~\cite[\S{8.2.2}]{X.690:2002} and the encoding of a
+  \texttt{SET} value imposes no order on the component
+  encodings~\cite[\textsc{note} in
+  \S{8.11.3}]{X.690:2002}. Mathematically, the BER define an
+  application, not a function. (The restricted form of the BER, called
+  the Canonical Encoding Rules (CER) and the Distinguished Encoding
+  Rules (DER), are functions.) This leads us to require an
+  \emph{equivalence relationship between codes} which would be
+  enough discriminative but would nevertheless make equivalent all the
+  encodings of a value.
+
+\end{itemize}
+
+\begin{proposition}\label{all_BER_codes}
+All the BER encodings of a given value, according to a given type, are
+equivalent.
+\end{proposition}
+
+
+\textbf{Network.} We assume that the network transfer does not alter
+the codes, despite the publicised vulnerabilities mentioned in the
+introduction being due to possibly forged BER codes. We ignore this
+point precisely because it has been shown that these vulnerabilities
+were due to non-robust decoders, and our aim here is to prove that the
+BER \emph{themselves} are not flawed.
+
+\medskip
+
+\textbf{Well-formedness.} The front-ends of the \ASN compilers must
+check that the type~\T{} and the value $v$ are well-formed. These
+properties are intrinsic to \ASN and include, for the types, the
+uniqueness of names and tags of component types. For instance
+\texttt{\small T ::= CHOICE \{a INTEGER, a REAL\}} and \texttt{\small
+U ::= CHOICE \{a INTEGER, b INTEGER\}} are not well-formed. Indeed,
+the encoding of \texttt{\small t T ::= a : 0} would be ambiguous
+(i.e. non\hyp{}deterministic) since \texttt{0} can denote either an
+\texttt{\small INTEGER} or a \texttt{\small REAL} value and
+\texttt{\small u U ::= a : 0} would make the decoding
+non-deterministic because the tags of fields \texttt{\small a} and
+\texttt{\small b} are identical (\texttt{\small INTEGER}'s tag). In
+both examples, there would be no way for the encoder or the decoder to
+solve the ambiguity.
+
+\medskip
+
+\textbf{Value equivalence and soundness.} As we mentioned previously,
+the standard says little about the receiver's behaviour, but, since
+the BER embed all the tags in the codes, the uniqueness of tags is
+clearly intended to make the decoding a function, i.e. it returns
+always the same value on the same code. This is not stated explicitly
+in the standard and it is imaginable that the decoder sorts some
+decoded parts before passing the whole input to the application, but
+the standard seems to favour an asymmetric model in which the sender
+may spend some time reorganising the encoded data (i.e. not following
+strictly the order of the \ASN specification) and the receiver fastly
+decodes them as they arrive, without any subsequent processing. With
+the same asymmetrical focus, we believe that the receiver is the peer
+who is mostly concerned with security: the soundness property we
+propose consists in defining an \emph{equivalence relationship between
+\ASN values} (therefore independent from the BER) and in stating that
+the decoded value is equivalent to the (unknown) one the sender
+emitted.
+
+\begin{theorem}[Soundness]\label{soundness}
+Let $v$ be a well-formed value of the well-formed type \T. Then the
+BER decoding of \emph{any} BER encoding of $v$ is equivalent to $v$.
+\end{theorem}
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=.85 \textwidth]{model-1.eps}}
+  \caption{\footnotesize Soundness property with equivalence entailment}
+  \label{model1}
+\end{figure}
+
+\textbf{Code equivalence.} The figure~\ref{model1} shows the model we
+described so far. We understand better now why it is important for the
+equivalence on codes to be enough discriminative: otherwise many codes
+would be equivalent despite their \ASN values not being related. As we
+said, the BER embed all the tags (collected from the type of the
+value) in the codes, so, if the type is well-formed, the codes would
+capture enough structure (from the type) to allow a rather natural and
+discriminative equivalence relationship to be defined. Moreover, the
+equivalence will not need the knowledge of the type to be decided
+(tags in the codes suffice). We already identified the need for an
+equivalence relation on \ASN values in order to express a soundness
+property, and since, according to our method, we define separately an
+equivalence relation on codes, we need the following property to be
+satisfied.
+
+\begin{proposition}[Equivalence entailment]\hspace*{-4pt}\label{entailment}
+Let $c_1$ and $c_2$ be two equivalent codes. Then the decoding of
+$c_1$ is equivalent to the decoding of $c_2$ assuming the same type.
+\end{proposition}
+
+This way, we can maintain the soundness property despite the encoding
+procedure is not a function. In particular we suggest that the
+decoding is a non-injective function (decoding of two different codes
+can lead to the same value, \emph{e.g.,} \texttt{TRUE}).
+
+\medskip
+
+\textbf{Typing.} In figure~\ref{model1} we annotate the arrows between
+the ``\ASN'' and the ``BER codes'' layers with \T{} to mean that a value
+is encoded following the type \T{} or a code is decoded assuming the
+type \T. The encoding and decoding of a value assumes that this value
+is of a given type. This does not imply that we need to formalise the
+typing relation independently, it actually means that part of the
+typing is embedded in the encoding and decoding relations. In other
+words, the encoding only does the type-checking needed to allow the
+decoding with the same typing assumption.
+
+\medskip
+
+\textbf{Subtyping.} The BER do not take into account the subtyping
+constraints. Since these constraints restrict the set of values of a
+given type, the set of values considered by the BER is greater than
+the specified PDU. The Packed Encoding Rules~\cite{X.691:2002} (PER)
+consider the subtyping constraints and define a notion of
+\emph{PER-visibility} upon them. This also amounts to making an
+approximation of the exact set of values. These behaviours are not a
+design flaw. Indeed, when the encoder receives a value from its
+application, it should first check whether this value fits the PDU
+and, if so, it would be encoded after. The decoder, on the other hand,
+when receiving a code, decodes it first, then checks whether the value
+fits the PDU and, if so, passes it to its application. Keep in mind
+also that the encoding rules try to minimise the length of the codes
+according to different strategies (contrast BER and PER), so they
+\emph{must} approximate the data in order to find some regularities
+--- as a cloud of points can be compactly approximated by its convex
+hull.
+
+\medskip
+
+\emph{It is up to the \ASN compiler, not to the encoding rules
+themselves, to generate the code checking whether a value fits the
+PDU.}  The great expressiveness of the \ASN subtyping paradigm makes
+it very difficult to calculate the exact set of values of a subtype,
+even in particular to detect and reject empty
+PDUs~\cite{Rinderknecht:2003}. However, the attacks mentioned earlier
+were based on forged BER codes which were not out of the PDU but
+merely ill-formed or took advantage of recursive types in order to
+overflow the receiver's stack. In any case, the decoders (generated by
+\ASN compilers) must be robust and the limits we just mentioned about
+determining the exact set of values of the PDU has more to do with
+\ASN modules validation rather than soundness of data transmission ---
+at least until now. Thereupon, the BER can take into account the
+structural subtyping constraints (requiring a component to be
+\texttt{ABSENT}, \texttt{PRESENT} or to remain \texttt{OPTIONAL}).
+
+\medskip
+
+\textbf{Core \ASN} Next, we note that \emph{the BER only apply to a
+  subset of \ITU Rec. \mbox{X.680}}~\cite{X.680:2002} (\mbox{X.680}
+does not contain information objects, non-subtyping constraints and
+parameterization). For instance, the BER standard does neither
+consider \texttt{COMPONENTS OF} clauses in \ASN types nor selection
+types as well. The tagging policy (\texttt{EXPLICIT},
+\texttt{IMPLICIT} or \texttt{AUTOMA\-TIC}) is not considered
+either. Another example is \texttt{BIT STRING} values which are
+supposed not to be specified with named bits. All this suggests that
+the whole \ASN can be reduced to an inner subset which has the same
+expressivity, i.e. a sub-language which can express all what can be
+expressed with the whole language and nothing more. For the sake of
+brevity, in this paper we shall cope with \mbox{X.680} and show that a
+simpler sub-language exists by giving a series of rewriting rules
+which preserves the set of values of a given type. In fact, it is even
+useful to reduce further our sub-\ASN (we call it \emph{BER domain} in
+figure~\ref{model2}) into a smaller one that we call \emph{\core.} The
+purpose is to get rid of some more syntactic constructs which are not
+fundamental, but are mere facilities, and thus to ease the
+formalisation and ensure some properties. One technical side effect is
+that the equivalence on values does not require the knowledge of their
+type, because \emph{the values in \core are not syntactically
+  ambiguous} (\emph{e.g.,} \texttt{0}~is a value for both
+\texttt{REAL} and \texttt{INTEGER} types in full \ASN, but in \core it
+is only of \texttt{INTEGER} type --- in the other case it is rewritten
+\texttt{0.0}). Another very interesting property is the following.
+
+\begin{theorem}[BER termination]
+The encoding of \core values with the BER always terminates.
+\end{theorem}
+
+The reason is that we detect and reject as illegal the infinite
+values, i.e. the recursive values, during the reduction phase. If we
+want to convince ourselves that the design of the BER is sound, we
+need to understand well \ASN and how to reduce it to a manageable
+kernel.
+
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=.85 \textwidth]{model-2.eps}}
+  \caption{\footnotesize Core \ASN and soundness property}
+  \label{model2}
+\end{figure}
+
+Figure~\ref{model2} gives the final model we arrived at. We note now
+$v^{\#}$ and $\T^{\#}$ the values and types in \mbox{X.680}, $v^{*}$
+and $\T^{*}$ the values and types in the BER domain, and simply $v$
+and \T{} when they are in \core. Let us note $v' \approx v$ the
+proposition ``Value $v'$ is equivalent to value $v$.''  Let us note
+$c' \sim c$ the proposition ``Code $c'$ is equivalent to code $c$.''
+The figure~\ref{model2} makes it clear that we need to guarantee that
+\emph{all the encodings of $v^{*}$ are equivalent to all the encodings
+of $v$}.

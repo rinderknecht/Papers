@@ -1,0 +1,122 @@
+The development of Web technologies has accelerated the offer of
+(commercial) e-learning platforms. 
+%MS rajouter qques ref.
+%AM le mieux serait une ref qui donne une survue de plateformes
+%je n en ai pas sous le coude.... on peut aussi laisser tomber
+However most of the current systems
+still provide a limited set of functionalities in terms of generic
+authoring tools, translation tools for importing existing course
+material, answer analysis tools, comprehensive collection of answers
+for future mining, etc. 
+%AM I think the lines below are superfluous.
+%In this paper we are interested in systems
+%that manage course material as well as exercises and tests associated
+%with a given course 
+%material. The target of such systems is three-fold: to  allow (i) the
+%user to check his mastering of a given 
+%topic, (ii) the teacher to give some feedback to the
+%user and to better understand the learning process by
+%means of answers mining. 
+
+This paper is a first step toward the design and implementation of a
+platform whose main functionalities are (a) the provision and
+management of series of exercises and tests (authoring tools), (b) a
+personalized navigation through the 
+existing collection  of tests and exercises, taking into account the
+user profile (level of skills) and history, (c) the analysis of user
+answers, its storing into a 
+database and its mining. We follow  what is called a process oriented
+   approach in \cite{grandbastien03}.
+
+The focus of the paper is on the
+design of a generic platform, emphasizing three aspects: (1)
+information model, (2) platform architecture and (3) visualisation and mining 
+of
+users' results. The system we are aiming at should  provide rich
+feedbacks to 
+both learners and teachers and be open enough to ease evolution and
+developments from both course authors and software developers. 
+
+As a  case study,  we have  chosen the
+learning of SQL, the standard database query language, to validate the 
+platform functionalities related to navigation.
+%AM I think it is better not to give many explanations here
+% However intelligent automatic analysis of
+%responses and supervised and unsupervised error detection in exercises on SQL and related topics such as relational
+%calculus and relational algebra, requires sophisticated tools which were
+%not currently available. 
+Then, to  illustrate our approach for students' 
+answers 
+mining and visualisation, we chose a mathematical reasoning  case
+study (formal proofs in propositional logic), 
+for which automatic answer checking and error detection has been implemented 
+in a web-based tool, the Logic-ITA \cite{logicT1}
+%is much easier to automatize. 
+%Other data mining case studies (including SQL) will later
+%be included.
+
+The contribution of this paper is threefold:
+
+\begin{itemize}
+
+  \item A rich information model with four components: (i) exercises
+  model which allows for a generic structuration 
+  (the internal structure of exercises and tests can be chosen by the
+  author); (ii) a model for 
+  {\em e-learning guided tours} (egt) which are subsets of exercises that
+  define consistent sequences of exercises,  similar to sequencing 
+ \cite{Brusilovsky}, egt can equivalently be seen as a navigation with constraints
+  through the set of exercises existing in the database; (iii) a
+  personalized navigation and choice of exercises by the user (driven
+  by the teacher that allows only specific tours but also taking into
+  account the user former scores and history); (iv) storing into the
+  database   the user scores, answers and errors. 
+%AM I think it is better to be a bit more cautious here since we have nothing
+% about infor on teachers and about exercises description.
+The database  may also
+  include information about   teachers and  documents describing 
+   exercises and predefined answers.
+
+  \item The design of a web platform called LeVinQam currently under
+  development.
+  %MS Christian et Patrick à vous
+  The main objective  is to provide a core
+  platform with an open  design, offering efficient
+  extension mechanisms based on robust and open standards like XML
+  and java.  This in order to ease contributive developments from both
+  authors and software developers, and to allow researchers to
+  capitalize and share more effectively on e-learning experiments.
+  
+  \item Tools to visualize and mine students' answers.  
+%MS Agathe, ne penses-tu as qu'on peut un raccourcir. je n'ai pas
+%vérifié l'homogénéité de cet item avec la section 4
+%AM, j'ai raccourci et mis en phase avec section 4
+Having all
+  students answers and errors at hand makes it possible to use
+  queries and data mining techniques to retrieve pedagogically relevant
+  information for both students and teachers~\cite{amv03}. Teachers often ask
+  for techniques that cluster students in homogeneous groups. A way to
+  achieve this is to use a Data Mining technique called
+   clustering.  Histograms prove to be useful to convey back to teachers information about the obtained clusters. Also mistakes made by students may be mined to find whether some errors are often made together. 
+   We illustrate the
+  approach using students answers from the Logic-ITA~\cite{logicT1}.
+% which synthetises
+%  all mistakes with their number of occurrences. Teachers often ask
+%  for techniques that cluster students in homogeneous groups. A way to
+%  achieve this is to use a Data Mining technique called
+%  \emph{hierarchical ascending clustering}. The clusters obtained are
+%  usually displayed by a tree called a \emph{dendrogram}. We propose
+%  an algorithm that rewrites the dendrogram in order to improve the
+%  visualization of students who made many mistakes. These students
+%  appear on the left of the graphic while students with few or no
+%  mistakes appear on the right. This order is in general not
+%  total. However, in practice, it is quite relevant. We illustrate the
+%  approach using students answers from the Logic Tutor~\cite{logicT1}.
+
+\end{itemize}
+Section 2 defines the e-learning information model we choose with
+emphasis on the modeling of egt. The design of the LeVinQam platform is
+addressed in Section 3. Section 4 presents some benefits of the  mining and
+visualisation approach. 
+%AM we said no conclusion!
+%We give some concluding remarks in Section 5.

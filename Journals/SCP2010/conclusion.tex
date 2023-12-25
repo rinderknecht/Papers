@@ -1,0 +1,49 @@
+%%-*-latex-*-
+
+\section{Conclusion}
+\label{concl}
+
+We have shown how concrete syntax pattern matching can be integrated
+with minimal effort in any parser\hyp{}based tool, written in any host
+language and manipulating any subject language, including
+multi\hyp{}language tools such as legacy systems analysers or
+intentional programming systems. Matching concrete syntax can make the
+code of such tools more concise and more readable.  The purely
+syntactic matching can be easily complemented with any other checks in
+the host language, due to a natural embedding of patterns as strings
+in the host language. Furthermore, unparsed patterns give a very
+simple means to make such tools extensible with user\hyp{}defined
+behaviour. In particular, most existing tools can be made extensible
+with minimal effort. Extensible compilers are a particular application
+in which users may add their own program checks. Other possible
+applications may involve model checkers, program inspectors, etc. The
+formal model we introduced allowed us to precisely define our matching
+algorithms. The first makes use of backtracking and is thus of
+theoretical interest. The same formalism allowed us to prove its
+soundness and completeness with respect to the classic pattern
+matching. We also proved that it defines a function. The second
+algorithm, \textit{ES}(1), is of practical interest because it runs in
+worst\hyp{}case linear time with a lookahead of one lexeme. This
+lookahead is naturally an approximation of the lexical context, its
+consequence is to lose completeness with respect to the classic
+pattern matching, despite being proven correct. This incompleteness
+can be overcome in all cases by adding meta\-parentheses to the
+pattern or by typing the meta\-variables. We illustrated
+\textit{ES}(1) on realistic, albeit small, examples processed by the
+prototype \Matchbox. We also described rather in detail how the
+unparsed patterns have been successfully integrated into \GCC.
+
+Unparsed patterns can be improved in several respects. For instance,
+it would be interesting, both from a practical and theoretical point
+of view, to reduce even further the amount of meta\-parentheses and
+typed meta\-variables required to obtain a complete matching
+algorithm. Also, as far as expressiveness is concerned, pattern
+variables could be typed and could also match tokens. Moreover, a
+single pattern variable could match a list of elements such as found
+in some other matchers, even when that list of elements is not grouped
+as a distinct subtree. Also, it would be useful to allow for empty
+trees in the definition of unparsing (yielding an empty list). In
+terms of execution time, it is an open question whether the subtree
+matching problem, when using unparsed patterns, can be solved more
+efficiently than in quadratic time. Finally, concrete uses of dynamic
+patterns remain to be investigated.

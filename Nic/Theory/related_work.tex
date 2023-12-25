@@ -1,0 +1,160 @@
+%%-*-latex-*-
+
+\section{Related Work}
+\label{related_work}
+
+The idea of matching a tree with a pattern expressed as a string
+without parsing the pattern was apparently first mentioned in our
+previous paper~\cite{ppdp}. Combining this idea with the use of lexeme
+information in the AST, meta\-parentheses, and lookahead is new, and
+so is the analysis of precise cases of bind/\-unparse conflicts and
+the study of the algorithmic complexity.
+
+Efficient algorithms for matching a tree with a pattern also
+represented as a tree have been known for a long time. This pattern
+matching problem can be solved in linear time as a particular case of
+unification~\cite{unification} where variables may occur only in the
+pattern. We saw that reducing pattern matching to tree matching is
+either difficult to use (patterns expressed as trees) or difficult to
+implement in most existing tools (pattern parser). Our approach avoids
+both difficulties while keeping the same linear execution time.
+
+Many variants of the tree pattern matching problem have been
+studied. The subtree matching problem consists of deciding if a
+pattern matches any subtree of a subject tree. The ``dictionary''
+version of this problem involves multiple patterns to be searched
+against the subject's subtrees. Some known algorithms~\cite{rooted}
+begin with a pre\-processing phase that reduces both the subject tree
+and the pattern to their pre\-order strings. However, re\-writing a
+text pattern as a pre\-order string requires first representing the
+pattern as a tree, so it cannot be used to avoid parsing the
+pattern. In terms of execution time, the preprocessing phase reduces
+the asymptotic complexity of the search, and thus ensures a very
+efficient search of the patterns against all subtrees. Our approach is
+less efficient on the problem of dictionary subtree searches.
+
+In the last decade, \XML has increasingly been adopted as a standard
+for representing tree\hyp{}shaped data, including program ASTs as a
+particular case. Therefore, \textsf{XML}\hyp{}specific tree pattern 
+languages such as \XPath are being used for matching code. Compared to
+\XPath, unparsed patterns provide the convenience of concrete syntax,
+but less matching power ---~for instance, matching a subtree nested at
+an arbitrary level is not possible. \XPath has been integrated in more
+powerful query languages such as \XQuery or in transformation
+languages such as \XSLT or \CDuce~\cite{cduce}. Unparsed patterns can
+be embedded in any programming language providing a string type,
+eventually as a complement to tree matching mechanisms already in the
+language.
+
+Native patterns~\cite{native} are completely valid code fragments, but
+in which some reserved names can be used as pattern
+variables. Actually, the reserved names are the names of
+non\-terminals in the grammar of the language as described in its
+reference manual (which is supposed to be known by programmers). These
+non\-terminal names may be suffixed by a number to denote different
+occurrences of the nonterminal and by \texttt{*} or \texttt{+} to
+denote lists of such nonterminals. The extended grammar of the
+patterns can be generated automatically from the base
+grammar. However, this requires expressing or porting the base grammar
+in a syntax definition formalism called \SDF. As opposed to this
+constraint, unparsed patterns can be incorporated in any existing
+parser\hyp{}based tool with minimal effort.
+
+\Scruple~\cite{scruple} is a generic pattern language specialised for
+matching source code. \Scruple patterns are more general than ours, as
+they allow, for instance, matching lists of subtrees in a single
+pattern variable, or matching in the same pattern a tree and one of
+its subtrees nested at an arbitrary level. Execution time is not
+linear, as the algorithm involves backtracking. The patterns are
+compiled into a recursive network of automata that consume lexemes in
+the subject AST that correspond to its subtrees. This is rather
+similar to our algorithm. However, \Scruple patterns are parsed by a
+pattern parser which extends the native parser of the subject
+language. Unlike our approach, the lexemes in the AST do not include
+lexemes in the concrete syntax (keywords, separators,
+etc.).\footnote{In our theoretical sections, however, we assumed, for
+the sake of simplicity, some tokenisation.}
+
+An elegant language\hyp{}embedding technique for meta\-programming is
+described by Visser~\cite{metaprog}, which allows the embedding an
+arbitrary context\hyp{}free subject language \(S\) in a host
+context\hyp{}free programming language \(H\), and further using the
+concrete syntax of \(S\) to match and build subject code fragments
+within \(H\) programs. This technique requires defining the grammar of
+both languages in the \SDF framework, which combines the two in a
+single grammar. This grammar fusion uses \SDF's support for modules
+and user\hyp{}defined grammar injection rules (that can be
+automated). The advantage of their approach is that syntax errors in
+both the host language and its subject patterns are checked by a
+single parser. After this combined parsing, a generic AST
+transformation reduces the bilingual AST to a plain \(H\) AST. Hence,
+a meta\-program in \(H+S\) is preprocessed to a program in \(H\), that
+can be compiled with any compiler for \(H\), and then linked with
+appropriate tree\hyp{}processing libraries for using the parsed
+patterns. In particular, pattern matching is supported if the language
+or the linked libraries provide tree matching. The main inconvenience
+of this approach, from a practical point of view, is the porting
+effort of both languages to \SDF. Besides, an acknowledged limitation
+of that work is that it cannot express context\hyp{}sensitive syntax
+such as type identifiers in \Clang or off\hyp{}side rules in
+\Haskell. Unparsed patterns can serve as a lightweight alternative to
+this approach, when re\-writing the two parsers in \SDF is not
+feasible. It requires a minimal effort to implement and is not limited
+to a given class of languages, once they are parsed to ASTs by an
+existing parser. Thus, unparsed patterns are meant to be easily
+incorporated in most existing tools. In turn, our approach does not
+provide support for building ASTs in concrete syntax, nor syntax
+checking of the patterns.
+
+Also related to our work is the problem of pattern disambiguation,
+consisting in choosing among the several possible trees corresponding
+to a textual pattern. As we mentioned in the introduction,
+disambiguation is traditionally done by introducing special pattern
+syntax, which tends to reduce the advantages of concrete syntax
+patterns. A clearly better solution, used in several meta\-programming
+systems, consists in exploiting type information associated to the
+pattern variables or to the whole pattern. This technique has been
+applied for instance in \MetaAspectJ~\cite{maj} to allow producing
+\AspectJ code within \Java meta\-programs using particularly
+convenient concrete patterns. Patterns are parsed using a backtracking
+\textsf{ANTLR}\hyp{}based parser mixing \textit{LL}(\(k\)) parsing and
+type checking. By greatly exploiting the specifics of the \Java and
+\AspectJ languages, the tool is able to infer the type of variables
+containing object code and automatically introduce some type
+conversions from basic host types to object code types when
+needed. However, patterns are used only for generating code, while our
+patterns are used only in pattern matching. Their parsing algorithm
+may exhibit exponential\hyp{}time behaviour.
+
+A general and language\hyp{}independent solution for the
+type\hyp{}based disambiguation of patterns is described by Bravenboer
+\emph{et al.}~\cite{type-disambig} Their solution consists in three
+phases. First, the host language code with embedded object language
+patterns is parsed using a scannerless GLR algorithm according to the
+method mentioned above~\cite{metaprog}, which returns a parse forest
+for each ambiguous pattern. A second phase translates each such object
+AST into host language code for building that AST. The disambiguation
+phase is done by a slightly extended version of the host language type
+checker, and keeps only the valid AST builders. Since the
+disambiguation phase sees no object code, its implementation is
+independent from the object language, but not from the host
+language. This is much like our language\hyp{}independent
+approach. Their technique itself is portable to any
+statically\hyp{}typed language, if different AST nodes are mapped to
+different types in the host language.
+
+In our framework, disambiguation is done using
+meta\-parentheses. These chiefly serve to eliminate ambiguities due to
+some tree structure that is absent in the unparsed patterns, but can
+also serve to eliminate other ambiguities that would also exist in the
+corresponding parsed patterns. For instance, the \Clang or \Java
+pattern \texttt{f(\%x)} may either represent a function call with a
+single argument (bound to variable \texttt{x}) or a function call with
+any number of arguments (then \texttt{x} is bound to the list of all
+the arguments). This ambiguity also exists with parsed patterns, where
+it is eliminated by specifying the type of \texttt{x} as a list of
+object ASTs or as a single object AST. When matched with the (greedy)
+\textit{ES}(1) algorithm, \texttt{x} will always match the AST
+representing the whole list of arguments.  Single\hyp{}argument calls
+can be matched by introducing extra meta-parentheses, yielding the
+pattern \texttt{f(\%(\%x\%))}.

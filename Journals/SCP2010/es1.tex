@@ -1,0 +1,451 @@
+%%-*-latex-*-
+
+\section{Algorithm \textit{ES}(1)}
+\label{es1}
+
+\subsection{Patterns and Substitutions}
+
+Let \mlp and \mrp be meta\-lexemes corresponding respectively to the
+opening and closing meta\-parentheses, whose concrete syntax is
+\texttt{\%(} and \texttt{\%)}. These meta\-parentheses are inserted by
+the user in order to guide matching the pattern against the parse tree
+by forcing the enclosed pattern to match one
+subtree. Meta\-parentheses can be present anywhere in the pattern as
+long as they are properly paired. Unparsed patterns are the smallest
+set \(\overline{\cal P}\) such that
+\begin{itemize}
+
+  \item \(\el \in \overline{\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(\overline{p} \in \overline{\cal
+    P}\), then \(\cons{l}{\overline{p}} \in \overline{\cal P}\);
+
+  \item if \(x \in {\cal V}\) and \(\overline{p} \in \overline{\cal
+    P}\), then \(\cons{\meta{x}}{\overline{p}} \in \overline{\cal
+    P}\);
+
+  \item if \(\overline{p}_1, \overline{p}_2 \in \overline{\cal P}\)
+    and \(\overline{p}_1 \neq \el\) then \([\mlp] \cdot \overline{p}_1
+    \cdot [\mrp] \cdot \overline{p}_2 \in \overline{\cal P}\). 
+
+\end{itemize}
+Given \(\overline{p}\), the first task is to check whether
+\(\overline{p} \in \overline{\cal P}\). This is done by means of a
+meta\-parsing function, which either fails due to
+mismatched meta\-parentheses or returns the initial pattern where all
+patterns enclosed in meta\-parentheses (these included) have been
+replaced by a \emph{pattern tree}. These trees are not parse trees
+because they contain patterns (thus the new patterns are still
+unparsed with respect to the programming language syntax). Let
+\(\unary{pat}\) be their unique constructor. Thus we have
+\(\unary{pat} \not\in {\cal C}\). Let us define the set of
+\emph{meta\-parsed patterns} \(p\) as the smallest set \({\cal P}\)
+such that
+\begin{itemize}
+
+  \item \(\el \in {\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(p \in {\cal P}\), then
+    \(\cons{l}{p} \in {\cal P}\);
+
+  \item if \(x \in {\cal V}\) and \(p \in {\cal P}\), then
+    \(\cons{\meta{x}}{p} \in {\cal P}\);
+
+  \item if \(p_1, p_2 \in {\cal P}\) and \(p_1 \neq \el\), then
+    \(\cons{\pat{p_1}}{p_2} \in {\cal P}\).
+
+\end{itemize}
+
+Pattern \(l_1 \; \texttt{\%(} \; l_2 \; l_3 \; \texttt{\%(} \;
+\texttt{\%x} \; l_4 \; \texttt{\%)} \; \texttt{\%)}\) is the
+simplified form of unparsed pattern \([l_1, \!\mlp, l_2, l_3, \!\mlp,
+  \meta{\!x\!}, l_4, \mrp, \mrp].\) Its meta\-parsing is shown in
+Figure~\ref{es1_pattern_tree}. (Thereupon we write `pattern' instead
+of `meta\-parsed pattern'.)
+\begin{figure}[h]
+\framebox[\columnwidth]{
+\centering
+\includegraphics[bb=71 671 128 721]{pattern_tree}
+}
+\caption{Metaparsed pattern \([l_1,
+  \pat{[l_2, l_3, \pat{[\meta{x}, l_4]}]}]\)\label{es1_pattern_tree}}
+\end{figure}
+
+Let us extend substitutions to cope with patterns, not just
+meta\-variables, as we did about the back\-tracking algorithm in
+sub\-section~\ref{x_subst_def}. Closed patterns are defined
+inductively as the smallest set \(\close{\cal P}\) such that
+\begin{itemize}
+
+  \item \(\el \in \close{\cal P}\);
+
+  \item if \(h \in {\cal H}\) and \(\close{p} \in \close{\cal P}\),
+        then \(\cons{h}{\close{p}} \in \close{\cal P}\);
+
+  \item if \(\close{p}_1, \close{p}_2 \in \close{\cal P}\) and
+    \(\close{p}_1 \neq \el\), then
+    \(\cons{\pat{\close{p}_1}}{\close{p}_2} \in \close{\cal P}\).
+
+\end{itemize}
+Note the absence of meta\-variables in \(\close{\cal P}\) and,
+instead, the presence of trees (\(h \in {\cal H}\)). The formal
+definition of substitutions can be found in
+Figure~\ref{es1_subst_def}. It is clear that the result of such
+substitutions is always a closed pattern.
+\begin{figure}[b]
+\framebox[\columnwidth]{%
+\(
+\begin{aligned}
+  \subst{\el}{\sigma} 
+&\eqn{1} \el\\
+  \subst{\cons{\meta{x}}{p}}{\sigma}
+&\eqn{2} \cons{\sigma(x)}{\subst{p}{\sigma}}\\
+  \subst{\cons{l}{p}}{\sigma}
+&\eqn{3} \cons{l}{\subst{p}{\sigma}}\\
+  \subst{\cons{\pat{p_1}}{p_2}}{\sigma}
+&\eqn{4}
+  \cons{\pat{\subst{p_1}{\sigma}}}{\subst{p_2}{\sigma}}
+\end{aligned}
+\)
+}
+\caption{Substitutions on meta\-parsed patterns%
+\label{es1_subst_def}}
+\end{figure}
+
+
+\subsection{Closed\hyp{}Tree Inclusion}
+
+A relationship \((\sqsubseteq)\) is needed to capture the concept of a
+closed\hyp{}tree inclusion in a parse tree, just as we did about the
+backtracking algorithm in sub\-section~\ref{backtracking}. The
+difference here is that closed trees may contain special nodes
+\textsf{pat} that distinguish them from parse trees. The formal
+definition we propose is based on ordered inference rules and given in
+Figure~\ref{es1_tree_matching_def}.
+\begin{itemize}
+
+  \item Rule \textsf{ONE} states that a pattern matches a tree if the
+    same pattern matches the corresponding singleton forest.
+
+  \item Rule \textsf{EMP} means: `The empty pattern always matches the
+    empty forest.'
+
+  \item Rule \textsf{EQ} specifies that if the head of the pattern and
+    the forest is the same closed tree, then the pattern is included
+    in the forest if the remaining pattern \(\close{p}\) is included
+    in the forest \(f\).
+
+  \item Rule \textsf{PAT} handles the case of a pattern tree: there is
+    inclusion if the subtrees \(\close{p}_1\) of the pattern tree are
+    included in the subtrees \(f_1\) of the forest head and if the
+    remaining pattern \(\close{p}_2\) is included in the remaining
+    forest \(f_2\).
+
+  \item Rule \textsf{SUB} states that if the two heads are different
+    trees (this is implicit due to partial ordering and \textsf{SUB}
+    being the last), there is inclusion if the pattern is included om
+    the catenation of the subtrees \(f_1\) of the tree in the forest
+    and the remaining forest \(f_2\). This rule must always be
+    considered last, i.e., if a derivation ends with \textsf{SUB}, the
+    last conclusion has the shape \(\close{p} \sqsubseteq
+    \cons{c(f_1)}{f_2}\) \emph{and it is implied that there are no
+      closed patterns} \(\close{p}_1\) \emph{and} \(\close{p}_2\)
+    \emph{such that} \(\close{p} = \cons{c(f_1)}{\close{p}_1}\) or
+    \(\close{p} = \cons{\pat{\close{p}_1}}{\close{p}_2}\) (which would
+    lead to the conclusions of \textsf{EQ} or \textsf{PAT}).
+
+\end{itemize}
+\begin{figure}[h]
+\framebox[\columnwidth]{
+\begin{mathpar}
+\inferrule*{}{\el \sqsubseteq \el}
+\;\TirName{\text{\sf EMP}}
+
+\inferrule
+  {\close{p} \sqsubseteq f}
+  {\cons{h}{\close{p}} \sqsubseteq \cons{h}{f}}
+\,\TirName{\text{\sf EQ}}
+
+\inferrule
+  {\close{p} \sqsubseteq [h]}
+  {\close{p} \sqsubseteq h}
+\,\TirName{\text{\sf ONE}}
+
+\inferrule*[right=\text{\sf PAT}]
+  {\close{p}_1 \sqsubseteq f_1 
+   \and
+   \close{p}_2 \sqsubseteq f_2}
+  {\cons{\pat{\close{p}_1}}{\close{p}_2} \sqsubseteq 
+   \cons{c(f_1)}{f_2}}
+\quad
+\inferrule*[right=\text{\sf SUB}]
+  {\close{p} \sqsubseteq f_1 \cdot f_2}
+  {\close{p} \sqsubseteq \cons{c(f_1)}{f_2}}
+\end{mathpar}
+}
+\caption{Closed\hyp{}pattern inclusion for \textit{ES}(1)%
+(\textsf{SUB} is last)
+\label{es1_tree_matching_def}}
+\end{figure}
+
+\subsection{Pattern Matching}
+
+Compared to the informal description of the backtracking pattern
+matching given in section~\ref{backtracking}, the binding and the
+unparsing steps are here specialised so to exclude each other based on
+the shape of the configuration at hand (this is
+syntax\hyp{}direction). The critical case is when the current pattern
+starts with a meta\-variable: a step may be chosen that leads to a
+match failure whilst the other step would have not. We will come back
+later on this point. For now, let us describe the new binding and
+unparsing operations.
+\begin{itemize}
+
+  \item \textbf{Binding.} The first element of the pattern is a
+    meta\-variable \(\meta{x}\) and the first tree \(t\) of the parse
+    forest is not a leaf. The meta\-variable is bound to the tree,
+    i.e., \(x \mapsto t\) in the following cases.
+    \begin{itemize}
+
+      \item \emph{When the parse forest is reduced to one tree.} An
+        unparsing is possible if the tree root has only one subtree
+        (so cutting out the root leads to another single tree), but
+        programmers usually want to bind the biggest tree. This step
+        is the rule \textsf{BIND}\(_3\) in
+        Figure~\ref{es1_match_def}. Notice the notation
+        \(\meta{x_{[c]}}\) which is a shortcut for `\(\meta{x}\) or
+        \(\meta{x_{c}}\),' where \(c\) is a node
+        constructor. \(\meta{x_{c}}\) means that the meta\-variable
+        \(x\) must be bound to a node labeled by a constructor
+        \(c\). This gives the programmer more control on the binding
+        process.
+
+      \item \emph{When the second element of the pattern and the
+        second tree of the forest are the same lexeme \(l\).} Hence
+        this decision is based on a lookahead of one lexeme after the
+        first tree. This case corresponds to the rule
+        \textsf{BIND}\(_1\) in Figure~\ref{es1_match_def}. Note that
+        there is a slight optimisation here, since \(l\) is eliminated
+        in the same rule (otherwise rule \textsf{ELIM} would always
+        have been used after this one). The meta\-variable \(x\) can
+        be typed so it can only bind nodes of kind \(c\), which is
+        denoted by \(\meta{x_{[c]}}\).
+
+      \item \emph{When the second tree of the forest is not a leaf.}
+        This is the rule \textsf{BIND}\(_2\) in
+        Figure~\ref{es1_match_def}. Same remark about
+        \(\meta{x_{[c]}}\).
+
+    \end{itemize}
+    The substitution \(\sigma\) resulting from the recursive call
+    (among the premises) must be compatible with the binding \(x
+    \mapsto c(f_1)\), i.e., \(\sigma \subseteq \sigma \oplus x \mapsto
+    c(f_1)\).
+
+  \item \textbf{Unparsing.} The root of the first tree in the parse
+  forest is cut out and the tree is replaced by its direct
+  subtrees.
+    \begin{itemize}
+
+      \item If the first element of the pattern is a tree pattern,
+      i.e., corresponds to a meta\-parenthesis in the original
+      unparsed pattern, then this tree pattern is matched against the
+      first tree and the remaining pattern is matched against the
+      remaining forest. The two resulting substitutions, \(\sigma_1\)
+      and \(\sigma_2\), must be compatible, i.e., no binding in one is
+      present in the other with the same meta\-variable, unless the
+      tree is the same (in short: \(\sigma_1 \subseteq \sigma_1 \oplus
+      \sigma_2\)). This is rule \textsf{UNPAR}\(_1\) in
+      Figure~\ref{es1_match_def}.
+\begin{figure}[t]
+\framebox[\columnwidth]{
+\begin{mathpar}
+\inferrule*{}{\smj{\el}{\el}{\sigma_\varnothing}}
+\;\TirName{\text{\sf END}}
+
+\inferrule
+  {\smj{f}{{p}}{\sigma}}
+  {\smj{\cons{l}{f}}{\cons{l}{{p}}}{\sigma}}
+\,\TirName{\text{\sf ELIM}}
+
+\inferrule*[right=\text{\sf BIND}\(_1\)]
+  {\smj{f_2}{{p}}{\sigma}
+   \and
+   \sigma \subseteq \sigma \oplus x \mapsto c(f_1)}
+  {\smj{\cons{c(f_1), l}{f_2}}%
+      {\cons{\meta{x_{[c]}}, l}{{p}}}%
+      {\sigma \oplus x \mapsto c(f_1)}}
+
+\inferrule*[right=\text{\sf BIND}\(_2\)]
+  {\smj{\cons{t_2}{f}}{{p}}{\sigma}
+   \and
+   \sigma \subseteq \sigma \oplus x \mapsto c(f_1)}
+  {\smj{\cons{c(f_1), t_2}{f}}%
+      {\cons{\meta{x_{[c]}}}{{p}}}%
+      {\sigma \oplus x \mapsto c(f_1)}}
+
+\inferrule*[right=\text{\sf BIND}\(_3\)]
+  {}
+  {\smj{[c(f)]}{[\meta{x_{[c]}}]}{\{x \mapsto c(f)\}}}
+
+\inferrule*[right=\text{\sf UNPAR}\(_1\)]
+{\sigma_1 \subseteq \sigma_1 \oplus \sigma_2\\
+ \smj{f_1}{{p}_1}{\sigma_1}
+ \and
+ \smj{f_2}{{p}_2}{\sigma_2}}
+{\smj{\cons{c(f_1)\!}{\!f_2}}%
+    {\cons{\pat{{p}_1}}{\!{p}_2}}%
+    {\sigma_1 \oplus \sigma_2}}
+
+\inferrule*[right=\text{\sf UNPAR}\(_2\)]
+{\smj{f_1 \cdot f_2}{{p}}{\sigma}}
+{\smj{\cons{c(f_1)\!}{\!f_2}}{{p}}{\sigma}}
+\end{mathpar}
+}
+\caption{Pattern matching \textit{ES}(1)
+(\(\textsf{UNPAR}_2\) is last)
+\label{es1_match_def}}
+\end{figure}
+
+      \item Otherwise, the new configuration is rewritten. This is
+      rule \textsf{UNPAR}\(_2\) in Figure~\ref{es1_match_def}, which
+      must be considered last, because its conclusion can overlap with
+      the one of \textsf{BIND} rules or \textsf{UNPAR}\(_1\).
+
+    \end{itemize}
+
+\end{itemize}
+
+
+\begin{figure}
+\VerbatimInput[frame=single]{es1.ml}
+\caption{Implementation of \textit{ES}(1) in \OCaml\label{es1_match_ocaml}}
+\end{figure}
+
+Figure~\ref{es1_match_ocaml} shows the implementation of \text{ES}(1)
+in \OCaml, a functional language with static typing. The substitutions
+are lists of bindings. We use an exception instead of an empty list to
+signal a match failure. The library function \texttt{List.fold\_left}
+is a functional iterator such that \texttt{List.fold\_left f a [b1;
+    ...; bn]} is \texttt{f (... (f (f a b1) b2) ...) bn}. The untyped
+meta\-variable \(\meta{x}\) is implemented as \texttt{`Meta(x,None)};
+the typed meta\-variable \(\meta{x_{c}}\) is implemented as
+\texttt{`Meta(x,Some c)}; lexeme \(l\) by \texttt{`Lex(l)}; a
+meta\-parsed pattern \(\pat{p}\) by \texttt{`Pat(p)}; the
+non\hyp{}leaf tree \(c(f)\) by \texttt{`Node(c,f)}; a forest \(f\) by
+a list of trees. The binary operator \texttt{@} is the list
+concatenation; the expression \(\cons{a}{l}\) is implemented by
+\texttt{a::l} and the binder `\texttt{as}' allows creating an alias in
+the \OCaml pattern. The function \texttt{add} is the equivalent of the
+\Prolog predicate \texttt{add/3} in Figure~\ref{x_match_def}.
+
+\subsection{Termination and Worst\hyp{}Case Complexity}
+
+The system terminates because each rule either strictly decreases the
+number of elements in the pattern or the number of nodes in the parse
+forest. A successful run happens when a configuration cannot be
+rewritten furthermore and it contains an empty pattern and an empty
+parse forest. Let us assume that the cost of applying an inference
+rule is constant. Then the cost of a run is upper bounded by a
+constant times the number of rules in the proof tree (which can be
+considered as a trace of the execution). The worst\hyp{}case
+complexity is thus obtained by an initial configuration which leads to
+the maximum number of rules being used. The observation made about the
+termination of the system gives us the clue as how to proceed in
+finding such input. Because a meta\-variable cannot be bound to a
+lexeme (i.e., a tree leaf), the nodes of the bounded subtree are not
+considered by the algorithm. Thus, the worst case contains no
+meta\-variables, so no \textsf{BIND} rule is used. Moreover, the size
+of the pattern has no impact on the cost, since a meta\-parenthesis or
+a lexeme are eliminated at the same time a node or a leaf is removed
+from the parse forest (see rules \textsf{ELIM} and
+\textsf{UNPAR}\(_1\)). The worst\hyp{}case complexity follows: it is
+linear in the number of nodes in the parse forest.
+
+\subsection{Soundness}
+\input{es1_soundness}
+
+\subsection{Completeness}
+
+This algorithm is not complete in the sense the backtracking algorithm
+was in section~\ref{backtracking:completeness}. Consider the unparsed
+pattern \texttt{\%x = \%y - \%z - \%t} and the same parse tree in
+Figure~\ref{fig:src_tree}. The execution trace is
+\textsf{UNPAR}\(_2\), \textsf{BIND}\(_1\), \textsf{UNPAR}\(_2\),
+\textsf{BIND}\(_1\) and then failure, that is, no rule apply. But
+there exists a successful closed\hyp{}tree inclusion if the
+substitution \(\{\textsf{x} \mapsto \text{var}(\texttt{a}), \textsf{y}
+\mapsto \text{var}(\texttt{a}), \textsf{z} \mapsto
+\text{mul}(\text{var}(\texttt{b}), \texttt{*},
+\text{var}(\texttt{c})), \textsf{t} \mapsto \text{var}(\texttt{d})\}\)
+is applied to the pattern first. Therefore, a match failure with
+\textit{ES}(1) can either mean that there is no matching or that one
+exists but was not found. In the latter case, meta\-parentheses must
+be added to the pattern in order to force an unparsing step instead of
+a binding. In the previous example, the successful substitution is
+found by \textit{ES}(1) if the unparsed pattern is transformed into
+\texttt{\%x = \%(\%(\%y - \%z\%) - \%t\%)}. Of course, as a
+worst\hyp{}case, if the pattern is fully meta\-parenthesized
+\emph{with respect to the grammar}, \textit{ES}(1) becomes complete in
+the sense above, e.g., \texttt{\%(\%x = \%(\%(\%(\%y\%) - \%z\%) -
+  \%t\%)\%)}. Indeed, such parenthesising leads to a meta\-parsed
+pattern\hyp{}tree which is isomorphic to a tree pattern, as in classic
+pattern matching. In other words, there is always a way to
+meta\-parenthesize an unparsed pattern to make it as expressive as the
+classic, tree\hyp{}based, pattern matching. Moreover, in practice,
+only a few meta\-parentheses may be needed for a given pattern, as
+shown above.
+\begin{figure}[t]
+\framebox[\columnwidth]{%
+  \includegraphics{const_static}
+}%
+\caption{A simplified parse tree (no empty words)\label{fig:const_static}}
+\end{figure}
+By looking closely at the rewrite rule, we can figure out necessary
+conditions for an unparsed pattern to lead to a loss of completeness
+in matching. These conditions can serve as empirical guidelines to
+prevent the problem from appearing. As mentionned above, the problem
+occurs when an instance of rule \textsf{BIND}\(_1\) or
+\textsf{BIND}\(_2\) is used and later leads to a failure. This failure
+could have been avoided, had \textsf{UNPAR}\(_2\) been selected,
+perhaps several times, followed by \textsf{BIND}\(_1\) or
+\textsf{BIND}\(_2\). Assuming that it is rule \textsf{BIND}\(_1\) that
+should be delayed after some \textsf{UNPAR}\(_2\) steps, it means that
+the lexeme \(l\) is repeated in the parse forest and occurs each time
+after a tree (not a lexeme). Left\hyp{}associative operators in
+programming languages usually occur in such kind of grammatical
+constructs. This is why the previous pattern had to be written
+\texttt{\%x = \%(\%(\%y - \%z\%) - \%t\%)}. Let us consider now that
+it is rule \textsf{BIND}\(_2\) that should have been delayed. This
+leads unparsed patterns as ``\texttt{\%q \%t \%x ;}'' to fail to match
+the parse tree given in Figure~\ref{fig:const_static}. An unparsing
+step should be taken instead of a premature binding, so that
+\texttt{\%q} matches the type qualifiers and \texttt{\%t} the
+type. One way out of this is to use the meta-parenthesized unparsed
+pattern \texttt{\%(\%(\%q \%t\%) \%x;\%)} instead. However, a simpler
+solution in this case is to use a typed meta\-variable $q$, giving the
+pattern `\texttt{\%<quals>q \%t \%x ;}', which does not force the user
+to know anything about the nesting structure of the AST, and is also
+arguably more readable than the former meta\-parenthesized pattern.
+
+In fact, a typed meta\-variable \texttt{\%<c>x} forces the algorithm
+to perform as many unparse step as needed before obtaining a tree of
+the form \(c(\ldots)\) at the left of the forest. Hence, the only
+possible ambiguity with a typed meta\-variable is when several trees
+of the form \(c(\ldots)\) can be obtained by such a continuous
+sequence of unparse steps. It is easy to see that this situation
+always corresponds to a (directly or indirectly) left\hyp{}recursive
+grammar construct such as a left\hyp{}associative operator, a
+left\hyp{}recursive list construct, etc. The set of such constructs
+may be automatically produced based on the subject language
+grammar. For these constructs, the algorithm will bind the
+meta\-variable typed with \(c\) to the biggest, enclosing \(c\)
+construct. If this is not what is needed, meta\-parentheses must be
+added to force more unparse steps.
+
+Summarising: parsing failures can always be solved by typing the
+conflicting meta\-variable, except when that variable must bind a
+\emph{nested} left\hyp{}recursive construct, in which case the pattern
+needs to be meta\-parenthesized. Of course, meta\-parentheses and
+typed variables can be freely combined and may complement each other.
+

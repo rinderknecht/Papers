@@ -1,0 +1,41 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}       % Required for hyphenation
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{url}               % URL typesetting
+\frenchspacing                 % No worries about placing \@
+\usepackage{amsmath,amssymb}   % Mathematics
+\usepackage{graphicx}          % Graphics
+\usepackage{subfig}            % Subfigures
+
+% Title
+%
+\title{Comparing Merge Sorts}
+
+\author{Christian Rinderknecht\\
+\small Department of Programming Languages and Compilers\\
+\small E\"otv\"os Lor\'and University\\
+\small Budapest, Hungary\\
+\small \url{rinderkn@caesar.elte.hu}}
+\date{}
+
+% Main document
+%
+\begin{document}
+
+\maketitle
+
+\allowdisplaybreaks
+
+\input{commands}
+\input{abstract}
+\input{introduction}
+\input{redux}
+\input{bottom_up}
+\input{comparison}
+
+\bibliographystyle{unsrt}
+\bibliography{tmcs2014}
+
+\end{document}

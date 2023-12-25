@@ -1,0 +1,438 @@
+%%-*-latex-*-
+
+\begin{theorem}[Soundness]\hfill
+\label{es1:soundness}
+\begin{center}
+If \(\smat{h}{p} \twoheadrightarrow \sigma\) 
+then \(\subst{p}{\sigma} \sqsubseteq h\).
+\end{center}
+\end{theorem}
+
+\medskip
+
+\noindent\textsc{Proof~\ref{es1:soundness}} (Soundness). 
+
+\noindent Let \(\ind{U}(p, f, \sigma)\) be the proposition
+\begin{center}
+\emph{If} \(\smj{f}{p}{\sigma}\)
+\emph{then} \(\subst{p}{\sigma} \sqsubseteq f\).
+\end{center}
+Then \(\ind{U}(p, [h], \sigma)\) is equivalent to the
+soundness. Let
+\begin{equation}
+  \smj{f}{p}{\sigma} \label{es1:sound:head}
+\end{equation}
+(otherwise the theorem is trivially true). This means that there
+exists a pattern\hyp{}matching derivation \(\Delta\) whose conclusion
+is \(\smj{f}{p}{\sigma}\). This derivation is a tree; we
+hence can reason by structural induction on it, i.e., we assume that
+\(\ind{U}\) holds for the premises of the last rule in \(\Delta\)
+(this is the \emph{induction hypothesis}) and then prove that
+\(\ind{U}\) holds for \(\smj{f}{p}{\sigma}\). We proceed
+case by case on the kind of rule that can end \(\Delta\).
+\begin{enumerate}
+
+  \item Case where \(\Delta\) ends with \textsf{END}.\\ We have
+    \(p = \el\), \(f = \el\) and \(\sigma =
+    \sigma_\varnothing\). Therefore \(\subst{p}{\sigma} =
+    \subst{\el}{\sigma} \eqn{1} \el \sqsubseteq \el = f\).  Thus
+    \(\ind{U}(\el, \el, \sigma_\varnothing)\) holds.
+
+  \item Case where \textsf{ELIM} ends \(\Delta\).
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf ELIM}]
+         {\inferrule*
+            {\inferrule*[vdots=1.5em]{}{ }}
+            {\smj{f'}{p'}{\sigma}}}
+         {\smj{\cons{l}{f'}}{\cons{l}{p'}}{\sigma}}
+    \end{mathpar}
+    where, since we assumed \eqref{es1:sound:head},
+    \begin{enumerate}
+
+      \item \label{es1:sound:24} \(p \triangleq
+        \cons{l}{p'}\),
+
+      \item \label{es1:sound:23} \(f \triangleq \cons{l}{f'}\).
+
+    \end{enumerate}
+    Let us assume that the induction hypothesis holds for the premise
+    of \textsf{ELIM}, that is to say, \(\ind{U}(p', f',
+    \sigma)\) holds. Thus
+    \begin{gather}
+      \subst{p'}{\sigma} \sqsubseteq f'. \label{es1:sound:02}
+    \end{gather}
+    Besides, we have
+    \begin{align}
+      \subst{p}{\sigma}
+      &= \subst{\cons{l}{p'}}{\sigma}\notag
+      & \text{by} \,\; \text{\ref{es1:sound:24}}\\
+      &\eqn{3} \cons{l}{\subst{p'}{\sigma}}
+      &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+      &\sqsubseteq \cons{l}{f'}
+      &\text{by} \,\; \eqref{es1:sound:02} \,\; \text{and} \,\;
+      \textsf{EQ} \, (\text{Fig.~\ref{es1_tree_matching_def}})\notag\\
+      &= f
+      & \text{by} \,\; \text{\ref{es1:sound:23}}\notag\\
+        \subst{p}{\sigma}
+      &\sqsubseteq f. \label{es1:sound:09}
+    \end{align}
+    As a conclusion, the induction hypothesis and
+    \eqref{es1:sound:head} imply \eqref{es1:sound:09} in this case,
+    i.e., \(\ind{U}(p, f, \sigma)\) holds.
+
+  \item Case where \textsf{BIND}\(_1\) ends \(\Delta\).
+    \begin{mathpar}
+        \inferrule
+          {\inferrule*
+            {\inferrule*[vdots=1.5em]{}{ }}
+            {\smj{f''}{p''}{\sigma'}}}
+          {\smj{\cons{t, l}{\!f''}}%
+               {\cons{\meta{x}, l}{p''}}%
+               {\sigma' \oplus x \mapsto t}}
+      \end{mathpar}
+      where, since we assumed \eqref{es1:sound:head},
+      \begin{enumerate}
+
+        \item \label{es1:sound:sigma'} \(\sigma' \subseteq \sigma'
+          \oplus x \mapsto t\),
+
+        \item \label{bind2_p} \(p \triangleq
+          \cons{\meta{x}, l}{p''}\),
+
+        \item \label{es1:sound:1} \(f \triangleq \cons{t, l}{f''}\),
+
+
+         \item \label{es1:sound:sigma} \(\sigma \triangleq \sigma'
+           \oplus x \mapsto t\).
+
+      \end{enumerate}
+      Let us assume that the induction hypothesis holds for the
+      premise of \textsf{BIND}\(_1\), i.e., 
+      \(\ind{U}(p'', f'', \sigma')\) holds:
+      \begin{gather}
+        \subst{p''}{\sigma'} \sqsubseteq f''. \label{es1:sound:M}
+      \end{gather}
+      From \ref{es1:sound:sigma'} and lemma \ref{minimality}, we draw
+      \begin{align}
+           \subst{p''}{\sigma'} 
+        &= \subst{p''}{(\sigma' \oplus x \mapsto
+             t)}\notag\\
+        &= \subst{p''}{\sigma}
+        &\text{by} \,\; \text{\ref{es1:sound:sigma}}\notag\\
+           \subst{p''}{\sigma}
+        &= \subst{p''}{\sigma'}\notag\\
+        &\sqsubseteq f''
+        &\text{by} \,\; \eqref{es1:sound:M}\notag\\
+           \subst{p''}{\sigma}
+        &\sqsubseteq f''. \label{es1:sound:00}
+      \end{align}
+      We have
+      \begin{align}
+           \sigma(x) 
+        &= (\sigma' \oplus x \mapsto t)(x)
+        &\text{by} \,\; \text{\ref{es1:sound:sigma}}\notag\\
+        &= t
+        &\text{by} \,\; \eqref{model:oplus}\notag\\
+           \sigma(x) 
+        &= t. \label{es1:sound:N}
+      \end{align}
+      Besides, we have the following equalities:
+      \begin{align}
+          \subst{p}{\sigma} 
+        &= \subst{\cons{\meta{x},l}{p''}}{\sigma}
+        &\text{by} \,\; \text{\ref{bind2_p}}\notag\\
+        &\eqn{2}
+          \cons{\sigma(x)}{\subst{\cons{l}{p''}}{\sigma}}
+        &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+        &\eqn{3}
+          \cons{\sigma(x),l}{\subst{p''}{\sigma}}
+        &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+        &= \cons{t,l}{\subst{p''}{\sigma}}
+        &\text{by} \,\; \eqref{es1:sound:N}\notag\\
+          \subst{p}{\sigma} 
+        &=
+          \cons{t,l}{\subst{p''}{\sigma}}. \label{es1:sound:13}
+      \end{align}
+      Closed\hyp{}tree matching \eqref{es1:sound:00} and the derivation
+      \begin{mathpar}
+        \inferrule*[right=\text{\sf{EQ}}]
+          {t \in {\cal H}
+           \and
+           \inferrule*[right=\text{\sf{EQ}}]
+              {l \in {\cal H}
+               \and
+               \subst{p''}{\sigma} \sqsubseteq f''}
+              {\cons{l}{\subst{p''}{\sigma}}
+               \sqsubseteq \cons{l}{f''}}}
+          {\cons{t, l}{\subst{p''}{\sigma}}
+           \sqsubseteq \cons{t, l}{f''}}
+      \end{mathpar}
+      imply
+      \begin{align}
+           \cons{t, l}{\subst{p''}{\sigma}} 
+        &\sqsubseteq
+           \cons{t, l}{f''}\notag\\
+           \subst{p}{\sigma}
+        &\sqsubseteq
+           \cons{t, l}{f''}
+        &\text{by} \,\; \eqref{es1:sound:13}\notag\\
+        &= f
+        &\text{by} \,\; \text{\ref{es1:sound:1}}\notag\\
+           \subst{p}{\sigma}
+        &\sqsubseteq f. \label{es1:sound:O}
+      \end{align}
+      As a conclusion, the induction hypothesis and
+      \eqref{es1:sound:head} imply \eqref{es1:sound:O} in this case,
+      i.e., \(\ind{U}(\cons{\meta{x}}{p'}, f, \sigma)\).
+
+  \item Case where \textsf{BIND}\(_2\) ends \(\Delta\).
+    \begin{mathpar}
+      \inferrule
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{ }}
+           {\smj{\cons{t_2}{f'}}{p'}{\sigma'}}}
+        {\smj{\cons{t_1, t_2}{f'}}%
+           {\cons{\meta{x}}{p'}}%
+           {\sigma' \oplus x \mapsto t_1}}
+    \end{mathpar}
+    where, since we assumed \eqref{es1:sound:head}, 
+    \begin{enumerate}
+
+      \item \label{bind1_def_p} \(p \triangleq
+        \cons{\meta{x}}{p'}\),
+
+      \item \label{bind1_def_f} \(f \triangleq \cons{t_1, t_2}{f'}\),
+
+      \item \label{es1:sound:BIND2:sigma} \(\sigma \triangleq \sigma'
+        \oplus x \mapsto t_1\),
+
+      \item \label{bind1_def_x} \(\sigma' \subseteq \sigma' \oplus x
+        \mapsto t_1\).
+
+    \end{enumerate}
+    Let us assume that the induction hypothesis holds for the
+    premise of \textsf{BIND}\(_2\), i.e.,
+    \(\ind{U}(p', \cons{t_2}{f'}, \sigma')\):
+    \begin{gather}
+      \subst{p'}{\sigma'} \sqsubseteq \cons{t_2}{f'}. \label{es1:sound:05}
+    \end{gather}
+    From \ref{bind1_def_x} and lemma \ref{minimality}, we draw
+    \begin{align}
+         \subst{p'}{\sigma'}
+      &= \subst{p'}{(\sigma' \oplus x \mapsto t_1)}\notag\\
+      &= \subst{p'}{\sigma}
+      &\text{by} \,\;
+         \text{\ref{es1:sound:BIND2:sigma}}\notag\\
+         \subst{p'}{\sigma}
+      &= \subst{p'}{\sigma'}\notag\\
+      &\sqsubseteq \cons{t_2}{f'}
+      &\text{by} \,\; \eqref{es1:sound:05}\notag\\
+         \subst{p'}{\sigma}
+      &\sqsubseteq \cons{t_2}{f'}. \label{es1:sound:19}
+    \end{align}
+    We have
+    \begin{align}
+          \sigma(x) 
+      &= (\sigma' \oplus x \mapsto t_1)(x)
+      &\text{by} \,\;
+       \text{\ref{es1:sound:BIND2:sigma}}\notag\\
+      &= t_1
+      &\text{by} \,\; \eqref{model:oplus}\notag\\
+         \sigma(x) 
+      &= t_1. \label{es1:sound:P}
+    \end{align}
+    Furthermore,
+    \begin{align}
+         \subst{p}{\sigma} 
+      &= \subst{\cons{\meta{x}}{p'}}{\sigma}
+      &\text{by} \,\; \text{\ref{bind1_def_p}}\notag\\
+      &\eqn{2} \cons{\sigma(x)}{\subst{p'}{\sigma}}
+      &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+      &= \cons{t_1}{\subst{p'}{\sigma}}
+      &\text{by} \,\; \eqref{es1:sound:P}\notag\\
+      &\sqsubseteq \cons{t_1, t_2}{f'}
+      &\text{by} \,\; \eqref{es1:sound:19}, \textsf{EQ}
+       \, (\text{Fig.~\ref{es1_tree_matching_def}})\notag\\
+      &=f 
+      &\text{by} \,\; \text{\ref{bind1_def_f}}\notag\\
+         \subst{p}{\sigma}
+      &\sqsubseteq f. \label{es1:sound:Q}
+    \end{align}
+    As a conclusion, the induction hypothesis and
+    \eqref{es1:sound:head} imply \eqref{es1:sound:Q} in this case,
+    i.e., \(\ind{U}(\cons{\meta{x}}{p'}, f, \sigma)\).
+
+  \item Case where \textsf{BIND}\(_3\) ends \(\Delta\).
+    \begin{mathpar}
+      \inferrule*[right=\;\text{\sf BIND}\(_3\)]
+         {}
+         {\smj{[t]}{[\meta{x}]}{\{x \mapsto t\}}}
+    \end{mathpar}
+    where, since we assumed \eqref{es1:sound:head},
+    \begin{enumerate}
+
+      \item \label{es1:sound:15} \(p \triangleq [\meta{x}]\),
+
+      \item \label{es1:sound:16} \(f \triangleq [t]\),
+
+      \item \label{es1:sound:14} \(\sigma \triangleq \{x \mapsto t\}\).
+
+    \end{enumerate}
+    Because \textsf{BIND}\(_3\) is an axiom, we must prove 
+    \(\ind{U}([\meta{x}], [t], \{x \mapsto t\})\) without relying on
+    the induction principle:
+    \begin{align}
+         \subst{p}{\sigma}
+      &= \subst{[\meta{x}]}{\sigma}
+      & \text{by} \,\; \text{\ref{es1:sound:15}}\notag\\
+      &\eqn{2} \cons{\sigma(x)}{\subst{\el}{\sigma}}
+      &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+      &\eqn{1} \cons{\sigma(x)}{\el}
+      &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+      &\triangleq [\sigma(x)]\notag\\
+      &= [t]
+      & \text{by} \,\; \ref{es1:sound:14} \,\; \text{and} \,\;
+        \eqref{model:oplus}\notag\\
+        \subst{p}{\sigma}
+      &= [t]. \label{es1:sound:R}
+    \end{align}
+    Since we also have the derivation
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf EQ}]
+        {\inferrule*[right=\text{\sf EMP}]
+          { }
+          {\el \sqsubseteq \el}}
+        {\cons{t}{\el} \sqsubseteq \cons{t}{\el}}
+    \end{mathpar}
+    we know that \([t] \sqsubseteq [t]\), which, in conjunction with
+    \eqref{es1:sound:R}, implies
+    \begin{align}
+        \subst{p}{\sigma}
+      &\sqsubseteq [t]\notag\\
+      &= f
+      & \text{by} \,\; \text{\ref{es1:sound:16}}\notag\\
+        \subst{p}{\sigma}
+      &\sqsubseteq f. \label{es1:sound:17}
+    \end{align}
+    As a conclusion, the induction hypothesis and
+    \eqref{es1:sound:head} imply \eqref{es1:sound:17}, i.e.,
+    \(\ind{U}([\meta{x}], [t], \{x \mapsto t\})\) holds.
+
+  \item Case where \(\Delta\) ends with \textsf{UNPAR}\(_1\).
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf UNPAR}\(_1\)]
+        {\inferrule*
+          {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+          {\smj{f_1}{p_1}{\sigma_1}}
+         \and
+         \inferrule*
+          {\inferrule*[vdots=1.5em]{}{(\Delta_2)}}
+          {\smj{f_2}{p_2}{\sigma_2}}}
+        {\smj{\cons{c(f_1)\!}{\!f_2}}%
+            {\cons{\pat{p_1}}{\!p_2}}%
+            {\sigma_1 \oplus \sigma_2}
+        }
+    \end{mathpar}
+    where, since we assumed \eqref{es1:sound:head},
+    \begin{enumerate}
+      
+      \item \label{es1:sound:22} \(p \triangleq
+        \cons{\pat{p_1}}{p_2}\),
+
+      \item \label{es1:sound:21} \(f \triangleq \cons{c(f_1)}{f_2}\),
+
+      \item \label{es1:sound:26} \(\sigma_1 \subseteq \sigma_1 \oplus
+        \sigma_2\).
+          
+    \end{enumerate}
+    The derivations \(\Delta_1\) and \(\Delta_2\) are
+    sub\hyp{}derivations of \(\Delta\), therefore the induction
+    hypothesis holds for their conclusions, i.e.,
+    \(\ind{U}(p_1, f_1, \sigma_1)\) is true:
+    \begin{gather}
+      \subst{p_1}{\sigma_1} \sqsubseteq f_1 \label{es1:sound:01}
+    \end{gather}
+    and \(\ind{U}(p_2, f_2, \sigma_2)\) is true as well:
+    \begin{gather}
+      \subst{p_2}{\sigma_2} \sqsubseteq f_2. \label{es1:sound:F}
+    \end{gather}
+    Directly from the definition \eqref{model:oplus:ext}, it comes
+    \begin{gather}
+      \sigma_2 \subseteq \sigma_1 \oplus \sigma_2. \label{es1:sound:27}
+    \end{gather}
+    It follows
+    \begin{align}
+       \subst{p_1}{\sigma_1}
+      &= \subst{p_1}{(\sigma_1 \oplus \sigma_2)}
+      &\text{by} \,\; \text{\ref{es1:sound:26}} \,\; \text{and} \,\;
+        \text{\ref{minimality}}\label{es1:sound:28}\\
+        \subst{p_2}{\sigma_2}
+      &= \subst{p_2}{(\sigma_1 \oplus \sigma_2)}
+      &\text{by} \,\; \eqref{es1:sound:27} \,\; \text{and} \,\;
+        \text{\ref{minimality}}.\label{es1:sound:29}
+    \end{align}
+    Let \(\sigma \triangleq \sigma_1 \oplus \sigma_2\). Besides, we
+    have
+    \begin{align}
+         \subst{p}{\sigma}
+      &= \subst{\cons{\pat{p_1}}{p_2}}{\sigma}
+      &\text{by} \,\; \text{\ref{es1:sound:22}}\notag\\
+      &\eqn{4}
+       \cons{\pat{\subst{p_1}{\sigma}}}%
+            {\subst{p_2}{\sigma}}
+      &\text{cf. Fig.~\ref{es1_subst_def}}\notag\\
+      &= \cons{\pat{\subst{p_1}{\sigma_1}}}%
+              {\subst{p_2}{\sigma}}
+      &\text{by} \,\; \eqref{es1:sound:28}\notag\\
+      &= \cons{\pat{\subst{p_1}{\sigma_1}}}%
+              {\subst{p_2}{\sigma_2}}
+      &\text{by} \,\; \eqref{es1:sound:29}\notag\\
+      &\sqsubseteq \cons{c(f_1)}{f_2}
+      &\text{by} \,\; \eqref{es1:sound:01}, \eqref{es1:sound:F},
+       \textsf{PAT}\notag\\
+      &= f
+      &\text{by} \,\; \text{\ref{es1:sound:21}}\notag\\
+       \subst{p}{\sigma}
+      &\sqsubseteq f. \label{es1:sound:G}
+    \end{align}
+    As a conclusion, the induction hypothesis and
+    \eqref{es1:sound:head} imply \eqref{es1:sound:G},
+    i.e., \(\ind{U}(\cons{\pat{p_1}}{p_2}, f,
+    \sigma)\) holds.
+
+  \item \label{case_l_UNPAR2} Case where \textsf{UNPAR}\(_2\) ends
+    \(\Delta\).
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf UNPAR}\(_2\)]
+         {\inferrule*
+            {\inferrule*[vdots=1.5em]{}{ }}
+            {\smj{f_1 \cdot f_2}{p}{\sigma}}}
+         {\smj{\cons{c(f_2)\!}{\!f_2}}{p}{\sigma}}
+    \end{mathpar}
+    where, since we assumed \eqref{es1:sound:head},
+    \begin{enumerate}
+
+      \item \label{es1:sound:25} \(f \triangleq \cons{c(f_1)}{f_2}\).
+
+    \end{enumerate}
+    Let us assume that the induction hypothesis holds for the premise
+    of \textsf{UNPAR}\(_2\), i.e., \(\ind{U}(p, f_1 \cdot
+    f_2, \sigma)\) is true. Therefore
+    \begin{align}
+         \subst{p}{\sigma} 
+       &\sqsubseteq f_1 \cdot f_2\notag\\
+       &\sqsubseteq \cons{c(f_1)}{f_2}
+       &\text{by} \,\; \textsf{SUB} \,
+       (\text{Fig.~\ref{es1_tree_matching_def}})\notag\\
+       &= f
+       &\text{by} \,\; \text{\ref{es1:sound:25}}\notag\\
+         \subst{p}{\sigma}
+       & \sqsubseteq f. \label{es1:sound:I}
+    \end{align}
+    As a conclusion, the induction hypothesis and
+    \eqref{es1:sound:head} imply \eqref{es1:sound:I} in this case,
+    i.e., \(\ind{U}(p, f, \sigma)\). (Note that the
+    structure of the pattern \(p\) is irrelevant
+    here.)\hfill \(\Box\)
+
+\end{enumerate}

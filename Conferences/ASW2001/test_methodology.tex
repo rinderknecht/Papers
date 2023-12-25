@@ -1,0 +1,52 @@
+\section{Test methodology}
+\subsection{Interoperability test architectures}
+
+We have mentioned in section~\ref{validation} that the \textsc{Platonis}
+project aims at two kinds of tests: interoperability
+testing and layer conformance testing. Figure~\ref{fig:fig1} shows test
+architectures for interoperability testing in the
+framework of the WAP. It is designed to validate and experiment new
+services related to mobility.
+
+This study is focused on the WAP architecture because this technology
+is nowadays available but it is possible to extend our methodology to
+other ones, like GPRS and UMTS, when they are widely available.
+
+The proposed test architectures use several distributed access points
+with a local WAP gateway. The behavior of each entity is
+observed through a Point of Observation (PO) and controlled through a
+Point of Control and Observation (PCO). Three levels of
+interoperability tests will be performed: the first one uses a PCO to
+control and observe the terminal exchanges, and two POs in the heart of
+the network, between the components (figure~\ref{fig:fig1}~(a)), to
+detect transmission errors and to perform some traffic analysis.
+%\footnote{In ideal case we should analyze all data
+%frames. Unfortunately, in practice, this procedure is complicated and
+%expensive, so we will just check the header of each frame.}. 
+This architecture can also be used for the network performance
+evaluation. In the second one we will observe and analyse the log
+files. A PCO is (still) on the terminal side, and a PO is located in
+the server side (figure~\ref{fig:fig1}~(b)) to check the behavior of
+the server. The last one considers the network as a black box that is
+observed and controlled through the PCO of the terminal
+(figure~\ref{fig:fig1}~(c)). This test architecture will be adapted to
+test the application use-cases and QoS properties.
+
+
+\subsection{A layer conformance test architecture}
+
+In the \textsc{Platonis} project another type of test will be studied:
+the conformance testing of a layer of the WAP stack. For this, a
+test architecture is proposed in figure~\ref{fig:fig2}.
+
+According to the WAP specification it is possible to
+access each WAP layer directly through service access points (SAPs),
+which facilitates the observation of the provided services of each
+layer~\cite{wapforum}. However, it depends on the
+availability of application programming interfaces (APIs) of each
+layer. If such APIs are not available, we will consider embedded
+system testing where target protocol is accessed through
+context~\cite{hit}. Concerning the specifications, France Télécom R\&D
+will modelise the WSP and WTP layers in SDL.
+
+

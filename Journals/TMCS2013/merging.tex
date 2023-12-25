@@ -1,0 +1,155 @@
+\section{Merging}
+
+Merging consists in combining two ordered series of keys into one
+ordered series. Without loss of generality, we shall be only
+interested in sorting keys in increasing order, like merging
+\((10,12,17)\) and \((13,14,16)\) results in
+\((10,12,13,14,16,17)\). One way to achieve this consists in comparing
+the two smallest keys, output the smallest and repeat the procedure
+until one of the series becomes empty, in which case the other is
+wholly appended. We have (compared keys underlined):
+\begin{equation*}
+\left\{
+\begin{aligned}
+&\underline{10}~12~17\\
+&\underline{13}~14~16
+\end{aligned}
+\right.
+\rightarrow 10
+\left\{
+\begin{aligned}
+&\underline{12}~17\\
+&\underline{13}~14~16
+\end{aligned}
+\right.
+\rightarrow 10~12
+\left\{
+\begin{aligned}
+&\underline{17}\\
+&\underline{13}~14~16
+\end{aligned}
+\right.
+\;\,\rightarrow 10~12~13
+\left\{
+\begin{aligned}
+&\underline{17}\\
+&\underline{14}~16
+\end{aligned}
+\right.
+\;\,\text{etc.}
+\end{equation*}
+We depict a key from one series as a \emph{white node} \((\circ)\) and
+a key from the other as a \emph{black node} \((\bullet)\). Nodes of
+these kinds are printed in a horizontal line, the leftmost being the
+smallest. Comparisons are always performed between black and white
+nodes and are represented as \emph{edges}, for instance:
+\begin{equation}
+\includegraphics[scale=0.9,bb=71 708 294 715]{merged}\label{fig:merged}
+\end{equation}
+An incoming arrow means that the node is smaller than the other end of the edge, so all edges point leftward and the number of comparisons is the number of nodes with an incoming edge. This number is none other than the \emph{cost} of merging.
+
+\paragraph{Minimum cost}
+\label{merge:best_case}
+
+In~\eqref{fig:merged}, there are two consecutive white nodes without
+any edges at the right end, which suggests that the more keys from one
+series we have at the end of the result, the fewer comparisons we
+needed for merging: the minimum cost is achieved when \emph{the
+  shorter series comes first in the result}. Here, the cost is the
+number of black nodes:
+\begin{center}
+\includegraphics[scale=0.9,bb=71 705 294 712]{min_mrg}
+\end{center}
+The minimum cost \(\B{\Join}{m,n}\) when
+merging series of length \(m\)~and~\(n\) is
+\begin{equation}
+\B{\Join}{m,n} = \min\{m,n\}.\label{eq:best_merge}
+\end{equation}
+
+
+\paragraph{Maximum cost}
+
+We can increase the number of comparisons with respect
+to \(m+n\) by removing in~\eqref{fig:merged} those rightmost
+nodes in the result \emph{that are not compared}:
+\begin{equation}
+\includegraphics[scale=0.9,bb=71 708 294 715]{max_mrg2}
+\label{fig:max_mrg2}
+\end{equation}
+This maximises comparisons because all nodes, but the last, are the
+destination of an edge. The maximum cost \(\W{\Join}{m,n}\) is the
+maximum number of comparisons when merging series of length \(m\)~and~\(n\):
+\begin{equation}
+\W{\Join}{m,n} = m + n - 1.\label{eq:worst_merge}
+\end{equation}
+Interchanging the two rightmost nodes in~\eqref{fig:max_mrg2} leaves \(m+n-1\) invariant, so the maximum number of comparisons occurs when \emph{the last two
+  keys of the result come from two series:}
+\begin{center}
+\includegraphics[scale=0.9,bb=71 708 294 715]{max_mrg1}
+\end{center}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.85,bb=68 650 348 722]{mean_mrg1}
+\caption{All mergers with \(m=3\) (\(\circ\)) and \(n=2\)
+  (\(\bullet\))
+\label{fig:mean_mrg1}}
+\end{figure}
+
+\paragraph{Average cost}
+
+The average of the costs of merging all pairs of series of given
+lengths defines the average cost, assuming that keys are not
+repeated. Consider \fig~\ref{fig:mean_mrg1}, with \(35\)~comparisons
+and \(10\)~results, so the average cost is \(35/10 = 7/2\). In
+general, there are \(\binom{m+n}{n}\) ways to interleave \(m\)~white
+nodes with \(n\)~black nodes, as it is the same as the number of ways
+to pick \(n\)~nodes amongst~\(m+n\). The total number \(K_{m,n}\) of
+comparisons needed to merge~\(m\) and~\(n\) keys in all possible
+manners with our algorithm is the number of nodes with incoming
+edges. Let \(\overline{K}_{m,n}\) be the total number of nodes
+\emph{without} incoming edges, circled in \fig~\ref{fig:mean_mrg2}.
+\begin{figure}[b]
+\centering
+\includegraphics[scale=0.85,bb=66 626 252 715]{mean_mrg2}
+\caption{Counting vertically\label{fig:mean_mrg2}}
+\end{figure}
+This figure has been obtained by moving the third column of
+\fig~\ref{fig:mean_mrg1} below the second column and by removing the
+edges. Since, for each merger, there are \(m+n\) nodes and each has an
+incoming edge or not, and because there are \(\binom{m+n}{n}\)
+mergers, we have \(K_{m,n} + \overline{K}_{m,n} = (m + n)
+\binom{m+n}{n}\). It is simple to characterise the circled nodes: they
+make up the longest, rightmost contiguous series of nodes of the same
+colour. Since there are only two colours, the problem of determining
+the total number \(W_{m,n}\) of white circled nodes is symmetric to
+the determination of the total number \(B_{m,n}\) of black circled
+nodes, that is, \(B_{m,n} = W_{n,m}\). We also obviously have
+\(\overline{K}_{m,n} = W_{m,n} + B_{m,n} = W_{m,n} + W_{n,m}\),
+therefore
+\begin{equation*}
+K_{m,n} = (m + n) \binom{m+n}{n} - W_{m,n} - W_{n,m}.
+\end{equation*}
+We can decompose \(W_{m,n}\) by counting the circled white nodes
+\emph{vertically}. In \fig~\ref{fig:mean_mrg2}, \(W_{3,2}\) is the sum
+of the numbers of mergers with one, two and three ending circled
+white nodes: \(W_{3,2} = 6 + 3 + 1 = 10\). The first column yields
+\(B_{3,2} = 4 + 1 = 5\). In general, the number of mergers with one
+ending circled white node is the number of ways to combine \(n\)~black
+nodes with \(m-1\)~white nodes: \(\binom{n+m-1}{n}\). Similarly, the
+number of mergers with two ending circled white nodes is
+\(\binom{n+m-2}{n}\), etc. Therefore, using standard binomial
+identities~\cite{GrahamKnuthPatashnik:1994}, we derive
+\begin{equation*}
+  W_{m,n} = \sum_{j=0}^{m-1}{\binom{n+j}{n}}
+       = \sum_{j=0}^{m-1}{\binom{n+j}{j}}
+       = \binom{n+m}{m-1}
+       = \binom{m+n}{n+1}.
+\end{equation*}
+Then \(K_{m,n} = (m + n) \binom{m+n}{n} - \binom{m+n}{n+1} -
+\binom{m+n}{m+1}\). By definition, the average cost \(\M{\Join}{m,n}\)
+is the ratio of \(K_{m,n}\) by \(\binom{m+n}{n}\), therefore
+\begin{equation}
+\M{\Join}{m,n} = m + n - \frac{m}{n+1} - \frac{n}{m+1}.
+\label{eq:mean_merge}
+\end{equation}

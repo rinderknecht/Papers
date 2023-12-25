@@ -1,0 +1,1969 @@
+%%-*-latex-*-
+
+In this section we define the collection of constraints from
+subtypes, \emph{i.e.,} on the declarations of pattern {\small $<$\textsf{type
+reference}$>$  \textsf{::=} $<$\textsf{non-reference type without
+inner constraints}$>$ \textsf{(}$<$\textsf{subtyping
+constraint}$>$\textsf{)}}. It is a function of type ${\cal T} \times
+{\cal C} \rightarrow V \rightarrow (\R \rightarrow V) \rightarrow
+{\cal K}$, where ${\cal C}$ is the set of subtyping constraints. We
+use a similar notation for this mapping as in
+section~\ref{constraints_from_types},
+\emph{e.g.,} $\denotC{f}{\T,\C}{\alpha}{\TSEmap{\R}}$.
+
+
+\subsection{Regular expression constraint}
+
+The strings can be constrained to belong to a regular language
+defined by means of a regular expression (similarly to the Perl
+scripting language, or the XML, or the \textsf{grep} Unix command)
+introduced by the \kwdPATTERN{} keyword. The following specifies date
+and time in format `{\sc dd/mm/yyyy-hh:mm}': \texttt{\small 
+DateAndTime ::= VisibleString(PATTERN "}{\small \verb+\+}\texttt{\small d\#2/}{\small \verb+\+}\texttt{\small d\#2/}{\small \verb+\+}\texttt{\small d\#4-}{\small \verb+\+}\texttt{\small d\#2:}{\small \verb+\+}\texttt{\small d\#2")}. Formally, the semantics is expressed as follows:
+
+\begin{center}
+\begin{tabular}{rcl}
+    $\denotC{f}{\String, \kwdPATTERN \,\, (s)}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = 
+  & \hspace*{-4mm}
+    $\alpha \CEeqR \Regexp \, (s)$
+\end{tabular}
+\end{center}
+
+\noindent
+This equation defines the constraint collected from a regular
+expression constraint (introduced by the \kwdPATTERN{} keyword). This
+case is straightforward since we have a built-in notion of
+regular expression ($\Regexp$).
+
+\subsection{Union constraint}\label{union_constraint}
+
+Given two constraints, it is possible to create a new constraint that
+is the union of both, using the keyword \texttt{\small UNION} or the
+symbol `\texttt{|}'. The semantics is then that the new subtype
+contains the values of the first subtype and of the second
+subtype. For instance, let us define \texttt{\small Day ::=
+ENUMERATED} \verb+{+\texttt{mon\-day, tues\-day, wed\-nes\-day,}
+\texttt{thurs\-day,} \texttt{fri\-day,} \texttt{sa\-tur\-day,}
+\texttt{sun\-day}\verb+}+. Then: \texttt{\small WeekEnd
+::= Day (}\texttt{sa\-tur\-day} \texttt{\small UNION}
+\texttt{sun\-day)}.
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T, \C_0 \,\, \kwdUNION \,\, \C_1}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}\\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$ 
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{and} \,\, \gamma \,\,
+           \emph{be fresh variables}$\\
+          $\ocamlkwd{in}$ 
+        & \hspace*{-4mm}
+          $\denotC{f}{\T,\C_0}{\beta}{\TSEmap{}}
+          \CEand 
+          \denotC{f}{\T,\C_1}{\gamma}{\TSEmap{}}
+          \CEand
+          \alpha \CEeq \beta \, \SEcup \, \gamma$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+This equation defines the collection of constraints from a union of
+subtyping constraints, $\C_0$ and $\C_1$, which apply to a type
+\T. First, we collect the constraints from the subtypes $(\T, \C_0)$
+and $(\T, \C_1)$. The associated sets are respectively $\beta$ and
+$\gamma$, and $\alpha$ is $\beta \, \SEcup \, \gamma$, as expected.
+
+
+\subsection{Intersection constraint}\label{intersection_constraint}
+
+Given two subtyping constraints, we can create a new one which is the
+intersection of both, using the \texttt{\small INTERSECTION} keyword
+or the symbol `\texttt{\symbol{94}}'. The semantics is that the new
+subtype contains only the values that belong to the two subtypes. For
+instance, we can define a type for the French telephone numbers:
+\texttt{\small PhoneNumber ::= NumericString ((FROM("0".."9"))
+INTERSECTION (SIZE(10)))}, using an alphabet constraint
+(section~\ref{alphabet_constraint}) and a size constraint
+(section~\ref{size_constraint}). The formal semantics is as follows:
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T,\C_0 \,\, \kwdINTERSECTION \,\,
+     \C_1}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll} 
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm} 
+          $\beta \,\, \emph{and} \,\, \gamma \,\,
+           \emph{be fresh variables}$\\
+          $\ocamlkwd{in}$
+        & \hspace*{-4mm}
+          $\denotC{f}{\T,\C_0}{\beta}{\TSEmap{}} \CEand
+           \denotC{f}{\T,\C_1}{\gamma}{\TSEmap{}}
+           \CEand
+           \alpha \CEeq \beta \, \SEcap \, \gamma$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+It is the dual case of section~\ref{union_constraint}.
+
+
+\subsection{Inclusion constraint}\label{contained_type_constraint}
+
+It is possible to restrict a subtype to only have the values of a
+given subtype, using the \texttt{\small INCLUDES} keyword. For instance,
+following the example given in section~\ref{union_constraint}, we can
+define: \texttt{\small LongWeekEnd ::= Day (INCLUDES WeekEnd |}
+\texttt{monday}\texttt{\small )}, or, as a short-hand
+\texttt{\small LongWeekEnd ::= Day (WeekEnd |}
+\texttt{monday}\texttt{\small )}. Formally, the semantics is
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T,\kwdINCLUDES \, \T'}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}\\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$ 
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{and} \,\, \gamma \,\,
+           \emph{be fresh variables}$\\
+          $\ocamlkwd{in}$ 
+        & \hspace*{-4mm}
+          $\TSE{\I}{\T}{\beta}{\TSEmap{}} \CEand
+           \denotC{f}{\T'}{\gamma}{\TSEmap{}}
+           \CEand
+           \alpha \CEeq \beta \, \SEcap \, \gamma$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+The values of the type \T{} are restricted to be in the set of values
+of the type \T'{}. Note that, since we work in \core, the type
+\T'{} is a reference (section~\ref{mapping},
+step~\ref{contained_reference}). This case is very similar to the
+intersection constraint presented in
+section~\ref{intersection_constraint}, and naturally has a very
+similar semantics.
+
+
+\subsection{Exclusion constraint}\label{complement_constraint}
+
+The protocol designer can restrict the values of a type to \emph{not}
+belong to another subtype, by means of a constraint preceded by
+\texttt{\small ALL EXCEPT}, or two constraints separated by
+\texttt{\small EXCEPT}. Consider for instance \texttt{\small Lipogram
+  ::= IA5String (FROM (ALL EXCEPT ("e" | "E")))}, defining the
+set of strings which do not contain the characters \texttt{\small "e"}
+and \texttt{\small "E"}. Formally, we have
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+     $\denotC{f}{\T,\C_0 \,\, \kwdEXCEPT \,\, \C_1}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = &\\ 
+    \multicolumn{3}{l}{
+      \begin{tabular}{r}
+        $\denotC{f}{\T,\C_0 \,\, \kwdINTERSECTION \,\, (\kwdALLEXCEPT
+         \,\, \C_1)}{\alpha}{\TSEmap{}}$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+This first equation defines the semantics of \texttt{\small EXCEPT}
+using the \texttt{\small ALL EXCEPT} constraint. The underlying
+ratio\-nale is the following equality on sets: $\beta \backslash
+\gamma = \beta \, \cap \, (\alpha \backslash \gamma)$, for all $\beta
+\subseteq \alpha$ and $\gamma \subseteq \alpha$. The remaining
+situation is
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T,\kwdALLEXCEPT \,\, \C_0}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{l}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{and} \,\,
+           \gamma \,\, \emph{be fresh variables}$\\
+          $\ocamlkwd{in}$
+        & \hspace*{-6mm}
+           $\TSE{\I}{\T}{\beta}{\TSEmap{}}
+            \CEand \denotC{}{\T,\C_0}{\gamma}{\TSEmap{}}
+            \CEand 
+            \alpha \CEeq \beta \, \SEdiff \, \gamma$
+      \end{tabular}
+    }
+\end{tabular}
+
+%\vspace*{-5mm}
+
+\subsection{Alphabet constraint}\label{alphabet_constraint}
+
+The strings can be restricted to be built upon a given alphabet, using
+the keyword \texttt{\small FROM}. For instance, we can define a
+subtype whose values are strings made of capital and small letters:
+\texttt{\small CapitalAndSmall ::= IA5String (FROM ("A".."Z" |
+  "a".."z"))}. Contrast with the following: \texttt{\small
+  CapitalOrSmall ::= IA5String (FROM("A".."Z") | FROM
+  ("a".."z"))}. These examples combine an alphabet constraint and an
+interval constraint (section~\ref{interval_constraint}).
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\String,\kwdFROM \,\, \C_0}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{be a fresh variable} \,\,
+           \ocamlkwd{in}$\\
+        & \hspace*{-4mm}
+          $\ocamlkwd{let} \,\, \C' = (\kwdSIZE \, (\PosInt \,\, 1))
+           \, \kwdINTERSECTION \, \C_0 \, \ocamlkwd{in}$\\
+        & \hspace*{-4mm}
+          $\ocamlkwd{let} \,\, \kappa =
+          \denotC{\I}{\String, \C'}{\beta}{\TSEmap{}}$\\
+          $\ocamlkwd{in}$
+        & \hspace*{-5mm} 
+          $\ocamlkwd{match} \,\, \ocamlvaluename{solve\_regexp} \, 
+           (\kappa) \, (\beta) \,\, \ocamlkwd{with}$\\
+        & \hspace*{-1mm}
+          $\Some \, (\ocamlvaluename{s}) \rightarrow 
+           \alpha \CEeq \Regexp \, (\ocamlvaluename{s})$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+This equation defines the constraint collection from the alphabet
+subtyping constraint. The constraint $\C_0$ models a set of strings
+allowed by \T. We construct a subtyping constraint $\C'$ that defines
+the \emph{characters} of $\C_0$ (characters are strings of size one)
+in order to build the corresponding semantic constraint $\kappa$. We
+must resolve it at this stage because we want to use a regexp
+constraint to model the alphabet subtyping constraint. In other words,
+we need to compute a string following the \ASN regular expression
+syntax and representing $\kappa$. This is done by the function
+$\ocamlvaluename{solve\_regexp} : {\cal K} \rightarrow V \rightarrow
+\ocamltypename{string} \, \ocamltypename{option}$ which takes as
+arguments a constraint denoting an alphabet, and a variable occurring
+in this constraint.
+
+First, $\ocamlvaluename{solve\_regexp}\, (\kappa) \, (\beta)$
+constructs the set of constraints which are the conjuncts of
+$\kappa$. By analysing all the cases of our algorithm
+(sections~\ref{constraints_from_types}
+and~\ref{constraints_from_subtypes}), it turns out that their patterns
+must be of five kinds only: $\alpha \CEeqR \beta \, \SEcup \, \gamma$,
+$\alpha \CEeqR \beta \, \SEcap \, \gamma$, $\alpha \CEeqR \beta \,
+\SEdiff \, \gamma$, $\alpha \CEeqR \Regexp \, (r)$ or $\alpha \CEeqR
+\SEbigcup_{1 \leqslant i \leqslant n}{\Regexp \, (r_i)}$, otherwise we
+reject the constraint as inconsistent. The last kind is transformed
+into the equivalent: $\alpha \CEeqR \Regexp \,
+\textsf{"(}r_1\textsf{)}\mid\textsf{(}r_2\textsf{)}\mid\ldots\mid\textsf{(}r_n\textsf{)"}$.
+These constraints form a non-recursive system, which can be solved in
+$\beta$ by simple substitution. The last step is to compute strings
+denoting intersections, unions and complements of regular expressions
+(the result is always a regular expression because regular expressions
+are closed under such operations). Consider now the following
+example. Let
+\begin{align*}
+\kappa &= (\alpha \CEeqR \beta \, \SEcup \, \SEneg\gamma)
+\, \CEand \, (\beta \CEeqR \Regexp \, \textsf{"[0-9A-F]*"})\\
+  & \hphantom{=} \; \CEand \, (\gamma \CEeqR \Regexp \, \textsf{"[01]*"}),
+\end{align*}
+then $\ocamlvaluename{solve\_regexp} \, (\kappa) \, (\alpha) = \Some
+\, \textsf{"([0-9A-F]*)}\mid\textsf{(\symbol{94}[01]*)"}$. If the
+return value is \None{}, then it is an inconsistency.
+
+
+\subsection{Size constraint}\label{size_constraint}
+
+The values of string types can be constrained to have given sizes,
+by introducing a subtyping constraint by the keyword \texttt{\small
+SIZE}. For instance:
+
+\noindent
+\texttt{\small Exactly31BitsString ::= BIT STRING} 
+\texttt{\small (SIZE (31))}
+
+\noindent
+\texttt{\small StringOf31BitsAtTheMost::= BIT STRING(SIZE(0..31))}
+
+\noindent
+\texttt{\small NonEmptyString ::= OCTET STRING (SIZE (1..MAX))}
+
+The size constraint can also apply to \kwdSETOF{} and \kwdSEQUENCEOF{}
+types. In that case, the semantics is very different: the values of
+the types are sets whose \emph{cardinals} are specified by the size
+constraint. Moreover, the constraint must appear between the keywords
+\texttt{\small SET} or \texttt{\small SEQUENCE}, and \texttt{\small
+  OF}, as in \texttt{\small List\-Of5\-Strings ::= SEQUENCE (SIZE (5))
+  OF Print\-able\-String}. Contrast this with \texttt{\small
+  List\-Of\-Strings\-Of5\-Char::= SEQUENCE OF Print\-able\-String
+  (SIZE (5))}, where the strings themselves are constrained, not the
+cardinal of the \kwdSEQUENCEOF. See Figure~\ref{fig:size_constraint}.
+\begin{figure}
+\centering
+\begin{tabular}{rcl}
+    $\denotC{f}{\T, \kwdSIZE \,\, \C_0}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{lll}
+          $\ocamlkwd{let}$
+        & \multicolumn{2}{l}{
+            \hspace*{-5mm}
+            $\beta, \gamma \,\, \emph{and} \,\, \delta \,\,
+             \emph{be fresh variables}$
+          }\\
+          $\ocamlkwd{and}$
+        & \multicolumn{2}{l}{
+            \hspace*{-5mm}
+            $\ocamlvaluename{apply} \,
+             (\ocamlvaluename{kind} \!:\! \ocamltypename{string}) \,
+             (\Interval \, (\PosInt(\ocamlvaluename{n}),
+             \ocamlvaluename{ub})) =$
+          }\\
+        & \multicolumn{2}{l}{
+            \hspace*{-4mm}
+            \begin{tabular}{lll}
+                $\ocamlkwd{let}$
+              & \hspace*{-4.5mm}
+                $\ocamlvaluename{up} =$
+              & \hspace*{-4.5mm}
+                $\ocamlkwd{match} \,\, \ocamlvaluename{ub} \,\,
+                 \ocamlkwd{with} \,\, \PlusInfInt \rightarrow \,
+                 \textsf{""}$\\
+              & 
+              & \hspace*{-8mm}
+                \begin{tabular}{l}
+                  \begin{tabular}{ll}
+                      $\mid$
+                    & \hspace*{-4mm}
+                      $\PosInt \, (m) \rightarrow
+                       \ocamlvaluename{string\_of\_int} \, (m)$
+                  \end{tabular}
+                \end{tabular}\\
+                $\ocamlkwd{in}$
+              & \multicolumn{2}{l}{
+                  \hspace*{-4mm}
+                  $\textsf{"(" \symbol{94}
+                   \ocamlvaluename{kind} \symbol{94} "{\small \#}("
+                   \symbol{94} \ocamlvaluename{string\_of\_int}
+                   (\ocamlvaluename{n})}$
+                }\\ 
+               & \multicolumn{2}{l}{  
+                  \hspace*{-4mm}
+                  $\textsf{\symbol{94} "," \symbol{94}
+                   \ocamlvaluename{up} \symbol{94} "))"}$
+                }
+            \end{tabular}
+          }\\
+          $\ocamlkwd{and}$
+        & \hspace*{-4mm}
+          $\C =$
+        & \hspace*{-4mm}
+            $(\PosInt \, (0) \, \pmb{\leqslant} \asnkwdconstr{..}
+             \pmb{<} \, \kwdMAX)$\\
+        &
+        & \hspace*{-4mm}
+          $\kwdINTERSECTION \,\, \C_0 \,\, \ocamlkwd{in}$\\
+          $\ocamlkwd{let}$
+        & \multicolumn{2}{l}{
+            \hspace*{-6mm}
+            $\kappa = \denotC{\I}{\kwdINTEGER,
+             \C}{\delta}{\TSEmap{}}$
+          }\\
+          $\ocamlkwd{in}$
+        & \multicolumn{2}{l}{
+            \hspace*{-7mm}
+            $\ocamlkwd{match} \,\, \ocamlvaluename{solve\_integers} \,
+             (\kappa) \, (\delta)$
+          }\\
+        & \multicolumn{2}{l}{
+            \hspace*{-7mm} 
+            $\ocamlkwd{with} \,\, \ocamlvaluename{dnf} \,\,
+             \ocamlkwd{when} \,\, \ocamlvaluename{dnf} \not=
+             \varnothing \,\, \textsf{\small \&\&} \,\,
+            \ocamlvaluename{dnf} \not= \{\SEbot\} \rightarrow$
+          }\\
+        & \multicolumn{2}{l}{
+            \hspace*{-8mm}
+            \begin{tabular}{l}
+              $(\ocamlkwd{match} \,\, \T \,\, \ocamlkwd{with} \,\,
+               \kwdBITSTRING \rightarrow$\\
+              \begin{tabular}{ll}
+                   & \hspace*{-3mm}
+                     $\alpha \CEeqR \SEbigcup_{\varsigma
+                     \in \ocamlvaluename{dnf}}{\Regexp \,
+                     (\!\ocamlvaluename{apply} \, 
+                     \textsf{"[01]"} \, (\varsigma))}$\\ 
+                $\mid$ 
+                   & \hspace*{-5mm}
+                     $\kwdOCTETSTRING \rightarrow$\\
+                   & \hspace*{-3mm}
+                     $\alpha \CEeqR \SEbigcup_{\varsigma
+                     \in \ocamlvaluename{dnf}}{\Regexp \,
+                     (\!\ocamlvaluename{apply} \, 
+                     \textsf{"[0-9A-F]"} \, (\varsigma))}$\\
+                $\mid$ 
+                   & \hspace*{-5mm}
+                     $\String \rightarrow
+                     \alpha \CEeqR \SEbigcup_{\varsigma
+                     \in \ocamlvaluename{dnf}}{\Regexp \,
+                     (\!\ocamlvaluename{apply} \, 
+                     \textsf{"."} \, (\varsigma))}$\\
+                $\mid$ 
+                   & \hspace*{-5mm}
+                     $\kwdSETOF \, \T_0 \mid \kwdSEQUENCEOF \, \T_0
+                      \rightarrow \TSE{f}{\T_0}{\beta}{\TSEmap{}}
+                      \CEand$\\
+                   & \hspace{-3mm}
+                     $\gamma \CEeqS \Cons \, (\beta, \gamma) \,
+                      \SEcup \, \Nil \CEand \alpha \PSCEeq
+                      \SEbigcup_{\varsigma \in
+                      \ocamlvaluename{dnf}}{\gamma \SEdiam \varsigma})$
+               \end{tabular}
+            \end{tabular}
+          }
+      \end{tabular}
+    }
+\end{tabular}
+\caption{Size constraint\label{fig:size_constraint}}
+\end{figure}
+
+This equation defines the constraint collected from a size subtyping
+constraint $\C_0$. The function \ocamlvaluename{apply} takes as its
+first argument a string \ocamlvaluename{kind}, and a positive (closed)
+interval as its second argument. The kind is a string that determines
+the alphabet of the string \T: \textsf{"[01]"} for bit strings,
+\textsf{"[0-9A-F]"} for octet strings, and \textsf{"."} for general
+strings. The interval is used to build an \ASN regular expression
+determining the repetition of the characters in the kind. Both are
+finally combined by \ocamlvaluename{apply}. For example:
+$\ocamlvaluename{apply} \, (\textsf{"[01]"}) \, (\PosInt \, (3),
+\PlusInfInt) = \textsf{"([01]{\small \#}(3,))"}$, for bit strings
+whose size is at least three.
+
+We can construct a subtyping constraint \C{} which is a restriction of
+$\C_0$ to the positive integers (indeed, a size must be a positive
+integer). Then we can compute the constraint corresponding to the
+sizes: `$\ocamlkwd{let} \,\, \kappa = \denotC{\I}{\kwdINTEGER,
+  \C}{\delta}{\TSEmap{}}$'. Our aim is to use the regexp constraint
+expressions to model the \kwdSIZE{} subtyping constraint, hence we
+need to extract from $\kappa$ a suitable set of constraints: a
+\emph{disjunctive normal form} which is the smallest union of closed
+intervals. This is the purpose of $\ocamlvaluename{solve\_integers} :
+{\cal K} \rightarrow V \rightarrow \textsf{[$>$} \,
+  \ocamltypename{clo\-sed\_int\_in\-ter\-val} \, \textsf{$\mid$} \,
+  \SEbot\textsf{]} \, \ocamltypename{set}$ (as a short-hand, we assume
+that we have an abstract polymorphic type \textsf{'a}
+\ocamltypename{set}). The returned value of
+$\ocamlvaluename{solve\_integers} \, (\kappa) \, (\delta)$ is called
+\ocamlvaluename{dnf}, where $\delta$ is the unknown in $\kappa$ we are
+interested in. If it is $\varnothing$, it means an inconsistency error
+(note that the property $\SEbot \in \ocamlvaluename{dnf} \Rightarrow
+\ocamlvaluename{dnf} = \{\SEbot\}$ always holds). The analysis of all
+the cases of our algorithm shows that each conjunct in $\kappa$ must
+have the pattern $\alpha \CEeqI \beta \, \SEcup \, \gamma$, $\alpha
+\CEeqI \beta \, \SEcap \, \gamma$, $\alpha \CEeqI \beta \, \SEdiff \,
+\gamma$ or $\alpha \CEeqI \Interval \, (\ocamlvaluename{lb},
+\ocamlvaluename{ub})$. They form a non-recursive system of equations
+on closed intervals, whose left-hand side variables are unique, hence
+resolution by substitution is straightforward.
+
+The type \T{} can be a string. In this case, the constraint is built
+as the union ($\SEcup$) of the constraints ($\Regexp \ldots$)
+associated (according to the actual kind of \T) to each interval
+($\varsigma$) of sizes ($\ocamlvaluename{dnf}$).
+
+Otherwise, \T{} is actually either a \kwdSETOF{} or a \kwdSEQUENCEOF{}
+type, and the semantics is very different. There is no easy way to
+encode sets whose sizes (cardinals) range over an interval with our
+constraints, \emph{e.g.,} a \kwdSET{} value whose size is 3.000, encoded as
+the embedding of 3.000 \Cons{} constructors. So we decide to issue a
+powerset constraint made of the expression collected from \T{} and the
+actual cardinals of its elements. More precisely, we return a
+constraint similar to the constraint $\denotC{}{\T}{\alpha}{{\cal Q}}$
+(see section~\ref{constraints_from_types}), but whose powerset
+constraint is $\SEbigcup_{\varsigma \in \ocamlvaluename{dnf}}{\gamma
+\SEdiam \varsigma}$ instead of $\gamma \SEdiam \mathbb{N}^{+}\!$. As
+an example, let us consider now the declaration: \texttt{\small A ::=
+SET (SIZE (3..8|7..10|12)) OF REAL}. Then the constraint collected
+from the type \texttt{\small A} is:
+\begin{align*}
+\denotC{\I}{\TRef \, \textsf{"A"}}{\alpha}{\{\}} 
+&= \denotC{\I}{\kwdSETOF \,\,
+\kwdREAL}{\beta}{\textsf{"A"} \mapsto \alpha}\\
+&\begin{tabular}{rcll}
+    $\CEand \, \alpha$
+  & \hspace*{-4mm} 
+    $\PSCEeq$
+  &
+  & \hspace*{-4mm}
+    $\beta \SEdiam \Interval \, (\PosInt \, (3), \PosInt \, (10))$\\
+  & 
+  & \hspace*{-4mm} 
+    $\SEcup$
+  & \hspace*{-4mm}
+    $\beta \SEdiam \Interval \, (\PosInt \,(12), \PosInt \,(12)).$
+\end{tabular}
+\end{align*}
+
+
+\subsection{Interval constraint}\label{interval_constraint}
+
+The \kwdINTEGER, \kwdREAL{} and (almost all) string types have totally
+ordered values, hence allowing interval definitions for their
+values. Consider for instance
+
+\vspace*{-1mm}
+
+{\small
+\begin{verbatim}
+PositiveOrZeroInteger ::= INTEGER (0..MAX)
+PositiveInteger ::= INTEGER (0<..MAX)
+NegativeOrZeroInteger ::= INTEGER (MIN..0)
+NegativeInteger ::= INTEGER (MIN..<0)
+PositiveReal ::= REAL (0<..PLUS-INFINITY)
+NegativeReal ::= REAL (MINUS-INFINITY..<0)
+RealInterval ::= REAL (4e-5..1e-4)
+\end{verbatim}
+}
+
+\vspace*{-1mm}
+
+\noindent
+\texttt{\small PositiveOrZeroInteger ::= INTEGER (0..MAX)}\\
+\noindent
+\texttt{\small PositiveInteger ::= INTEGER (0<..MAX)}\\
+\noindent
+\texttt{\small NegativeOrZeroInteger ::= INTEGER (MIN..0)}\\
+\noindent
+\texttt{\small NegativeInteger ::= INTEGER (MIN..<0)}\\
+\noindent
+\texttt{\small PositiveReal ::= REAL (0<..PLUS-INFINITY)}\\
+\noindent
+\texttt{\small NegativeReal ::= REAL (MINUS-INFINITY..<0)}\\
+\noindent
+\texttt{\small RealInterval ::= REAL (4e-5..1e-4)}
+
+\noindent
+The formal semantics of this kind of constraint is:
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T, v_0 \, b_0 \, \asnkwdconstr{..} \, b_1 \,
+     v_1}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-5mm}
+          $\ocamlvaluename{norm\_int\_interval}:$\\
+        & \hspace*{-5mm}
+          $\ocamltypename{interval} \rightarrow
+           \ocamltypename{closed\_int\_interval} = \ldots$\\
+%      \end{tabular}
+%    }
+%\end{tabular}
+%\begin{tabular}{rcl}
+%    \multicolumn{3}{r}{
+%      \begin{tabular}{ll}
+          $\ocamlkwd{and}$
+        & \hspace*{-5mm}
+          $\ocamlvaluename{norm\_real\_interval}:$\\
+        & \hspace*{-5mm}
+          $\ocamltypename{interval} \rightarrow
+           \ocamltypename{real\_interval} = \ldots$\\
+          $\ocamlkwd{and}$
+        & \hspace*{-5mm}
+          $\ocamlvaluename{regexp\_of\_str\_interval}:$\\
+        & \hspace*{-5mm}
+          $\ocamltypename{interval}\rightarrow \textsf{[}\textsf{$>$}
+           \Regexp \, \ocamlkwd{of} \,\ocamltypename{string}\textsf{]}
+           = \ldots$\\
+          $\ocamlkwd{in}$
+        & \hspace*{-7mm}
+          $\ocamlkwd{match} \,\, \T \,\, \ocamlkwd{with}$\\ 
+          \multicolumn{2}{l}{
+            \begin{tabular}{ll} 
+              & \hspace*{-4.5mm}
+                $\kwdINTEGER \! \rightarrow \! \alpha \! \CEeqI \!\!
+                 \ocamlvaluename{norm\_int\_interval} (v_0 \,
+                 b_0 \, \asnkwdconstr{..} \, b_1 \, v_1)$\\
+                $\mid$ 
+              & \hspace*{-4.5mm}
+                $\kwdREAL \! \rightarrow \! \alpha \! \CEeqF \!\!
+                 \ocamlvaluename{norm\_real\_interval} (v_0 \,
+                 b_0 \, \asnkwdconstr{..} \, b_1 \, v_1)$\\
+                 $\mid$ 
+              & \hspace*{-4.5mm}
+                $\String \! \rightarrow \! \alpha \! \CEeqR \!\!
+                 \ocamlvaluename{regexp\_of\_str\_interval}
+                 (v_0 \, b_0 \, \asnkwdconstr{..} \, b_1 \, v_1)$
+            \end{tabular}  
+          }     
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+This equation defines the constraint collection from value range
+subtyping constraints, in other words, interval constraints. These
+constraints can be applied to the \kwdINTEGER, \kwdREAL{} and
+\String{} types, because the values of these types can be totally
+ordered. So, according to the actual type, the specified value range
+constraint will be transformed respectively into an OCaml value of
+type \ocamltypename{closed\_int\_interval} (\emph{i.e.,} a closed integer
+interval), \ocamltypename{real\_interval}, or \textsf{[$>$} \Regexp \,
+\ocamlkwd{of} \, \ocamltypename{string}\textsf{]} (that is to say, it
+is a regular expression). Due to the lack of room, we cannot give the
+pieces of codes of the three functions implementing these
+transformations, but there is nothing really difficult here.
+
+
+\subsection{Value constraint}\label{value_constraint}
+
+It is possible to restrict the set of values of a type to be a
+singleton, by simply specifying this unique value between
+parenthesis. Consider again the example of
+section~\ref{union_constraint}: \texttt{\small Wednesday ::= Day
+(}\texttt{\small wednesday}\texttt{\small )}, and the type
+\texttt{\small LongWeekEnd} in
+section~\ref{contained_type_constraint}. As we showed in
+section~\ref{mapping} at step~\ref{types_from_values}, all the
+declared values in \core appear in value constraints (of their
+expected type). Therefore, this section provides the solution to the
+type compatibility problem (section~\ref{validation},
+item~\ref{type_compatibility}). Typically, we want to compute the
+constraint $\denotC{}{\T, \VRef (y_0)}{\alpha}{\TSEmap{}}$, with the
+pseudo-specification excerpt
+\begin{center}
+\tt y$_0$ X$_1$ ::= y$_1$ \ y$_1$ X$_2$ ::= y$_2$ ... y$_{n-1}$ X$_n$
+::= $v$,
+\end{center}
+where $v$ is not a value reference. We have to unfold the reference
+\texttt{y$_0$} and get: $\denotC{}{\T, \VRef (y_0)}{\alpha}{\TSEmap{}}
+= \denotC{}{\T, v}{\alpha}{\TSEmap{}}$. Moreover, the semantic model
+of \ASN implies that the following condition must hold:
+\begin{align*}
+\denotC{}{\T}{\beta}{\{\}} &= \denotC{}{\TRef \,
+  (\textsf{"}\texttt{X}_1\textsf{"})}{\beta}{\{\}} = \denotC{}{\TRef
+  \, (\textsf{"}\texttt{X}_2\textsf{"})}{\beta}{\{\}} = \ldots\\
+ &=
+\denotC{}{\TRef \, (\textsf{"}\texttt{X}_n\textsf{"})}{\beta}{\{\}},
+\end{align*}
+\emph{i.e.,} all the types must have the same value sets. For
+instance, the \core specification:
+
+\medskip
+
+{\small
+ $\left\{
+    \begin{tabular}{ll}
+        \texttt{a} \texttt{\small A} \texttt{\small ::=} \texttt{b}
+      &
+        \texttt{\small A} \texttt{\small ::=} \texttt{\small SET}
+        \verb+{+\texttt{x} \texttt{\small REAL OPTIONAL}\verb+}+\\
+        \texttt{b} \texttt{\small B} \texttt{\small ::= 0.0}
+      & \texttt{\small B} \texttt{\small ::=} \texttt{\small SET}
+        \verb+{+\texttt{x} \texttt{\small REAL}\verb+}+
+    \end{tabular}
+  \right.$
+}
+
+\medskip
+
+\noindent
+must be rejected because the value \verb+{}+ does not belong to the
+type \texttt{\small B}, despite \texttt{\small 0.0} belonging to both
+\texttt{\small A} and \texttt{\small B}. The following equation
+formally defines this semantics:
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{}{\T, \VRef \, (y_0)}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{l}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{be a fresh variable} \,\, \ocamlkwd{in}$\\
+          \multicolumn{2}{l}{
+            \begin{tabular}{ll}
+                $\ocamlkwd{let}$
+              & \hspace*{-4mm}
+                $\ocamlkwd{rec} \,\, \ocamlvaluename{unfold} \, (f :
+                 \V \rightarrow {\cal K}) = \,\,
+                 \ocamlkwd{function}$\\
+                \multicolumn{2}{l}{
+                  \begin{tabular}{ll}
+                    & \hspace*{-4mm}
+                      $((x_1, \VRef \, (y_1)) : \R \times
+                       \ocamltypename{v\_ref}) \rightarrow$\\ 
+                    & \hspace*{-3mm}
+                      \begin{tabular}{ll}
+                          $\ocamlkwd{let}$
+                        & \hspace*{-4mm} 
+                          $f' \, (v) = f (v) \CEand
+                           \denotC{}{\TRef \, (x_1)}{\beta}{\{\}}$\\
+                          $\ocamlkwd{in}$
+                        & \hspace*{-5mm}
+                          $\ocamlvaluename{unfold} \,\, f' \,
+                           (\ValueEnv (y_1))$
+                      \end{tabular}\\
+                      $\mid$
+                    & \hspace*{-4mm}
+                      $(\wildcard, v) \rightarrow f \, (v)$
+                  \end{tabular}
+                }
+            \end{tabular}
+          }\\
+          $\ocamlkwd{in}$
+        & \hspace*{-6mm}
+          $\ocamlvaluename{unfold} \,\, (\ocamlkwd{fun} \,\, v
+           \rightarrow \denotC{}{\T, v}{\alpha}{\{\}} \!\CEand\!
+           \denotC{}{\T}{\beta}{\{\}}) \,\, (\ValueEnv (y_0))$
+      \end{tabular} 
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+If the value $v$ is not a reference, the following equations apply,
+in accordance with the type \T:
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{}{(\wildSETOF \mid \wildSEQUENCEOF),
+     v}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = &\\
+    \multicolumn{3}{l}{
+      \begin{tabular}{l}
+        \begin{tabular}{lll}
+            $\ocamlkwd{let}$
+          & \hspace*{-4mm}
+            $\ocamlvaluename{length} =$
+          & \hspace*{-4mm}
+            $\ocamlkwd{match} \,\, v \,\, \ocamlkwd{with}$\\
+          &
+          & \hspace*{-5mm}
+            \begin{tabular}{ll}
+              & \hspace*{-4mm}
+                $\List \, (\textnormal{L}) \rightarrow 
+                 \ocamlmodulepath{List}.\ocamlvaluename{length} \,
+                 (\textnormal{L})$\\
+                $\mid$
+              & \hspace*{-4mm}
+                   $\Nil \rightarrow 0$
+            \end{tabular}\\
+            $\ocamlkwd{in}$
+          & 
+            \multicolumn{2}{l}{
+              \hspace*{-4mm}
+              $\alpha \PSCEeq \mu(v) \SEdiam \mu (\PosInt
+               (\ocamlvaluename{length}))$
+            }
+        \end{tabular}
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+This equation applies for \kwdSETOF{} and \kwdSEQUENCEOF{} types. The
+value $v$ must be either \List{} or \Nil. We compute the length
+\ocamlvaluename{length} of $v$. Hence $\mu \, (\PosInt \,
+(\ocamlvaluename{length}))$ is the expression corresponding to a
+closed integer interval containing only the size of $v$. Finally, we
+form the powerset expression $\mu (v) \SEdiam \mu (\ldots)$.
+
+\begin{itemize}
+
+  \item $\denotC{}{\kwdREAL, v}{\alpha}{\TSEmap{}} = \,\, \alpha
+         \CEeqF \mu \, (\ocamlvaluename{normalise\_real} \,
+         (\ocamlvaluename{v}))$
+
+  \item $\denotC{}{\kwdINTEGER, v}{\alpha}{\TSEmap{}} = \,\, \alpha
+         \CEeqI \mu \, (\ocamlvaluename{v})$
+
+  \item $\denotC{}{(\kwdBITSTRING \! \mid \kwdOCTETSTRING \! \mid
+         \String), v}{\alpha}{\TSEmap{}} =$\\ 
+         \hspace*{3mm} $\alpha \CEeqR \mu \, (\ocamlvaluename{v})$
+
+  \item $\denotC{}{\T, v}{\alpha}{\TSEmap{}} = \,\, \alpha
+        \CEeqS \mu \, (\ocamlvaluename{v})$ otherwise.
+
+\end{itemize}
+
+\medskip
+
+These equations handle the remaining cases. If \T{} is \kwdREAL, we
+need to normalise the value $v$ by means of the
+\ocamlvaluename{normalise\_real} function (whose code is not shown
+here). It consists of rewriting the values of the type associated to
+\kwdREAL{} using the decimal (dotted) notation:
+\verb+{+\texttt{mantissa} \texttt{\small 1,} \texttt{base}
+\texttt{\small 10,} \texttt{exponent} \texttt{\small -3}\verb+}+
+$\longrightarrow$ \texttt{\small 1E-3}, and each integer literal of
+the \kwdREAL{} type is rewritten with the decimal notation:
+\texttt{\small 5} $\longrightarrow$ \texttt{\small 5.0}. Then $\mu$ is
+applied: $\mu \, (\ocamlvaluename{normalise\_real} \,
+(\ocamlvaluename{v}))$. The remaining equations are obvious.
+
+
+\subsection{Inner type constraints}
+ 
+When some \kwdSETOF{} or \kwdSEQUENCEOF{} type is imported from
+another \ASN module, we cannot syntactically insert a constraint on
+its elements between the keywords \texttt{\small SET} or
+\texttt{\small SEQUENCE} and \texttt{\small OF} (see
+section~\ref{size_constraint}). That is why there is another way of
+achieving the same goal: using the \texttt{\small WITH COMPONENT}
+constraint. For instance, quoting
+Dubuisson~\cite[\S{13.8.11}]{Dubuisson:2000}, given \texttt{\small
+  TextBlock ::= SEQUENCE OF VisibleString}, we can further refine this
+type for lines of no more than 32 characters: \texttt{\small
+  Address\-Block ::= Text\-Block (WITH COM\-PO\-NENT (SIZE (1..32)))},
+or for digits and spaces: \texttt{\small Digit\-Block ::= Text\-Block
+  (WITH COM\-PO\-NENT (Numeric\-String))}. These two subtypes have the
+same values as: \texttt{\small Address\-Block ::= SE\-QUEN\-CE OF
+  Visible\-String(SIZE(1..32))} and \texttt{\small Digit\-Block
+  ::=SE\-QUEN\-CE OF Vi\-si\-ble\-String(Numeric\-String)}. Formally:
+
+\medskip
+
+\noindent
+\begin{tabular}{lll}
+    $\llbracket (\kwdSETOF \,\, \T_0 \mid \kwdSEQUENCEOF \,\, \T_0)$,
+  & & \\
+    \multicolumn{3}{l}{
+      \hspace*{1mm}
+      ${\kwdWITHCOMPONENT \,\, \C_0}\rrbracket_{\alpha}({\TSEmap{}})
+       =$
+    } \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{and} \,\, \gamma \,\, \emph{be fresh
+           variables}$\\ 
+          $\ocamlkwd{in}$
+        & \hspace*{-4mm}
+          $\denotC{\I}{\T_0,\C_0}{\beta}{\TSEmap{}}
+           \,\, \CEand \,\, \gamma \CEeqS \Cons \, (\beta, \gamma) \,
+           \SEcup \, \Nil$\\
+        & \hspace*{-4mm}
+          $\CEand \,\, \alpha \PSCEeq \gamma\SEdiam\mathbb{N}^{+}$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+\noindent
+This equation defines the constraint collection from the
+\kwdWITHCOMPONENT{} subtyping constraint. It applies to \kwdSETOF{}
+and \kwdSEQUENCEOF{} types, corresponding to powersets of values, by
+constraining their elements (but not their cardinals). For instance
+\texttt{\small A ::= SET (WITH COMPONENT (0..7)) OF INTEGER} is the
+type of the set of integers ranging from 0 to 7. First, we extract the
+expression corresponding to the type of the elements \emph{as
+constrained by the clause \kwdWITHCOMPONENT}, and bind it to the fresh
+variable $\beta$: $\denotC{\I}{\T_0,\C_0}{\beta}{\TSEmap{}}$. Then we
+form the constraint $\gamma \CEeqS \Cons \, (\beta, \gamma) \, \SEcup
+\, \Nil$ which denotes the powerset over sets of $\beta$
+elements. Finally, we get the powerset constraint $\alpha \PSCEeq
+\gamma\SEdiam\mathbb{N}^{+}$ which assigns the set $\mathbb{N}^{+}\!$
+as the cardinals for the elements of $\gamma$.
+
+\medskip
+
+Now let us introduce the \emph{partial constraints} of \kwdSETOF,
+\kwdSEQUENCE{} and \kwdCHOICE{} types. Given 
+{\small
+\begin{verbatim}
+Quadruple ::= SEQUENCE {
+  alpha ENUMERATED {in, out} OPTIONAL,
+  beta  IA5String OPTIONAL,
+  gamma SEQUENCE OF INTEGER,
+  delta BOOLEAN DEFAULT TRUE}
+\end{verbatim}
+}
+
+\noindent
+we can derive a subtype whose component \verb+alpha+ is always present
+and equals \verb+in+, and the component \verb+gamma+ always has
+five elements:
+{\small
+\begin{verbatim}
+Quadruple1 ::= Quadruple (
+    WITH COMPONENTS {..., alpha (in) PRESENT, 
+                          gamma (SIZE (5))})
+\end{verbatim}
+}
+\noindent
+This subtype has the same values as
+{\small 
+\begin{verbatim}
+Quadruple1 ::= SEQUENCE {
+  alpha ENUMERATED {in, out} (in),
+  beta  IA5String OPTIONAL,
+  gamma SEQUENCE SIZE (5) OF INTEGER,
+  delta BOOLEAN DEFAULT TRUE}
+\end{verbatim}
+}
+\noindent
+The symbol `\verb+...+' means that we constrain only the listed
+components: this is a \emph{partial constraint}. If the symbol
+`\verb+...+' is missing, there is an implicit constraint
+\texttt{\small PRESENT} on the listed components, and \texttt{\small
+ABSENT} on the others:
+{\small
+\begin{verbatim}
+Quadruple1 ::= Quadruple (WITH COMPONENTS 
+    {alpha (in), gamma (SIZE (5)), delta})
+\end{verbatim}
+}
+\noindent
+This subtype has the same values as
+{\small 
+\begin{verbatim}
+Quadruple1 ::= SEQUENCE {
+  alpha ENUMERATED {in, out} (in),
+  gamma SEQUENCE SIZE (5) OF INTEGER,
+  delta BOOLEAN DEFAULT TRUE
+}
+\end{verbatim}
+}
+
+\noindent
+This is called a \emph{complete} or \emph{fully specified}
+constraint~\cite[\S{47.8.6}]{X.680:2002}. The following equation
+defines the constraint collection from this kind of constraint. They
+can be expressed in terms of the so-called partial constraints. Let us
+first examine the case of the \kwdCHOICE{} type:
+
+\medskip
+
+\noindent
+\begin{tabular}{lll}
+    $\denotC{f}{\T, \kwdWITHCOMPONENTS \,\, (\Full,
+     \FieldConst{\Labels'})}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = &\\
+    \multicolumn{3}{l}{
+      $\,\, \ocamlkwd{match} \,\, \T \,\, \ocamlkwd{with}$
+    }\\
+    \multicolumn{3}{l}{
+      \begin{tabular}{ll}
+        & \hspace*{-4mm}
+          $\kwdCHOICE \,\, \FieldEnv{\Labels} \,\, \ocamlkwd{when}
+           \,\, \Labels' \subseteq \Labels \rightarrow$\\
+        & \hspace*{-4mm}
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm}
+              $\textnormal{A} = \{l \mapsto (\None, \Some \,
+               \kwdABSENT)\}_{l \in  \Labels \backslash \Labels'} \,\,
+               \ocamlkwd{in}$\\
+            & \hspace*{-6mm}
+              $\ocamlkwd{let} \,\, \NormFieldConst{\Labels'} =
+              \FieldConst{\Labels'} \funupdate \textnormal{A}$\\
+              $\ocamlkwd{in}$
+            & \hspace*{-5mm}
+              $\denotC{f}{\T, \kwdWITHCOMPONENTS \,\, (\Partial,
+               \NormFieldConst{\Labels'})}{\alpha}{\TSEmap{}}$
+          \end{tabular}\\
+          $\mid$
+        & \hspace*{-4mm}
+          $\ldots$
+      \end{tabular}%    
+    }%
+\end{tabular}%
+
+\medskip
+
+The component names (\emph{labels}) which carry constraints,
+$\Labels'$, must occur in the type definition: $\Labels' \subseteq
+\Labels$ (this is a consistence checking). The fact that the
+constraint is fully specified implies that the components not
+explicitly constrained must be absent (A) in the value notation,
+and, since moreover the type is a \kwdCHOICE, no further constraint is
+added to the explicitly constrained components. For instance:
+\texttt{\small A ::= CHOICE} \verb+{+\texttt{a} \texttt{\small
+INTEGER,} \texttt{b} \texttt{\small T}\verb+}+ \texttt{\small (WITH
+COMPONENTS} \verb+{+\texttt{a} \texttt{(3..10)}\verb+}+\texttt{\small
+)} is equivalent to \texttt{\small A ::= CHOICE} \verb+{+\texttt{a}
+\texttt{\small INTEGER,} \texttt{b} \texttt{\small T}\verb+}+
+\texttt{\small (WITH COMPONENTS} \verb+{+\texttt{a} \texttt{\small
+(3..10),} \texttt{b} \texttt{\small ABSENT,} \texttt{\small
+...}\verb+}+\texttt{\small )}.
+
+This semantics may lead to an assumption we made being broken. Indeed,
+we assumed that the types in \core (section~\ref{core}) are
+well-founded (section~\ref{well_founded_types}), \emph{i.e.,} the
+types have at least a finite value. This property may not hold here
+anymore because of this `component-cancellation' semantics. Consider the following type declaration:
+\begin{center}
+\tt\small A ::= CHOICE \{a A, b INTEGER\} (WITH COMPONENTS \{a\}).
+\end{center}
+It is equivalent to \texttt{\small A ::= CHOICE} \verb+{+\texttt{a}
+\texttt{\small A}\verb+}+, which is obvioulsy not a well-founded
+type. That is why we must check again this property on the
+\kwdCHOICE{} with only its explicitly constrained components:
+$\TypeEnv \Vdash \kwdCHOICE \,\, \FieldEnv{\Labels'}$.
+
+The inner subtyping constraint is represented by
+$\FieldConst{\Labels'}$, which is a mapping from labels (belonging to
+the set $\Labels'$) to pairs of (possibly optional) subtyping
+constraint and (possibly optional) presence constraint. For example
+\texttt{\small WITH COMPONENTS} \verb+{+\texttt{a} \texttt{\small
+(0..9) PRESENT,} \texttt{b} \texttt{\small ABSENT,} \texttt{c}
+\texttt{\small (7)}\verb+}+ corresponds to:
+
+\noindent
+$\left\{
+\begin{tabular}{lcl}
+    $\FieldConst{}(\textsf{"a"})$ 
+  & \hspace*{-4mm} = 
+  & \hspace*{-4mm} 
+    $(\Some \, ( \PosInt (0) \LEQ \pmb{..}
+     \LEQ \PosInt (9)),$\\
+  &
+  & \hspace*{-3mm} 
+    $\Some \, \kwdPRESENT)$\\
+    $\FieldConst{}(\textsf{"b"})$
+  & \hspace*{-4mm} = 
+  & \hspace*{-4mm}
+    $(\None, \Some \, \kwdABSENT)$\\
+    $\FieldConst{}(\textsf{"c"})$
+  & \hspace*{-4mm} =
+  & \hspace*{-4mm}
+    $(\Some \, (\PosInt (7)), \None)$
+\end{tabular}
+\right.$
+
+When there is no explicit presence constraint, like for the component
+\texttt{c} in our last example, there is implicitly a \kwdPRESENT{}
+constraint~\cite[\S{48.8.9.2}]{X.680:2002}. This rule is formally
+specified in the lines `$\ocamlkwd{let} \,\, \ocamlvaluename{p} =
+\ldots \,\, \ocamlkwd{in} \,\, \ocamlkwd{let} \,\,
+\NormFieldConst{\Labels'} = \ldots$' (let us recall that the notation
+`$v \lhd p$' is a short-hand for `$\ocamlkwd{match} \,\, v \,\,
+\ocamlkwd{with} \,\, p \rightarrow \ocamlkwd{true}$').
+
+We can finally create a subtyping constraint that is \emph{partial},
+instead of being complete:
+\begin{equation*}
+\denotC{f}{(\kwdCHOICE \,\, \FieldEnv{\Labels'}), \kwdWITHCOMPONENTS
+    \, (\Partial, \ldots)}{\alpha}{\TSEmap{}}.
+\end{equation*}
+This way we are able to factorize as much as possible the computations
+and checks: we reduce the complete constraints to partial ones.
+
+Let us consider the second pattern. It filters the \kwdSET{} and
+\kwdSEQUENCE{} types:
+
+\medskip
+
+\noindent
+\begin{tabular}{lll}
+    \multicolumn{3}{l}{%
+      \begin{tabular}{ll}%
+          $\mid$
+        & \hspace*{-4mm}
+          $\ldots$\\
+          $\mid$ 
+        & \hspace*{-4mm}
+          $(\kwdSET \, \CompEnv{\Labels} \mid \kwdSEQUENCE \,
+           \CompEnv{\Labels}) \,\, \ocamlkwd{when} \,\, \Labels'
+           \subseteq \Labels \rightarrow$\\
+        & \hspace*{-4mm}
+          \begin{tabular}{lll}
+              $\ocamlkwd{let}$
+            & \multicolumn{2}{l}{
+                \hspace*{-4mm}
+                $\textnormal{A} = \{l \mapsto (\None, \Some \,
+                 \kwdABSENT)\}_{l \in \Labels \backslash \Labels'}
+                 \,\, \ocamlkwd{in}$
+              }\\
+            & \hspace*{-6mm} 
+              $\ocamlkwd{let} \,\, \textnormal{P} =$
+            & \hspace*{-4mm}
+              $\{l' \mapsto (\sigma, \Some \, \kwdPRESENT) \mid$\\
+            &
+            & \hspace*{-2mm}
+              $\FieldConst{}(l') \lhd (\sigma, \None)\}_{l'\in
+               \Labels'} \,\, \ocamlkwd{in}$\\
+            & \multicolumn{2}{l}{
+                \hspace*{-6mm}
+                $\ocamlkwd{let} \,\,
+                 \NormFieldConst{\Labels'} = \FieldConst{\Labels'} \,
+                 \funupdate \, \textnormal{A} \, \funupdate \,
+                 \textnormal{P}$
+              }\\
+              $\ocamlkwd{in}$
+            & \multicolumn{2}{l}{
+                \hspace*{-5mm}
+                $\denotC{f}{\T,
+                 \kwdWITHCOMPONENTS \,\, (\Partial,
+                 \NormFieldConst{\Labels'})}{\alpha}{\TSEmap{}}$
+              }
+          \end{tabular}
+      \end{tabular} 
+    }
+\end{tabular}
+
+\medskip
+
+First we perform the same consistence checking as for \kwdCHOICE{}
+types, $\Labels' \subseteq \Labels$. As for \kwdCHOICE{} types, since
+the constraint is fully specified, it implies that the components not
+explicitly constrained must be absent in the value notation
+(A). But, contrary to \kwdCHOICE{} types, the components which are
+not explicitly constrained are further constrained to be present
+(P)~\cite[\S{47.8.9.3}]{X.680:2002}. For instance: \texttt{\small A
+::= SET} \verb+{+\texttt{a} \texttt{\small REAL OPTIONAL}\verb+}+
+\texttt{\small (WITH COMPONENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0)}\verb+}+\texttt{\small )} is equivalent to \texttt{\small A ::=
+SET} \verb+{+\texttt{a} \texttt{\small REAL OPTIONAL}\verb+}+
+\texttt{\small (WITH COMPONENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0)} \texttt{\small PRESENT,} \texttt{\small
+...}\verb+}+\texttt{\small )}.
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\denotC{f}{\T, \kwdWITHCOMPONENTS \,\, (\Partial,
+     \FieldConst{\Labels'})}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = &\\
+    \multicolumn{3}{l}{
+      $\,\, \ocamlkwd{match} \,\, \T \,\, \ocamlkwd{with}$ 
+    }\\
+    \multicolumn{3}{l}{
+      \begin{tabular}{ll}
+        & \hspace*{-4mm}
+          $\kwdCHOICE \,\, \FieldEnv{\Labels} \,\, \ocamlkwd{when}
+          \,\, \Labels' \subseteq \Labels \rightarrow \ldots$%\\
+      \end{tabular}%
+    }%
+\end{tabular}%
+
+\medskip
+
+This equation defines the constraint collection from the partially
+specified subtyping constraints on \kwdCHOICE{} types.  First, we
+check the consistence $\Labels' \subseteq \Labels$. Then we use a
+non-standard construct $\ocamlkwd{cases} \,\, b_0 \rightarrow e_0 \mid
+\ldots \mid b_n \rightarrow e_n \,\, \ocamlkwd{end}$, which
+means:`$\ocamlkwd{if}$ $b_0$ $\ocamlkwd{then}$ $e_0$ $\ocamlkwd{else}$
+$\ldots$ $\ocamlkwd{if}$ $b_n$ $\ocamlkwd{then}$ $e_n$
+$\ocamlkwd{else}$ $\ocamlkwd{fail}$':
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}%
+    \multicolumn{3}{l}{%
+      \begin{tabular}{ll}%
+        & $\ldots$\\
+        & $\ocamlkwd{cases}$\\
+        & \begin{tabular}{rll}
+            & \multicolumn{2}{l}{
+                \hspace*{-4mm}
+                 $\Labels' = \varnothing \rightarrow \,
+                 \TSE{f}{\T}{\alpha}{\TSEmap{}}$
+              }\\
+              $\mid$ 
+            & \hspace*{-4mm}
+              $\exists! l' \in \Labels'.$
+            & \hspace*{-5mm}
+              $(\FieldConst{}(l')
+                \lhd (\sigma, \Some \, \kwdPRESENT)$\\
+            &
+            & \hspace*{-4mm}
+              $\BOOLand \TypeEnv \Vdash \kwdCHOICE \,\,
+               \FieldEnv{\{l'\}}) \rightarrow$\\
+            & \multicolumn{2}{l}{
+                \hspace*{-4mm}
+                \begin{tabular}{ll}
+                    $\ocamlkwd{let}$
+                  & \hspace*{-4mm}
+                    $\NormFieldConst{} = \{ l' \mapsto (\sigma, \None)
+                     \}$\\
+                    $\ocamlkwd{and}$
+                  & \hspace*{-4mm}
+                    $\T' = \kwdCHOICE \,\, \FieldEnv{\{l'\}}$\\
+                    \multicolumn{2}{l}{
+                      $\ocamlkwd{in} \,
+                       \denotC{f}{\T',\kwdWITHCOMPONENTS \,
+                       (\Partial,
+                        \NormFieldConst{}\,)}{\alpha}{\TSEmap{}}$
+                    }
+                \end{tabular}
+              }\\
+              $\mid$
+            & \hspace*{-4mm}
+              $\ldots$ & %
+          \end{tabular}%%  
+      \end{tabular}%
+    }%
+\end{tabular}%
+
+\medskip
+
+The first case corresponds to the lack of an actual inner subtyping
+constraint, \emph{i.e.,} $\Labels' = \varnothing$. In this case, the
+constraint is simply collected from the type \T{} (this means, for
+example, that \texttt{\small A ::= CHOICE} \verb+{+\texttt{a}
+\texttt{\small B}\verb+}+ \texttt{\small (WITH COMPONENTS}
+\verb+{+\texttt{\small ...}\verb+}+\texttt{\small )} is equivalent to
+\texttt{\small A ::= CHOICE} \verb+{+\texttt{a} \texttt{\small
+B}\verb+}+).
+
+The second case applies when there is only one \kwdPRESENT{}
+constraint applying to a component $l'$ and when the \kwdCHOICE{}
+type restricted to $l'$ is not recursive: $\TypeEnv
+\Vdash \kwdCHOICE \,\, \FieldEnv{\{l'\}}$, \emph{e.g.,} \texttt{\small A ::=
+CHOICE} \verb+{+\texttt{a} \texttt{\small A,} \texttt{b} \texttt{\small
+REAL}\verb+}+ \texttt{\small (WITH COMPONENTS} \verb+{+\texttt{a}
+\texttt{\small PRESENT, ...}\verb+}+\texttt{\small )} is rejected
+because \texttt{\small A ::= CHOICE} \verb+{+\texttt{a} \texttt{\small
+A}\verb+}+ is recursive. In this case, the collected constraint is the
+same as for the restricted type with no presence constraint,
+\emph{e.g.,} \texttt{\small A ::= CHOICE} \verb+{+\texttt{a} \texttt{\small
+REAL,}  \texttt{b} \texttt{\small INTEGER}\verb+}+\texttt{\small (WITH
+COMPONENTS} \verb+{+\texttt{a} \texttt{\small (0.0)
+PRESENT,...}\verb+}+\texttt{\small )} is equivalent to \texttt{\small
+A ::= CHOI\-CE} \verb+{+\texttt{a} \texttt{\small REAL}\verb+}+
+\texttt{\small (WITH COMPO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0),...}\verb+}+\texttt{\small )}. 
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}%
+    \multicolumn{3}{l}{%
+      \begin{tabular}{ll}%
+        & \begin{tabular}{rll}
+              $\mid$
+            & \hspace*{-4mm}
+              $\ldots$ & \\
+              $\mid$
+            &
+              \multicolumn{2}{l}{
+                \hspace*{-4mm}
+                $\neg\exists l' \in \Labels'.\FieldConst{}(l')
+                 \lhd (\wildcard, \Some \, \kwdPRESENT)$
+              }\\
+            & \multicolumn{2}{l}{
+                \hspace*{-4mm}
+                $\!\!\BOOLand \exists l' \in
+                 \Labels'.\FieldConst{}(l') \lhd (\sigma,
+                 \wildcard) \rightarrow$ 
+              }\\
+            & \multicolumn{2}{l}{
+                \hspace*{-4mm} 
+                \begin{tabular}{ll}
+                    $\ocamlkwd{let}$ 
+                  & \hspace*{-4mm}
+                    $\beta \,\, \emph{and} \,\, \gamma \,\,
+                     \emph{be fresh variables}$\\
+                    $\ocamlkwd{and}$
+                  & \hspace*{-4mm}
+                    $\NormFieldConst{} = \FieldConst{\Labels'
+                     \backslash \{l'\}} \,\,
+                     \ocamlkwd{and} \,\, 
+                     \T' = \kwdCHOICE \,\, 
+                     \FieldEnv{\Labels' \backslash \{l'\}}$\\
+                    \multicolumn{2}{l}{
+                      $\ocamlkwd{in} \,
+                       \denotC{f}{\T',\kwdWITHCOMPONENTS \,
+                       (\Partial,
+                        \NormFieldConst{}\,)}{\gamma}{\TSEmap{}}$
+                    }\\
+                  & \hspace*{-7mm}
+                    $\!\!\CEand \alpha \CEeqS (l' \pmb{:} \beta)
+                     \, \SEcup \, \gamma$\\
+                  & \hspace*{-7mm}
+                    $\!\! \CEand \ocamlkwd{match}
+                     \,\, \sigma \,\, \ocamlkwd{with} \,\, \None
+                     \rightarrow \,
+                     \TSE{\I}{\FieldEnv{}(l')}{\beta}{\TSEmap{}}$\\
+                  & \hspace*{-4mm}
+                    \begin{tabular}{ll}
+                        $\mid$
+                      & \hspace*{-4mm}
+                        $\Some \, (\C) \rightarrow \,
+                         \denotC{\I}{\FieldEnv{}(l'),
+                         \C}{\beta}{\TSEmap{}}$
+                    \end{tabular}
+                \end{tabular}
+              }
+          \end{tabular} \\                
+        & $\ocamlkwd{end} \,\,\, \textsf{(*} \,\, \ocamlkwd{cases} \,\,
+           \textsf{*)}$\\
+          $\mid$
+        & \hspace*{-4mm}
+          $\ldots$
+      \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+
+The last case applies when there is no \kwdPRESENT{} constraint. A
+component labelled $l'$ is chosen and the constraint corresponding to
+the \kwdCHOICE{} type without $l'$ is collected:
+\begin{equation*}
+\denotC{f}{\T',\kwdWITHCOMPONENTS \, (\Partial,
+  \NormFieldConst{}\,)}{\gamma}{\TSEmap{}}.
+\end{equation*}
+If there is actually a subtyping constraint $\C$ for the component
+$l'$, then the constraint for it is collected:
+$\denotC{\I}{\FieldEnv{}(l'), \C}{\beta}{\TSEmap{}}$. Otherwise the
+constraint from the component alone is collected:
+$\TSE{\I}{\FieldEnv{}(l')}{\beta}{\TSEmap{}}$. The next cases
+correspond to the \kwdSET{} and \kwdSEQUENCE{} types:
+
+\medskip
+
+\noindent
+\begin{tabular}{ll}
+    $\mid$
+  & \hspace*{-4mm}
+    $\ldots$\\
+    $\mid$
+  & \hspace*{-4mm}
+    $(\kwdSET \, \CompEnv{\Labels} \mid \kwdSEQUENCE \,
+     \CompEnv{\Labels}) \,\, \ocamlkwd{when} \,\, \Labels'
+     \subseteq \Labels \rightarrow$\\
+  & \hspace*{-4mm}
+    $\ocamlkwd{cases} \,\, \Labels' = \varnothing \rightarrow \,
+     \TSE{f}{\T}{\alpha}{\TSEmap{}}$\\
+  & \hspace*{-4mm}
+    \begin{tabular}{rll}
+        $\mid$ 
+      & \hspace*{-4mm}
+        $\exists l' \in \Labels'.$
+      & \hspace*{-5mm}
+        $(\FieldConst{}(l') \lhd (\sigma, \Some \, \kwdOPTIONAL)$\\
+      &
+      & \hspace*{-4mm}
+        $\BOOLand \CompEnv{}(l') \lhd (\T_0, \Some \,
+         \kwdOPTIONAL)) \rightarrow$\\
+      & \multicolumn{2}{l}{
+          \hspace*{-4mm}
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm}
+              $\NormFieldConst{\Labels'} = \FieldConst{\Labels'}
+               \funupdate \{ l' \mapsto (\sigma, \None) \}$\\
+              $\ocamlkwd{in}$
+            & \hspace*{-5mm}
+              $\denotC{f}{\T, \kwdWITHCOMPONENTS \,\, (\Partial,
+               \NormFieldConst{\Labels'})}{\alpha}{\TSEmap{}}$
+          \end{tabular}
+        }\\
+        $\mid$
+      & \hspace*{-4mm}
+        $\ldots$
+    \end{tabular}%
+\end{tabular}%
+
+\medskip
+
+The first pattern corresponds to the situation where there is an
+\kwdOPTIONAL{} constraint applying to a component marked as
+\kwdOPTIONAL{} in the type definition. Hence the presence constraint
+is removed, \emph{e.g.,} \texttt{\small A ::= SET} \verb+{+\texttt{a}
+\texttt{\small REAL OPTION\-AL}\verb+}+ \texttt{\small (WITH
+COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small (0.0) OPTION\-AL,
+...}\verb+}+\texttt{\small )} is equivalent to \texttt{\small A ::=
+SET} \verb+{+\texttt{a} \texttt{\small REAL OPTION\-AL}\verb+}+
+\texttt{\small (WITH COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0)} \texttt{\small ...}\verb+}+\texttt{\small )}.
+
+\medskip
+
+\noindent%
+\begin{tabular}{ll}%
+  & \hspace*{-4mm}%
+    \begin{tabular}{rll}%
+        $\mid$%
+      & \hspace*{-4mm}
+        $\dots$\\%
+        $\mid$ 
+      & \hspace*{-4mm}
+        $\exists l' \in \Labels'.$
+      & \hspace*{-5mm}
+        $(\FieldConst{}(l') \lhd (\None, \Some \, \kwdABSENT)$\\
+      &
+      & \hspace*{-4mm}
+        $\BOOLand \CompEnv{}(l') \lhd (\T_0, \Some \,
+         \kwdOPTIONAL)) \rightarrow$\\
+      & \multicolumn{2}{l}{
+          \hspace*{-4mm}
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm}
+              $\C' = \kwdWITHCOMPONENTS \,\, (\Partial,
+               \FieldConst{\Labels' \backslash \{l'\}})$\\
+              $\ocamlkwd{in}$
+            & \hspace*{-4mm}
+              $\denotC{f}{\kwdSET \,\, \CompEnv{\Labels \backslash
+               \{l'\}}, \C'}{\alpha}{\TSEmap{}}$
+          \end{tabular}
+        }\\
+        $\mid$
+      & \hspace*{-4mm}
+        $\ldots$
+    \end{tabular}
+\end{tabular}
+       
+\medskip
+
+The second pattern rules if an \kwdABSENT{} constraint \emph{alone}
+applies to a component marked as \kwdOPTIONAL. Then the component and
+the constraints are simply discarded, \emph{e.g.,} \texttt{\small A ::= SET}
+\verb+{+\texttt{a} \texttt{\small REAL OPTION\-AL}\verb+}+
+\texttt{\small (WITH COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+ABSENT,...}\verb+}+\texttt{\small )} is equivalent to \texttt{\small A
+::= SET} \verb+{}+. If the \kwdABSENT{} constraint was associated to
+another kind of constraint, like a value constraint, then it is an
+error (in the implementation, this behaviour can be turned into a
+warning). For instance, the semantics of \texttt{\small A ::= SET}
+\verb+{+\texttt{a} \texttt{\small REAL OPTION\-AL}\verb+}+
+\texttt{\small (WITH COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0) ABSENT,...}\verb+}+\texttt{\small )} is undefined.
+
+\medskip
+
+\noindent
+\begin{tabular}{ll}
+  & \hspace*{-4mm}
+    \begin{tabular}{rll}    
+        $\mid$
+      & \hspace*{-4mm}
+        $\ldots$\\
+        $\mid$ 
+      & \hspace*{-4mm}
+        $\exists l' \in \Labels'.$
+      & \hspace*{-5mm}
+        $\FieldConst{}(l') \lhd (\sigma, \Some \, \kwdPRESENT)
+        \rightarrow$ \\
+      & \multicolumn{2}{l}{
+          \hspace*{-4mm}
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm}
+              $\NormFieldConst{\Labels'} =
+               \FieldConst{\Labels'} \funupdate \{ l' \mapsto (\sigma,
+               \None) \} \,\, \ocamlkwd{in}$\\
+              \multicolumn{2}{l}{
+                \begin{tabular}{l}
+                  $\ocamlkwd{let} \,\, \C' = \kwdWITHCOMPONENTS \,\,
+                   (\Partial, \NormFieldConst{\Labels'})$
+                \end{tabular}
+              }\\
+              $\ocamlkwd{in}$
+            & \hspace*{-6mm}
+              $(\ocamlkwd{match} \,\, \CompEnv{}(l') \,\,
+               \ocamlkwd{with}$\\
+            & \hspace*{-6mm}
+              \begin{tabular}{rl}
+                & \hspace*{-4mm}
+                  $(\T_0, \Some \, \kwdOPTIONAL) \rightarrow$\\
+                & \hspace*{-4mm}
+                  \begin{tabular}{ll}
+                      $\ocamlkwd{let}$
+                    & \hspace*{-4mm} 
+                      $\NormCompEnv{\Labels} =
+                       \CompEnv{\Labels} \funupdate \{ l' \mapsto (\T_0,
+                       \None) \}$\\
+                      $\ocamlkwd{in}$
+                    & \hspace*{-6mm}
+                      $(\ocamlkwd{match} \,\,
+                       \TypeEnv \Vdash \kwdSET \,\, 
+                       \NormCompEnv{\{ l' \}} \,\,
+                       \ocamlkwd{with}$\\
+                    & \hspace*{-3mm}
+                      $\ocamlkwd{true} \rightarrow \,
+                       \denotC{f}{\kwdSET \,\,
+                       \NormCompEnv{\Labels},
+                       \C'}{\alpha}{\TSEmap{}})$
+                    \end{tabular}\\
+                  $\mid$ 
+                & \hspace*{-4mm} 
+                  $\wildcard \,\, \rightarrow \,\, \denotC{f}{\kwdSET
+                   \,\, \CompEnv{\Labels}, \C'}{\alpha}{\TSEmap{}})$
+              \end{tabular}\\
+          \end{tabular}
+        }\\
+        $\mid$
+      & \hspace*{-4mm}
+        $\ldots$
+  \end{tabular}
+\end{tabular}
+
+\medskip
+
+The third pattern is appropriate when there is some \kwdPRESENT{}
+constraint. If the component in question is not optional, then the
+presence constraint is discarded, otherwise its mark \kwdOPTIONAL{} is
+discarded and so is the constraint (we need to check also that the
+resulting type is still well-founded), \emph{e.g.,} \texttt{\small A
+  ::= SET} \verb+{+\texttt{a} \texttt{\small A OPTION\-AL}\verb+}+
+\texttt{\small (WITH COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+  PRE\-SENT, ...}\verb+}+\texttt{\small )} is equivalent to
+\texttt{\small A ::= SET} \verb+{+\texttt{a} \texttt{\small
+  A}\verb+}+, which has only infinite values, hence must be
+rejected. The last case is:
+
+\medskip
+
+\noindent
+\begin{tabular}{ll}
+  & \hspace*{-4mm}
+    \begin{tabular}{rll}
+        $\mid$
+      & \hspace*{-4mm}
+        $\ldots$\\
+        $\mid$
+      & \hspace*{-4mm} 
+        $\exists l' \in \Labels'.$
+      & \hspace*{-5mm} 
+        $\FieldConst{}(l') \lhd (\sigma, \None) \rightarrow$\\
+      & \multicolumn{2}{l}{
+          \hspace*{-4mm}
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm} 
+              $\beta \,\, \emph{and} \,\, \gamma \,\, \emph{be fresh
+               variables}$\\
+              $\ocamlkwd{and}$
+            & \hspace*{-4mm}
+              $\C' = \kwdWITHCOMPONENTS \,\,
+               (\Partial, \FieldConst{\Labels' \backslash \{l'\}})$\\
+              $\ocamlkwd{in}$
+            & \hspace*{-7mm} 
+              $\denotC{f}{\kwdSET \,\, \CompEnv{\Labels \backslash
+               \{l'\}}, \C'}{\gamma}{\TSEmap{}} \CEand$\\
+            & \hspace*{-7mm}
+              $\ocamlkwd{match} \,\, \CompEnv{}(l') \,\,
+               \ocamlkwd{with}$\\
+            & \hspace*{-8mm}
+              \begin{tabular}{rl}
+                & \hspace*{-4mm}
+                  $(\T_0, \None \mid \Some \, (\kwdDEFAULT
+                   \wildcard)) \rightarrow$\\ 
+                & $\alpha \CEeqS \Bind \, (l', \beta, \gamma)
+                  \CEand$\\
+                & $(\ocamlkwd{match}
+                   \,\, \sigma \,\, \ocamlkwd{with} \,\, \None \,
+                  \rightarrow \TSE{\I}{\T_0}{\beta}{\TSEmap{}}$\\
+                & \hspace*{-1mm} 
+                  \begin{tabular}{ll}
+                      $\mid$
+                    & \hspace*{-4mm}
+                      $\Some \, (\C_0) \rightarrow
+                       \TSE{\I}{\T_0,\C_0}{\beta}{\TSEmap{}})$\\
+                  \end{tabular}\\
+                  $\mid$
+                & \hspace*{-4mm}
+                  $(\T_0, \Some \, \kwdOPTIONAL) \rightarrow$\\
+                & 
+                  $\alpha \CEeqS \Bind \, (l', \beta, \gamma) \,
+                   \SEcup \, \gamma \,\, \CEand$\\
+                & $\ocamlkwd{match}
+                   \,\, \sigma \,\, \ocamlkwd{with} \,\, \None \,
+                   \rightarrow \TSE{\I}{\T_0}{\beta}{\TSEmap{}}$\\
+                & \hspace*{-1mm} 
+                  \begin{tabular}{ll}
+                      $\mid$
+                    & \hspace*{-4mm}
+                      $\Some \, (\C_0) \rightarrow
+                       \TSE{\I}{\T_0,\C_0}{\beta}{\TSEmap{}}$
+                  \end{tabular}
+              \end{tabular}
+          \end{tabular}
+        }
+    \end{tabular}\\
+  & \hspace*{-4mm}
+    $\ocamlkwd{end} \,\,\, \textsf{(*} \,\, \ocamlkwd{cases} \,\,
+    \textsf{*)}$
+\end{tabular}
+
+\medskip
+
+This last pattern applies when there is no presence constraint on the
+component (see \ocamlconstr{None} in $\FieldConst{}(l') \lhd (\sigma,
+\None)$). A component labelled $l'$ is chosen, and the constraint
+corresponding to \T{} without $l'$ is collected: $\denotC{f}{\kwdSET
+\,\, \CompEnv{\Labels \backslash \{l'\}}, \C'}{\gamma}{\TSEmap{}}$ (if
+\T{} is actually a \kwdSEQUENCE{} type, we nevertheless transform it
+in \kwdSET{} because their semantics is the same in our work).
+
+Next, if there is actually a subtyping constraint $\C$ for the
+component $l'$, then the constraint for this subtyped component is
+collected: $ \TSE{\I}{\T_0,\C_0}{\beta}{\TSEmap{}}$. Otherwise the
+constraint from the component alone is collected:
+$\TSE{\I}{\T_0}{\beta}{\TSEmap{}}$. Finally, if the component $l'$ is
+not \kwdOPTIONAL{}, then the constraint for \T{} is collected: $\alpha
+\CEeqS \Bind \, (l', \beta, \gamma)$. Otherwise, we have to take into
+account that the component may be missing in the value notation:
+$\alpha \CEeqS \Bind \, (l', \beta, \gamma) \, \SEcup \, \gamma$.
+
+
+\subsection{Type reference}\label{collection_from_type_references}
+
+\noindent
+\begin{tabular}{rcl}
+     $\denotC{f}{\TRef \, (x), \C}{\alpha}{\TSEmap{\R}}$
+   & \hspace*{-4mm} = & \\
+   \multicolumn{3}{r}{
+      \begin{tabular}{l}
+        $\ocamlkwd{if} \,\, x \in \R
+         \,\, \ocamlkwd{then} \,\, \alpha \CEeq \TSEmap{}(x)$\\
+        $\ocamlkwd{else} \,\, \ocamlkwd{match} \,\, \TypeEnv(x) \,\,
+         \ocamlkwd{with}$\\
+        \hspace*{5mm}
+        \begin{tabular}{rl}
+             & \hspace*{-4mm}
+               $(\T_0, \None) \rightarrow \,\,
+               \denotC{f}{\T_0,\C}{\alpha}{\TSEmap{}
+               \funupdate \{x \mapsto \alpha\}}$\\
+          $\mid$
+             & \hspace*{-4mm}
+               $(\T_0, \Some \, \C_0) \rightarrow$\\
+             & 
+               $\denotC{f}{\T_0, \C \,\, \kwdINTERSECTION
+                \,\, \C_0}{\alpha}{\TSEmap{} \funupdate \{x \mapsto
+                \alpha\}}$
+        \end{tabular}
+      \end{tabular}
+   }
+\end{tabular}
+
+\medskip
+
+This equation defines the constraint collection from type references
+\emph{with a subtyping constraint} --- here $\C$. This situation can
+only happen when a component, which is always a reference in \core
+(see section~\ref{component_types}), is constrained by $\C$. It is
+similar to the equation $\TSE{f}{\TRef \, (x)}{\alpha}{\TSEmap{\R}}$
+we gave in the section~\ref{constraints_from_types}. As before, two
+cases can occur. First, if the reference $x$ has an image through the
+mapping $\TSEmap{}$, it means we previously analysed the referenced
+type, and we collect $\alpha \CEeq \TSEmap{}(x)$.
+
+Otherwise, we analyse the referenced subtype $\TypeEnv (x)$. The first
+pattern corresponds to the case when it is not a proper subtype,
+\emph{i.e.,} it is actually a type $\T_0$: we collect the constraints from it
+\emph{with the subtyping constraint $\C$}:
+$\denotC{f}{\T_0,\C}{\alpha}{\TSEmap{} \funupdate \{x \mapsto
+\alpha\}}$. This case means that the values of \texttt{\small A} in
+\texttt{\small A ::= SET} \verb+{+\texttt{a} \texttt{\small B}\verb+}+
+\texttt{\small (WITH COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+(0.0)}\verb+}+\texttt{\small )}, where \texttt{\small B ::= REAL}, are
+the same as \texttt{\small A} in \texttt{\small A ::= SET}
+\verb+{+\texttt{a} \texttt{\small B}\verb+}+, where \texttt{\small B
+::= REAL (0.0)}.
+
+The second pattern applies when the referenced type $\T_0$ is itself
+constrained by $\C_0$. Then we form the constraint $\C \,\,
+\kwdINTERSECTION \,\, \C_0$ and to apply it to $\T_0$. This case means
+that the values of \texttt{\small A} in \texttt{\small A ::= SET}
+\verb+{+\texttt{a} \texttt{\small B}\verb+}+ \texttt{\small (WITH
+  COM\-PO\-NENTS} \verb+{+\texttt{a} \texttt{\small
+  (0.0)}\verb+}+\texttt{\small )}, where \texttt{\small B ::= REAL
+  (-2..15)}, are the same as \texttt{\small A} in \texttt{\small A ::=
+  SET} \verb+{+\texttt{a} \texttt{\small B}\verb+}+, where
+\texttt{\small B ::= REAL ((0.0) INTERSECTION (-2..15))}.
+
+In the following, we show the constraint collection from a complex
+subtype and the solved form.\label{subtype_example} Let us consider
+the following specification excerpt:\\
+
+\begin{verbatim}
+T ::= SET (ALL EXCEPT 
+             ((SIZE (6..9))
+              INTERSECTION 
+              (WITH COMPONENT (16..19))))
+      OF INTEGER
+\end{verbatim}
+
+We want the constraint whose solution in $\alpha$ is the set of terms
+of \texttt{T}, shown in Figure~\ref{fig:TRef}.
+\begin{figure}[!t]
+\centering
+\begin{tabular}{rcll}
+    \multicolumn{4}{l}{
+      $\denotC{}{\TRef \, (\textsf{"T"})}{\alpha}{\{\}}$
+    }\\
+  & \hspace*{-4mm} =
+  &
+  & \hspace*{-5mm}
+    $\denotC{}{\kwdSETOF \, \kwdINTEGER}{\beta}{\{\}}$\\
+  & 
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\llbracket \kwdSETOF \, \kwdINTEGER,$\\
+  &
+  &
+  & \hspace*{-3mm}
+    $\kwdSIZE \, (\Interval \, (\PosInt \, (6), \PosInt \, (9)))$\\
+  & 
+  &  
+  & \hspace*{-3mm}
+    $\kwdINTERSECTION \, (\kwdWITHCOMPONENT$\\
+  &
+  &
+  & \hspace*{-2mm}
+    $(\Interval \, (\PosInt \, (16), \PosInt \, (19))))
+     \rrbracket_{\varepsilon}(\{\})$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\alpha \CEeq \beta \, \SEdiff \, \varepsilon$\\
+  & \hspace*{-4mm} =
+  & 
+  & \hspace*{-5mm}
+    $(\denotC{}{\kwdINTEGER}{\gamma}{\{\}}
+      \CEand
+      \delta \CEeq \Cons \, (\gamma, \delta) \, \SEcup \, \Nil$\\
+  &
+  &
+  & \hspace*{-5mm}
+    $\CEand \beta \CEeq \delta \SEdiam \mathbb{N}^{+}\!)$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $(\llbracket \kwdSETOF \, \kwdINTEGER, \kwdSIZE$\\
+  &
+  &
+  & $(\Interval \, (\PosInt \, (6), \PosInt \,
+     (9))) \rrbracket_{\zeta}(\{\})$\\
+  &
+  &
+  & \hspace*{-5mm}
+    $\CEand \llbracket \kwdSETOF \, \kwdINTEGER, \kwdWITHCOMPONENT$\\
+  &
+  &
+  & $(\Interval \, (\PosInt \, (16), \PosInt \,
+     (19)))) \rrbracket_{\lambda}(\{\})$\\
+  &
+  & 
+  & \hspace*{-5mm}
+    $\CEand \varepsilon \CEeq \zeta \, \SEcap \, \lambda)$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\alpha \CEeq \beta \, \SEdiff \, \varepsilon$\\
+  & \hspace*{-4mm} =
+  & 
+  & \hspace*{-5mm}
+    $\gamma \CEeq \mathbb{N}
+     \CEand \delta \CEeq \Cons \, (\gamma, \delta) \, \SEcup \, \Nil
+     \CEand \beta \CEeq \delta \SEdiam \mathbb{N}^{+}$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $(\denotC{}{\kwdINTEGER}{\theta}{\{\}}
+     \CEand 
+     \eta \CEeq \Cons \, (\theta, \eta) \, \SEcup \, \Nil$\\
+  &
+  & 
+  & \hspace*{-5mm}
+    $\CEand
+     \zeta \CEeq \eta \SEdiam \Interval \, (\PosInt \, (6), \PosInt
+     \, (9)))$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\!(\denotC{}{\kwdINTEGER, \PosInt (16) \! \pmb{\leqslant} \!
+     \pmb{..} \! \pmb{\leqslant} \! \PosInt (19)}{\iota}{\{\}}$\\
+  &
+  &
+  & \hspace*{-5mm}
+    $\CEand \xi \CEeq \Cons \, (\iota, \xi) \, \SEcup \, \Nil
+     \CEand \lambda \CEeq \xi \SEdiam \mathbb{N}^{+}\!)$\\
+  &
+  & \hspace*{-5mm} 
+    $\CEand$
+  & \hspace*{-5mm}
+    $\varepsilon \CEeq \zeta \, \SEcap \, \lambda
+     \CEand
+     \alpha \CEeq \beta \, \SEdiff \, \varepsilon$\\
+  & \hspace*{-4mm} =
+  & 
+  & \hspace*{-5mm}
+    $\gamma \CEeqI \mathbb{N} 
+     \CEand
+     \delta \CEeqS \Cons \, (\gamma, \delta) \, \SEcup \, \Nil
+     \CEand 
+     \beta \CEeq \delta \SEdiam \mathbb{N}^{+}$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\theta \CEeqI \mathbb{N}
+     \CEand
+     \eta \CEeqS \Cons \, (\theta, \eta) \, \SEcup \, \Nil$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\zeta \CEeq \eta \SEdiam \Interval \, (\PosInt \, (6), \PosInt \,
+     (9))$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\iota \CEeqI \Interval \, (\PosInt \, (16), \PosInt \, (19))$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\xi \CEeqS \Cons \, (\iota, \xi) \, \SEcup \, \Nil
+     \CEand
+     \lambda \CEeq \xi \SEdiam \mathbb{N}^{+}$\\
+  &
+  & \hspace*{-5mm}
+    $\CEand$
+  & \hspace*{-5mm}
+    $\varepsilon \CEeq \zeta \, \SEcap \, \lambda
+     \CEand
+     \alpha \CEeq \beta \, \SEdiff \, \varepsilon$
+\end{tabular}
+\caption{Constraint collection from a complex subtype\label{fig:TRef}}
+\end{figure}
+
+The simplified result of the solving procedure (not presented here),
+is:
+
+\medskip
+
+\noindent
+$\left\{
+\begin{tabular}{rcllll}
+    $\alpha$
+  & \hspace*{-4mm}
+    $\CEeq$
+  & 
+  & \multicolumn{3}{l}{
+      \hspace*{-4mm}
+      $\omega \SEdiam \Interval \, (\PosInt \, (6), \PosInt \, (9))$ 
+    }\\
+  & 
+  & \hspace*{-4mm}
+    $\SEcup$
+  & \hspace*{-4mm}
+    $\delta \SEdiam ($
+  &
+  & \hspace*{-4mm}
+    $\Interval \, (\PosInt \, (0), \PosInt \, (5))$\\
+  & 
+  & 
+  &
+  & \hspace*{-4mm}
+    $\SEcup$
+  & \hspace*{-4mm}
+    $\Interval \, (\PosInt \, (10), \PlusInfInt))$\\
+    $\omega$
+  & \hspace*{-4mm}
+    $\CEeqS$
+  & \multicolumn{4}{l}{
+       \hspace*{-4mm}
+       $\Cons \, (\phi, \nu)$
+    }\\
+    $\phi$
+  & \hspace*{-4mm}
+    $\CEeqI$
+  & 
+  & \multicolumn{3}{l}{
+      \hspace*{-4mm}
+      $\Interval \, (\MinInfInt, \PosInt \, (15))$
+    }\\
+  & 
+  & \hspace*{-4mm}
+    $\SEcup$
+  & \multicolumn{3}{l}{
+      \hspace*{-4mm}
+      $\Interval \, (\PosInt \, (20), \PlusInfInt)$
+    }\\
+    $\nu$
+  & \hspace*{-4mm}
+    $\CEeqS$
+  & \multicolumn{4}{l}{
+      \hspace*{-4mm}
+      $\Cons \, (\phi, \nu) \, \SEcup \, \Nil$
+    }\\
+    $\delta$
+  & \hspace*{-4mm}
+    $\CEeqS$
+  & \multicolumn{4}{l}{
+      \hspace*{-4mm}
+      $\Cons \, (\mathbb{N}, \delta) \, \SEcup \, \Nil$
+    }
+\end{tabular}
+\right.$
+
+\medskip
+
+So, the values of type \texttt{T} are either of size $[6;9]$ and made
+of integers in $]-\infty;15] \, \cup \, [20;+\infty[$, or of size
+$[0;5] \, \cup \, [10;+\infty[$ and made of integers in
+$\mathbb{N}$. As a corollary, this type contains at least a finite
+value, hence is correct.
+
+

@@ -1,0 +1,70 @@
+%%-*-latex-*-
+
+It is a common belief among the practitioners in the networking area
+that theoretical study cannot help the industrial audience. We
+nevertheless think that many tools the engineers use can concretely
+benefit from such an initiative, especially those based on protocol
+languages and compilers. The work on \ASN we have presented in this
+article follows this track, and can be considered in several
+complementary ways.
+
+From a theoretical point of view, we bring to the fore the first
+complete and formal semantics of \mbox{X.680}, based on the set
+constraints framework. Each syntactic construct is mapped to a
+mathematical object in a consistent manner, thus bringing new insights
+to obscure areas of the standard, like type compatibility in
+assignments, type emptiness, type recursion in the presence of the
+complement subtyping constraint, etc. The set constraints prove to be
+a suitable model that allows one to encode all \mbox{X.680}. One of
+the reasons is that the paradigm of \ASN types comes from the
+telecommunications industry, where what matters are the values
+exchanged between applications or network equipments --- hence types
+are naturally considered as \emph{sets} of values. The tree-like
+structure of the \ASN values also contributed to this successful
+fitting. Nevertheless, some special values not found in the set
+constraint litterature, such as regular expressions, numeric intervals
+and powersets, motivated a specific contribution. Also, the usage of a
+functional meta-language to express our algorithm brought elegance and
+compactness. This work can be considered as an improvement of our
+PhD~\cite{myPhD}, which introduced an \emph{ad-hoc} `operational
+semantics' of X.680, based on the 1988/1990 standard --- as opposed to
+the present `denotational semantics' based on the 1997/2001
+standard. Indeed, this early framework did not take advantage of the
+expressiveness of the set constraints, and their natural fitting to
+the `types as sets' paradigm of \ASN. Also, the operational aspect
+introduced too many aspects that are split here into collection and
+solving. From a general standpoint, a formal semantics, if properly
+documented, is a good complement to that provided by the
+standards. They indeed provide definitions in English by following the
+\ASN grammar in Backus-Naur Form. Unfortunately, this is ambiguous in
+the sense that a specification can be derived using different
+syntactical rules and, therefore, such a syntax-driven approach of
+semantics may be misleading.
+
+From a practical point of view, the existence of a compiler for a
+plainer version of this meta-language, namely the OCaml language,
+helps in bridging the gap between the semantics and its implementation
+in an \ASN compiler. We identified the main issues in the validation
+of \mbox{X.680} specifications, and stressed the importance of the `at
+least one finite value' property for types in the Protocol Data
+Units. We showed how our semantics \emph{is} naturally an algorithm.
+
+Despite the present paper focusing on the telecommunication usages of
+\ASN, we do not forget the database researchers. They are, in general,
+more concerned about formal foundations, hence we hope this work will
+convince them of the suitability of \ASN for their purposes. For
+instance, ongoing joint work of the ISO and the ITU-T explores the
+links between XML and \ASN, in particular the use of \ASN as a schema
+notation for XML, and a mapping from XML schemas to \ASN modules
+(\url{http://asn1.elibel.tm.fr/xml/}).
+
+Immediate further work ranges from optimization of the collecting
+algorithm, to extension to full \ASN (\mbox{X.681}, \mbox{X.682} and
+\mbox{X.683}). A mid-term project would be to implement our algorithm
+in OCaml. This will lead to the completion of our parser and
+typechecker, \textsf{Asno} (available at
+{\small\url{http://cristal.inria.fr/~rinderkn/}}), which lacks subtype
+analysis. In the long term, a more challenging endeavour consists in
+taking the benefit of our new semantics in order to formally model the
+Packed Encoding Rules~\cite{X.691:2002}.
+

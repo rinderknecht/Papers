@@ -1,0 +1,38 @@
+%%-*-latex-*-
+
+\section{Conclusion}
+
+We presented a formal review design of the BER. On purpose, we
+abstracted away many low-level details in our model in order to
+understand, capture and formalise what are, according to us, the main
+characteristics of the BER. Therefore the further step would be to
+refine our model, by explicitly providing the coding and decoding
+functions for the primitive types, by reckoning with the various
+string types etc. Also we did not present evidences that the rewriting
+from the BER domain to its \core subset conserves code equivalence, as
+pointed out in figure~\ref{model2}: this was a matter of room. We
+nevertheless think that our work dispels clouds of suspicion --- if
+any --- about the soundness of \ASN and the BER. More precisely, we
+mean that the composition of encoding and decoding yields a value
+which is equivalent to the original. The aim of our formal review
+design is to raise user's confidence on a solid ground and we doubt
+whether twenty more pages of formul{\ae} would have been a stronger
+argument for the casual reader. Indeed, making explicit as many as
+possible assumptions and checking their consistence is inherently
+reassuring. The mere fact that we had to understand the rationale of
+the BER and put it into mathematical formal{\ae} really brought to the
+fore a new understanding. Also the interest in choosing a system of
+inference rules to define our relationships is that this formalism
+closes the gap between specifications and algorithms. Besides, the
+suggested use of OCaml as an implementation language is motivated
+because, as a descendant of a logic meta-language, it is precisely
+suited to implement algorithms specified by means of inference
+rules. The way of deducing them consists mainly in providing a
+deterministic and constructive refinement which is sound and complete
+with respect to the initial specification. By constructive we mean for
+instance to replace existential quantifiers, the symmetry rule etc. by
+explicit procedures, and determinism means, in the context of this
+work, having no backtracking implied (\emph{e.g.,} no overlapping
+conclusions).
+
+

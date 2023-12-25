@@ -1,0 +1,206 @@
+%%-*-latex-*-
+
+\begin{theorem}[Soundness]\hfill
+\label{f0:soundness}
+\begin{center}
+If \(\smat{t}{p} \xrightarrow{+} \sigma\) 
+then \(\subst{p}{\sigma} \sqsubseteq t\).
+\end{center}
+\end{theorem}
+
+\paragraph{Proof.}
+
+Let \(\ind{P}(\match{f}{p}{\sigma'}, n, \sigma)\) be the proposition
+\begin{center}
+\emph{If} \(\match{f}{p}{\sigma'} \xrightarrow{n} \sigma\)
+\emph{then} \(\sigma' \subseteq \sigma\)
+\emph{and} \(\subst{p}{\sigma} \sqsubseteq f\).
+\end{center}
+Then \(\forall p, f, \sigma', n, \sigma.\ind{P}(\match{f}{p}{\sigma'},
+n, \sigma)\) implies the soundness property by choosing
+\(\dom{\sigma'} = \varnothing\) and \(f = [t]\). Therefore, let us
+assume
+\begin{equation}
+\match{f}{p}{\sigma'} \xrightarrow{n} \sigma \label{f0:sound:n}
+\end{equation}
+that is to say, there exists a successful series \(\Delta\) of \(n\)
+rewrite steps (called a \emph{rewrite}) from \(\match{f}{p}{\sigma'}\)
+to \(\sigma\). (If not, i.e., if \(\Delta\) is empty, then the theorem
+is trivially true, since it has the form \(A \Rightarrow B\), which is
+equivalent to \(\neg{A} \vee B\).) We hence can reason by induction on
+length of \(\Delta\), that is to say, we assume that \(\ind{P}(\kappa,
+n, \sigma)\) holds for any \(n\) (that is the \emph{induction
+  hypothesis}) and then prove that all the ways to extend backwards
+\(\Delta\) with one more step result in a configuration \(\kappa'\)
+such that \(\ind{P}(\kappa', n+1, \sigma)\) holds too. Indeed, by
+definition of \((\rightarrow)\), we have
+\[
+\kappa' \rightarrow \underbrace{\kappa \xrightarrow{n} \sigma}_{\Delta}
+\quad \Longrightarrow \quad
+\kappa' \xrightarrow{n+1} \sigma
+\]
+The complete\hyp{}induction principle implies then that \(\forall p,
+f, \sigma', n, \sigma.\ind{P}(\match{f}{p}{\sigma'}, n, \sigma)\),
+thus the soundness. We discriminate first on the length of \(\Delta\),
+then case by case on the shape of the configuration
+\(\match{f}{p}{\sigma'}\).
+\begin{enumerate}
+
+  \item \(\Delta\) is made of one rewrite step.\\ In this case,
+    \(\Delta\) is made of \textsf{END}, since \textsf{END} is the
+    unique terminating rule. Its syntax implies that \(f = \el\), \(p
+    = \el\) and \(\sigma' = \sigma\). These definitions lead to
+    \(\sigma' \subseteq \sigma\) and \(\subst{p}{\sigma} =
+    \subst{\el}{\sigma} \eqn{1} \el \sqsubseteq \el = f\). Therefore
+    \(\ind{P}(\match{f}{p}{\sigma'}, 1, \sigma)\) holds.
+
+  \item \(\Delta\) is made of at least two rewrite steps.\\ A quick
+    examination of the rules reveals that all the ways to extend
+    backwards \(\Delta\) can be characterised by discriminating only
+    upon the element (lexeme, parenthese or meta\hyp{}variable) added
+    to the pattern \(p\). Assuming the induction hypothesis
+    \(\ind{P}(\match{f}{p}{\sigma'}, n, \sigma)\) and
+    \eqref{f0:sound:n}, we get
+    \begin{align}
+      \sigma' &\subseteq \sigma \label{f0:sound:6}\\
+      \subst{p}{\sigma} &\sqsubseteq f \label{f0:sound:7}
+    \end{align}
+    we have the following cases to consider.
+    \begin{enumerate}
+
+      \item Case where \textsf{ELIM} extends \(\Delta\).\\ This means
+        that we have \(l \in {\cal L} \cup \{\rpar\}\) in
+        \begin{align}
+            \match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}
+          &\rightarrow
+            \match{f}{p}{\sigma'}
+            &\textsf{ELIM} \notag\\
+          &\xrightarrow{n} \sigma 
+            & (\Delta) \notag\\
+            \match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}
+          &\xrightarrow{n+1} \sigma \label{f0:sound:ELIM}
+            \intertext{Furthermore, we have the following equalities:}
+           \subst{\cons{l}{p}}{\sigma}
+          &\eqn{2} \cons{l}{\subst{p}{\sigma}}\notag\\
+          &\sqsubseteq \cons{l}{f}
+          &\text{by} \,\; \eqref{f0:sound:7} \,\; \text{and} \,\;
+           \textsf{EQ}\notag\\
+             \subst{\cons{l}{p}}{\sigma}
+          &\sqsubseteq \cons{l}{f} \label{f0:sound:ELIM:conc}
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{f0:sound:n} imply \eqref{f0:sound:ELIM},
+        \eqref{f0:sound:6} and \eqref{f0:sound:ELIM:conc}, which,
+        together, imply
+        \(\ind{P}(\match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}, n+1,
+        \sigma)\).
+
+      \item Case where \textsf{UNPAR} extends \(\Delta\).\\ The syntax
+        of the rule implies that there exists a sub\hyp{}forest \(f_2\)
+        of \(f\) and a tree \(c(f_1)\) such that
+        \begin{enumerate}
+
+          \item \label{f0:sound:1} \(f \triangleq f_1 \cdot
+            \cons{\rpar}{f_2}\)
+
+        \end{enumerate}
+        and
+        \begin{align}
+          \match{\cons{c(f_1)\!}{\!f_2}}{\cons{\lpar\!}{\!p}}{\sigma'}
+          &\rightarrow
+          \match{f_1 \cdot \cons{\rpar\!}{\!f_2}}{p}{\sigma'}
+          \notag\\
+          & \qquad\qquad\quad\ \textsf{UNPAR} \notag\\
+          &\xrightarrow{n} \sigma
+          \qquad\qquad\quad(\Delta) \notag\\
+          \match{\cons{c(f_1)\!}{\!f_2}}{\cons{\lpar\!}{\!p}}{\sigma'}
+          &\xrightarrow{n+1} \sigma \label{f0:sound:UNPAR}
+        \end{align}
+        Furthermore, we have the following equalities:
+        \begin{align}
+          \subst{\cons{\lpar}{p}}{\sigma}
+          &\eqn{3} \cons{\lpar}{\subst{p}{\sigma}}\notag\\
+          &\sqsubseteq \cons{\lpar}{f}
+          &\text{by} \,\; \eqref{f0:sound:7}\notag\\
+          &= \cons{\lpar}{f_1 \cdot \cons{\rpar}{f_2}}
+          &\text{by} \,\; \text{\ref{f0:sound:1}}\notag\\
+          &= \cons{\lpar}{f_1} \cdot \cons{\rpar}{f_2}
+          &\text{by} \,\; \eqref{model:conc:2}\notag\\
+          &= \cons{\lpar\!}{\!\el\!\cdot\!f_1}
+             \!\cdot\!\cons{\rpar\!}{\!\el\!\cdot\!f_2}
+          &\text{by} \,\; \eqref{model:conc:1}\notag\\
+          &= ([\lpar] \!\cdot\! f_1) \!\cdot\! ([\rpar] \!\cdot\! f_2)
+          &\text{by} \,\; \eqref{model:conc:2}\notag\\
+          \subst{\cons{\lpar}{p}}{\sigma}
+          &\sqsubseteq \cons{c(f_1)}{f_2}
+          &\text{by} \,\; \textsf{SUB} \label{f0:sound:8}
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{f0:sound:n} imply \eqref{f0:sound:UNPAR},
+        \eqref{f0:sound:6} and \eqref{f0:sound:8}, which, together,
+        imply \(\ind{P}(\match{\cons{c(f_1)}{f_2}}{\cons{\lpar}{p}}%
+        {\sigma'}, n+1, \sigma)\).
+
+      \item Case where \textsf{BIND} extends \(\Delta\).\\ The syntax
+        of the rule implies that there exists a substitution
+        \(\sigma_1\) such that
+        \begin{enumerate}
+
+          \item \(\sigma_1 \subseteq \sigma_1 \oplus x \mapsto t \triangleq
+          \sigma'\) \label{f0:sound:incl1}
+
+        \end{enumerate}
+        and
+        \begin{align}
+           \match{\cons{t}{f}}{\cons{\meta{x}}{p}}{\sigma_1}
+          &\rightarrow
+           \match{f}{p}{\sigma'}
+          &\textsf{BIND} \notag\\
+          &\xrightarrow{n} \sigma
+          & (\Delta) \notag\\
+           \match{\cons{t}{f}}{\cons{\meta{x}}{p}}{\sigma_1}
+           &\xrightarrow{n+1} \sigma \label{f0:sound:BIND}
+        \end{align}
+        Inclusions \ref{f0:sound:incl1} and \eqref{f0:sound:6} imply, by
+        \eqref{model:incl:trans}:
+        \begin{align}
+          \sigma_1 \subseteq \sigma \label{f0:sound:incl2}\\
+          \intertext{Moreover \eqref{f0:sound:6} and \ref{f0:sound:incl1}
+            imply}
+          \sigma_1 \oplus x \mapsto t \subseteq \sigma\notag
+        \end{align}
+        which is equivalent, by definition \eqref{model:incl}, to
+        \[
+        \forall y \in \dom{\sigma_1 \oplus x \mapsto t}.((\sigma_1
+        \oplus x \mapsto t)(y) \!=\! \sigma(y))
+        \] 
+        By \eqref{model:dom}, \(x \in \dom{\sigma_1 \oplus x \mapsto
+          t}\), so the previous equation can be instantiated by taking
+        \(y = x\) and we draw \((\sigma_1 \oplus x \mapsto t)(x) =
+        \sigma(x)\), which, by means of \eqref{model:oplus}, leads to
+        \begin{equation}
+          t = \sigma(x) \label{f0:sound:t}
+        \end{equation}
+        We can now derive the following:
+        \begin{align}
+            \subst{\cons{\meta{x}}{p}}{\sigma}
+          &\eqn{2} \cons{\sigma(x)}{\subst{p}{\sigma}}\notag\\
+          &= \cons{t}{\subst{p}{\sigma}}
+          &\text{by} \,\; \eqref{f0:sound:t}\notag\\
+          &\sqsubseteq \cons{t}{f}
+          &\text{by} \,\; \eqref{f0:sound:7}\notag\\
+            \subst{\cons{\meta{x}}{p}}{\sigma}
+          &\sqsubseteq \cons{t}{f} \label{f0:sound:9}
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{f0:sound:n} imply \eqref{f0:sound:BIND},
+        \eqref{f0:sound:incl2} and \eqref{f0:sound:9}, which,
+        together, imply 
+        \(\ind{P}(\match{\cons{t}{f}}%
+                        {\cons{\meta{x}}{p}}%
+                        {\sigma_1},%
+                  n+1, \sigma)\). \hfill \(\Box\)
+
+    \end{enumerate}
+
+\end{enumerate}

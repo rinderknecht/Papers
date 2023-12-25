@@ -1,0 +1,108 @@
+-------------------------------------------------------------------------
+
+REFEREE C:
+
+Paper number: 	02-025
+Authors: 	Christian Rinderknecht
+Title of Paper:	A set-based semantics for validating
+                ASN.1 specifications
+
+
+Evaluation:
+
+Please rank from 1 = Poor to 5 = Excellent. 
+
+Technical Quality: 		4
+Knowledge of field: 		4
+Rigour of arguments: 		4
+Originality: 			5
+Clarity of presentation: 	3
+Organisation: 			4
+Standard of English: 		2
+References to other work:	5
+
+Summary: 	
+
+> This is an interesting approach to validation of ASN.1 specification,
+> however I doubt any commercial ASN.1 compiler vendor will use this
+> approach. This is especially true since things like component relation
+> constraints have not been addressed here.
+
+This is true. I believe that almost the rest of ASN.1 can be mapped
+into my system of constraints for the purpose of validation. This is
+further work, indeed.
+
+Further comments to the author(s):
+
+
+> The English grammar needs correction in many places throughout the
+> paper. For example, on page 2 the middle paragraph should begin with
+> "There are excellent books" rather than "They are excellent books".
+
+I revised the text. I hope it is better now.
+
+
+> In the last paragraph on page 2 there is the assertion that existing
+> standard encoding rules cannot handle infinite values.
+> Clarification is needed on what is meant by "infinite values" since
+> there are special vavlues for REAL called PLUS-INFINITY and
+> MINUS-INFINITY, and INTEGER values are not limited to 4 or even 8
+> bytes.  Some ASN.1 specifications even use 128 byte INTEGERS.
+
+Good point. I changed the sentence to: 
+
+"The finiteness condition applies no matter the encoding rule is, but
+it arises from the fact that the current standard encoding rules
+cannot handle infinite values, i.e. recursive values."
+
+
+> On page 3 in the second bullet, NULL is used as a placeholder in
+> many real (complete) specifications to indicate that no additional
+> information is needed.
+
+Indeed. The text is now as follows:
+
+"The NULL type has only one value, also noted NULL. This type is often
+used as a placeholder in many real complete specifications to indicate
+that no additional information is needed, or in incomplete
+specifications to be tested."
+
+
+> On page 4 in the bullet on OBJECT IDENTIFIER and RELATIVE-OID,
+> object identifiers are used not only to identify other modules, but
+> any object such as a printer on a network, or a postal package, or
+> an ASN.1 Type which get carried in some larger message.
+
+Good point. The text has been changed in accordance.
+
+
+> Also on page 4, on string types, there are other factors besides
+> just the alphabets.  Some string types such as GeneralString allow
+> escape characters to kick into alternate character sets (such as
+> those for different languages) while others such as UTF8String can
+> represent characters of all languages directly.
+
+I added a footnote with your explanation, thank you.
+
+
+> On page 5, the second bullet (on SET OF) has the assertion "but
+> their number is not known beforehand". This is not always TRUE.
+> For example, "A ::= SET SIZE (5) OF INTEGER" indicates that there
+> will always be exactly 5 integers.
+
+Right. I added a comment between parenthesis.
+
+
+> On page 10 where "type integer =" and "type real =" are specified,
+> it is not clear whether the value zero is included in those sets.
+
+Good point. I mention now that 0 is coded either as PosInt (0) or
+PosReal (0), according to the governor type.
+
+
+More detailed recommendations:
+>
+>		Accept with minor technical corrections and
+>		significant gramatical corrections.
+
+-------------------------------------------------------------------------

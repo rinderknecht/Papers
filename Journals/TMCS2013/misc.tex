@@ -1,0 +1,62 @@
+The following approximation of \(\sum_{k=0}^{n-1}{\nu_k}\) is based on
+a short article by Bush~\cite{Bush:1940}. Consider \fig~\ref{fig:bits}
+again. Note that \(n=0\) is missing in the table, but it is important
+to include it here and also to mentally fill the blanks in the table
+with~\(0\)s. Bit strings whose pattern is \(0^{2^{i}}1^{2^{i}}\)
+repeat themselves downward, where \(i\)~is the exponent of~\(2\) in
+the binary notation in the rows. Let us call them
+\emph{01-strings}. For example, in the third column, that is, \(i=2\),
+we see \(\underline{00001111}00001\dots\) A bit string from
+\(0\)~to~\(n-1\) has length~\(n\) and the length of the \(01\)-strings
+is~\(2^{i+1}\), hence the number of \(01\)-strings it contains
+is~\(\floor{n/2^{i+1}}\). We already noted that these
+contain~\(2^i\)~\(1\)-bits. When \(n\)~is not a power of~\(2\), there
+is an incomplete \(01\)-string, containing at most \(2^{i}-1\)
+1-bits. Let us define \(\sigma_{n,i}\) as the sum of the bits of the
+\(i\)th column from row \(0\)~to~\(n-1\), included. Hence,
+\begin{equation*}
+\left\lfloor{n/2^{i+1}}\right\rfloor 2^i \leqslant \sigma_{n,i}
+\leqslant \left\lfloor{n/2^{i+1}}\right\rfloor 2^i + (2^i - 1).
+\end{equation*}
+Using \(x - 1 < \floor{x} \leqslant x\), we deduce the weaker bounds
+\begin{equation*}
+\tfrac{1}{2}n - 2^{i} < \sigma_{n,i} < \tfrac{1}{2}n + 2^{i}.
+\end{equation*}
+Remains to sum over all the columns so the leftmost bit of~\(n-1\) is
+accounted for. We already know that \(n\)~is represented
+by~\(\floor{\lg n}+1\) bits, so its leftmost bit is at
+position~\(\floor{\lg n}\). Accordingly, the position of the leftmost
+bit of~\(n-1\) is~\(\floor{\lg(n-1)}\). This expression can be
+simplified by a simple variation of the argument that led to the
+number of bits in~\(n\) being \(\floor{\lg n} + 1\). Let \(n :=
+(b_{m-1}\dots b_0)_2\), with \(b_{m-1} = 1\). Then \(2^{m-1} \leqslant
+n \leqslant 2^m - 1\) and \(2^{m-1} < 2^{m-1} + 1 \leqslant n + 1
+\leqslant 2^m\), so \(m-1 < \lg(n+1) \leqslant m\), that is, \(m =
+\ceiling{\lg(n+1)}\), therefore
+\begin{equation}
+1 + \floor{\lg n} = \ceiling{\lg(n+1)}.\label{eq:floor_ceiling}
+\end{equation}
+Therefore, by summing all the sides of the inequalities bounding
+\(\sigma_{n,i}\) from \(i=0\)~to~\(\ceiling{\lg n}-1\), we cover all
+the \(1\)-bits of all the integers from \(0\)~to~\(n-1\):
+\begin{equation*}
+\sum_{i=0}^{\ceiling{\lg n}-1}{\!\!\!\left(\frac{n}{2} - 2^{i}\right)}
+< \sum_{i=0}^{\ceiling{\lg n}-1}{\!\!\sigma_{n,i}} <
+\sum_{i=0}^{\ceiling{\lg n}-1}{\!\!\!\left(\frac{n}{2} + 2^{i}\right)}.
+\end{equation*}
+The sum in the middle is \(\B{}{n}\) counted \emph{vertically}:
+\begin{equation*}
+\tfrac{1}{2}{n\ceiling{\lg n}} - 2^{\ceiling{\lg n}} + 1 
+< \B{}{n} <
+\tfrac{1}{2}n\ceiling{\lg n} + 2^{\ceiling{\lg n}} - 1.
+\end{equation*}
+By means of \(x \leqslant \ceiling{x} < x + 1\), we draw
+\begin{equation}
+\tfrac{1}{2}{n\lg n} - 2n + 1
+< \B{}{n} <
+\tfrac{1}{2}n\lg n + \tfrac{5}{2}{n} - 1,
+\label{ineq:Btop}
+\end{equation}
+therefore \(\B{}{n} \sim \tfrac{1}{2}{n\lg n}\), where \(f(n) \sim
+g(n)\) is an equivalence relation satisfying \(\lim_{n \rightarrow
+  +\infty} f(n)/g(n) = 1\). Delange~\cite{Delange:1975} studied \(\sum_{k=0}^{n-1}\nu_k\) and expressed it in terms of a function nowhere differentiable.

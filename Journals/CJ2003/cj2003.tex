@@ -1,0 +1,105 @@
+%%-*-latex-*-
+
+\documentclass[11pt,a4paper]{article}
+
+% Pre-defined packages
+%
+\usepackage[british]{babel}
+\usepackage[T1]{fontenc}       % Required for hyphenation and \DJ
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{amsmath,amsthm,amssymb,stmaryrd}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{float}
+\usepackage{supertabular}
+\usepackage{cite}
+
+% Typesetting of Abstract Syntax
+%
+\input{asn1}
+
+% Typesetting of Inference Rules
+%
+\usepackage{mathpartir}
+\input{inference-commands}
+
+% Hyperlinks in PDF (user-defined)
+%
+%\usepackage{hrefpdf}
+
+%% New definitions, theorems, remarks etc.
+%%
+\newtheorem{Def}{Definition}[section]
+\newtheorem{Rem}{Remark}[section]
+\newtheorem{Algo}{Algorithm}[section]
+\newtheorem{Theorem}{Theorem}[section]
+\newtheorem{Proof}{Proof}[section]
+
+%% Main document
+%%
+\title{An Algorithm for Validating \ASN~(\mbox{X.680}) Specifications
+       using Set Constraints}
+\author{Christian Rinderknecht\\
+Network Architecture Laboratory \\
+Information and Communications University \\
+58-4 Hwaam-dong, Yuseong-gu, Daejeon, \\
+305-732, Republic of Korea\\
+{\small\url{rinderkn@nalab.icu.kr}}}
+\date{July 2003}
+
+%% \shortauthors{Christian Rinderknecht}
+%% \volumeyear{2003}
+%% \volumenumber{46}
+%% \issuenumber{3}
+
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+
+\noindent\textbf{Keywords:} \mbox{ASN.1}, abstract syntax notation,
+validation, compilation, set constraints.
+
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+\label{introduction}
+\input{introduction}
+
+\section{Presentation of \ASN}
+\label{presentation}
+\input{presentation}
+
+\section{Core \ASN}
+\label{core}
+\input{core_asn1.tex}
+
+\section{Well-founded Types}
+\label{well_founded_types}
+\input{well_founded_types}
+
+\section{Constraints}
+\label{constraints}
+\input{constraints}
+
+\section{Constraints from Types}
+\label{constraints_from_types}
+\input{constraints_from_types}
+
+\section{Constraints from Subtypes}
+\label{constraints_from_subtypes}
+\input{constraints_from_subtypes}
+
+\section{Full Collection and Solving}
+\label{full_collection_and_solving}
+\input{full_collection_and_solving}
+
+\section*{Conclusion}
+\addcontentsline{toc}{section}{Conclusion}
+\input{conclusion}
+
+\bibliographystyle{unsrt}
+\bibliography{cj2003}
+
+\end{document}

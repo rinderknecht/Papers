@@ -1,0 +1,763 @@
+\documentclass[a4paper,11pt,twoside]{article}
+
+% Language and fonts
+%
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}       % Required for hyphenation and \DJ
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{xspace}            % Spacing after macros
+\usepackage{hyphenat}          % \hyp{} is a breakable dash
+\usepackage[style=british]{csquotes} % British quotes
+\usepackage{url}               % To typeset URLs
+\usepackage{mdwlist}           % Tight vertical spacing of list items
+\usepackage{microtype}         % Microtypographic enhancements
+\usepackage[backend=bibtexu,   % BibTeX with Unicode,
+            natbib=true,       % natbib aliases
+            citestyle=authoryear]{biblatex}
+\usepackage{amsmath,amssymb}
+
+%\apptocmd{\thebibliography}{\raggedright}{}{} % No Underfull \hbox
+
+% Hyperlinks
+%
+% Note: figure references do not seem to work.
+% Note: Set "USE_PS := yes" in Makefile.cfg
+%
+\usepackage[breaklinks]{hyperref}
+%\usepackage[ps2pdf,breaklinks]{hyperref}
+%\usepackage[ps2pdf]{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue}
+
+\newcommand\SPIN{\textsf{SPIN}\xspace}
+\newcommand\Promela{\textsf{Promela}\xspace}
+\newcommand\UPPAAL{\textsf{UPPAAL}\xspace}
+\newcommand\UPPAALTRON{\textsf{UPPAAL-TRON}\xspace}
+\newcommand\UPPAALSMC{\textsf{UPPAAL-SMC}\xspace}
+\newcommand\McErlang{\textsf{McErlang}\xspace}
+\newcommand\QuickCheck{\textsf{QuickCheck}\xspace}
+\newcommand\UML{\textsf{UML}\xspace}
+\newcommand\Erlang{\textsf{Erlang}\xspace}
+\newcommand\Clang{\textsf{C}\xspace}
+\newcommand\Esterel{\textsf{Esterel}\xspace}
+\newcommand\Lustre{\textsf{Lustre}\xspace}
+\newcommand\Simulink{\textsf{Simulink}\xspace}
+\newcommand\RefactorErl{\textsf{RefactorErl}\xspace}
+\newcommand\Clean{\textsf{Clean}\xspace}
+\newcommand\Spoofax{\textsf{Spoofax}\xspace}
+\newcommand\TTCN{\textsf{TTCN-3}\xspace}
+\newcommand\BPEL{\textsf{BPEL}\xspace}
+\newcommand\YAWL{\textsf{YAWL}\xspace}
+\newcommand\Agda{\textsf{Agda}\xspace}
+\newcommand\JavaScript{\textsf{JavaScript}\xspace}
+\newcommand\Scheme{\textsf{Scheme}\xspace}
+
+\hyphenation{now-a-days}
+
+\title{Model-based Design of Cyber-Physical Systems}
+\author{Christian Rinderknecht}
+\date{\today}
+
+\addbibresource{verif2013.bib}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We survey existing tools and methods for the simulation, testing and
+verification of concurrent communicating systems, and their pertinence
+for model-driven design and programming of cyber\hyp{}physical
+systems. We also cover workflows and tests and conclude with two
+proposals.
+\end{abstract}
+
+\section{Formal methods}
+
+In the context of our project, we define a \emph{cyber-physical
+  system} (CPS) as a wireless mobile network of embedded systems
+featuring environmental sensors and computational capability. Usually,
+an embedded system carries on specific control functions with
+real\hyp{}time constraints, e.g., related to safety, on top of a
+real\hyp{}time operating system (RTOS), but we will extend the notion
+to encompass general\hyp{}purpose computers, for example, smartphones
+and \href{http://www.raspberrypi.org/}{Raspberry Pis} running
+GNU/Linux.
+
+Depending on the scale and the nature of the software applications,
+different network topologies, routing and synchronisation protocols
+may be used, for example centralised architectures
+(client\hyp{}server) or decentralised ones, like
+peer\hyp{}to\hyp{}peer (P2P) or mobile ad hoc networks (MANET), where
+nodes are also routers. At the application layer, real\hyp{}time
+constraints might be expected, as well as code (a.k.a.\@ location)
+migration and security guarantees.
+
+The \emph{model-driven design} of CPS uses formal models, possibly
+including real\hyp{}time features, which are checked with regards to
+some desired properties and tested through simulation, before
+implementations are derived.
+
+\emph{Model checking} is a formal method whereby the truth of a
+logical formula (e.g., of a temporal nature) is checked on a finite
+model of a system. It is different from \emph{testing}, which consists
+in interacting with an implementation, whose state space may be
+infinite, and observing whether its responses conform to its model (if
+no stimulation of the system is performed, we have an instance of
+\emph{passive testing}). Testing hence applies to implementations and
+can, at best, only prove the presence of errors, whilst model checking
+applies to models and conclusively proves the absence of design errors
+or finds a counterexample (with an execution trace, called
+\emph{scenario} in telecommunications), thanks to the finiteness
+imposed by construction. Clearly, these two approaches are
+complementary, and it even makes sense to ``test'' a model by
+\emph{simulation}, that is, by animating runs of the model itself and
+thusly derive \emph{test sequences} (of inputs and outputs), ranging
+from purely random walks to guided explorations, for example to cover
+all the transitions of a component. Model\hyp{}based test generation
+is usually a heuristics which avoids the potential combinatorial
+explosion of the state space at the cost of incompleteness.
+
+Another approach is \emph{theorem proving}, which delivers the same
+guarantees as model checking (except in presence of a counterexample)
+but does not require the model to be finite, because it relies on
+induction. Some proof assistants, like \textsf{Coq}, can even generate
+implementations from proofs, thanks to the use of a constructive
+logic. Theorem proving can fruitfully be used in conjunction with
+model checking \citep{vanGasterLensingSmetsersvanEekelen:2011}.
+
+Finally, \emph{static analysis} consists in approximating sets of
+values and behaviours of implementations as they would occur at
+run-time, without instrumenting the source code and actually running
+it. A very general theoretical framework for static analysis is
+\emph{abstract interpretation}, which is based on a sound abstraction
+of the semantics of a programming language and a symbolic execution of
+the program. More syntactical algorithms, like static type checking or
+inference, also work well in practice and both approaches are
+useful. Static analysis can be thought of as abstracting a model from
+a program, and is thus complementary to the techniques we have
+mentioned earlier.
+
+In the following sections, we examine the models, logics and tools
+most widely used for model checking, and we assess whether they are
+suitable for designing and programming CPS and, more precisely, which
+features of CPS they support best. We finally outline different
+approaches to harness them to our project.
+
+\section{Model checking}
+
+\citet{Kaliappan:2008} offers a short survey on verification
+techniques from the software engineering perspective, with an emphasis
+on systems specified with \UML. \citet{Zheng:YYYY} provides a good
+tutorial.
+
+In this section, we review and compare two verification systems,
+namely \SPIN and \UPPAAL, which are mature, maintained and used both
+in academy and industry. We proceed by considering translations
+between models, from model to implementation (``top\hyp{}down'') and
+from implementation to model (``bottom\hyp{}up'', or \emph{model
+  extraction}), in particular \McErlang, a model checker for \Erlang
+written in \Erlang. But first, we need some notion about
+\emph{temporal logics}.
+
+\subsection{Temporal logics}
+
+The properties or, put more properly, the claims to be checked on the
+models are expressed in some temporal logic, that is, a modal logic
+interpreted over time \citep{Zheng:XXXX}. The most common properties
+expected from a system are
+\begin{itemize*}
+
+  \item reachability, i.e., ``Something good may happen;''
+
+  \item liveness, i.e., ``Something good eventually happens;''
+
+  \item safety, i.e., ``Something good always happens.''
+
+\end{itemize*}
+Reachability is a weak property, which is nonetheless useful to debug
+a model under construction, for example, by asserting that a process
+may access a given resource (a scenario can usually be automatically
+constructed). Safety is a strong property reminiscent of a global
+invariant in non\hyp{}temporal logics, and it can be utilised for
+example to state mutual exclusion, that is, that, at any time, there
+will be no more than one process accessing a common resource, or the
+absence of deadlocks, that is, that, at any time, there will be no
+processes waiting transitively on each other for the release of a lock
+on a shared resource. Other interesting safety properties are the
+non\hyp{}reception of unspecified messages and the absence of invalid
+end states.
+
+In a temporal logic, doing nothing obviously realises safety, and this
+is where liveness comes into play, to require some progress. For
+example, liveness is useful for expressing the absence of starvation,
+in other words, the fact that a process will gain access to a
+resource. In the theory of programming languages, partial correctness,
+by which, if a program terminates, then its output satisfies some
+condition, would be considered a safety property in temporal logics,
+whilst termination would be considered a liveness property. A
+criterion to distinguish between safety and liveness is the following:
+safety can, in theory, be \emph{disproved} in finite time, by simple
+observation of the states of the system execution, whereas liveness
+can be \emph{proved} in finite time.
+
+Let us note that temporal logics assume infinite futures, and since
+the system is finite, its behaviour must then be cyclic, as this
+happens to be the case of many communication systems implementing
+sessions or interactive loops, like servers and command shells. This
+aspect is perhaps addressed more obviously by properties like
+\emph{fairness}, which states that ``something good will happen an
+arbitrary number of times,'' and can be conceived as a repeated
+liveness property. For example: ``If access to the critical section is
+infinitely often requested, then access will be granted infinitely
+often.'' Fairness is most useful when dealing with the scheduling of
+processes.
+
+\subsection{SPIN}
+
+\SPIN~\citep{Holzmann:1997,Holzmann:2003,Benari:2008} is a system
+supporting the design, simulation and model checking of asynchronous
+systems. Accordingly, sequential computations tend to be abstracted so
+the state of the system reflects mainly process interactions. These
+can be classified into several kinds: rendezvous primitives,
+asynchronous message passing through buffered channels, shared
+variables, and any combination of these.
+
+The language for defining the models is \Promela (process
+meta\hyp{}language), from which the name \SPIN is actually derived:
+``Simple \Promela Interpreter.'' It is an imperative specification
+language with a \Clang look and feel, except for the lack of pointers,
+dynamic memory allocation and functions returning values. The purpose
+of those restrictions, and others, is mainly to constrain the number
+of states in the model to be finite. In theory, this enables all
+correctness properties to become decidable, although, in practice,
+some engineering methods and techniques are needed to overcome
+resource limitations in the presence of very large state spaces.
+
+The language used in \SPIN to express temporal formulas is based upon
+the standard
+\href{http://en.wikipedia.org/wiki/Linear_temporal_logic}{Linear
+  Temporal Logic} (LTL), where the future is denoted by the set of all
+possible paths that the system can take, and quantification in
+formulas is always universal, that is, it is not possible to isolate a
+strict subset of paths with respect to a property. The typical
+temporal operators used are
+\begin{itemize*}
+
+  \item $\bigcirc \varphi$, meaning that $\varphi$ is true in the
+    \emph{next} moment in time;
+
+  \item $\Box \varphi$, meaning that $\varphi$ is true in \emph{all}
+    future moments;
+
+  \item $\lozenge \varphi$, meaning that $\varphi$ is true in
+    \emph{some} future moment;
+
+  \item $\varphi \mathrel{\textsf{U}} \psi$, meaning that $\varphi$ is
+    true \emph{until} $\psi$ is true.
+ 
+\end{itemize*}
+The usual connectors of classical logics are present as well in the
+LTL, like conjunction, negation etc. but time is \emph{not} explicitly
+present, for example in the guise of clocks. As a consequence, time
+constraints, like timeouts, can not be modelled, but partial orderings
+of process interactions can.
+
+Once a \Promela model and temporal formulas in LTL have been written,
+\SPIN generates a dedicated \Clang~program, whose run checks the
+claims against the specification. In case the formulas are found to be
+satisfied, there is no automatic generation of a skeleton of the
+implementation, which leaves a gap where errors can be introduced. In
+case the state space is too large, \Promela allows for the embedding
+of \Clang code as atomic sections whose scope is local and invisible
+to other processes (note: there is no hierarchy of processes). Of
+course, this is only feasible if the code in question does not deal
+directly with the control aspect of the protocol, otherwise its
+effects have to be observable in the global state space. Purely
+computational tasks can be abstracted this way,
+though. \citet{PajicJiangLeeSokolskyMangharam:2012} remark: \blockquote{Due to the limitations of the verification
+  process (e.g., restricted model size), some parts of the models used
+  for verification represent over\hyp{}approximations of the more
+  ``realistic'' models. For example, for verification of
+  Cyber\hyp{}Physical Systems (CPS) that feature a tight coupling
+  between the real\hyp{}time controller and (usually) continuous
+  physical environment, it is necessary to model the closed-loop
+  system as a whole.}
+
+By contrast, note that in the control system industry (e.g.,
+automotive industry, aerospace, robotics, logic circuit design etc.)
+\emph{synchronous languages} like \Esterel, \Lustre, \Simulink
+etc. are used to express the models, and these allow automatic
+generation of the implementation. By contrast, the application domain
+of \SPIN is that of dynamic asynchronous software systems, which allow
+the instanciation and scheduling of new processes at run\hyp{}time,
+and where processes may perform complex computational tasks in
+addition to protocol related operations.
+
+\subsection{UPPAAL}
+
+\emph{Timed automata} are a standard modelling formalism for
+real\hyp{}time systems because they enable efficient system
+verification by model checking and testing
+\citep{Bouyer:2003,BengtssonYi:2004}. Basically, a timed automaton is
+a finite\hyp{}state machine extended with clock variables. The time
+denoted by the clocks is dense or continuous, in other words, it is a
+mathematical real number. Moreover, edges of the automata are
+threefold, in all generality: not only do they carry \emph{send or
+  receive} actions for synchronisation on unbuffered channels, but
+also \emph{guards}, which are constraints on the clock values that
+must hold for the edges to be executable, and \emph{clock resets} to
+zero. The semantics of a network of timed automata is their
+synchronous product. This kind of model is usually extended further
+with bounded discrete variables which are part of the system state and
+are used as if in an imperative language. In sum, the state of the
+system consists in the locations (vertices) of all the automata, the
+clock values and the discrete variable values.
+
+The model checker \UPPAAL \citep{Amnell:2001,BehrmannDavidLarsen:2004}
+uses an extension of timed automata, called \emph{timed safety
+  automata} because the theoretical model is further extended with
+features which help in proving safety and liveness properties, like
+urgent and committed locations, urgent synchronisations and broadcast
+channels. User functions are allowed for computational tasks and have
+a \Clang~look and feel, except for the absence of
+pointers. Synchronisations are realised only with rendezvous on one
+action name: the sender is blocked until the receiver is in a state
+with an out\hyp{}going executable edge receiving the same action; the
+sender is released after the receiver has accessed and perhaps
+modified the global state and reached the next local state
+(vertex). In other words, there is no parameter passing with actions:
+instead, shared variables and side\hyp{}effects are used to exchange
+information (bidirectionally) during the rendezvous.
+
+The query language is based on \emph{Temporal Computational Temporal
+  Logic} (TCTL), a modal extension of \emph{Computational Temporal
+  Logic} (CTL) with time. The concept of future in the TCTL is that of
+a tree of all possible traces from the present moment. The objects of
+the logical formulas are paths (in the tree) and individual states.
+Quantifications are universal or existential: $\textsf{A} \, \varphi$,
+which means that ``for all paths, the formula $\varphi$ holds,'' and
+$\textsf{E}\, \varphi$, which means that ``there exists a path such
+that $\varphi$ holds.'' Furthermore, we find the following modal
+operators:
+\begin{itemize*}
+
+  \item $\textsf{X} \, \varphi$, meaning: ``In the next state,
+    $\varphi$ is true;''
+
+  \item $\textsf{F}\,\varphi$, meaning: ``In a future state, $\varphi$
+    is true;''
+
+  \item $\textsf{G} \, \varphi$, meaning: ``Globally in the future,
+    $\varphi$ is true;''
+
+  \item $\varphi \mathrel{\textsf{U}} \psi$, meaning: ``$\varphi$ is
+    true \emph{until} $\psi$ is true.''
+
+\end{itemize*}
+For example \citep{Raimondi:2008}: $\textsf{AG}(\varphi \rightarrow
+(\textsf{EF}\,\psi))$ means: ``It is globally the case that, if $\varphi$
+holds, then there exists a path such that, at some point in the
+future, $\psi$ holds as well.''
+
+\UPPAAL is actually a toolkit made of a graphical user interface and a
+built\hyp{}in model checker. The graphical interface is convenient and
+helps understanding the model through simulation. There is no
+automatic generation of a skeleton of the implementation, which
+presents a risk of introducing errors.
+
+There is an extension of model checking which attracts a lot of
+attention nowadays: \emph{statistical model checking}
+\citep{David:2012,LegayDavid:2012}. Simply put, the timed automata are
+extended with probabilities to become \emph{Priced Timed Automata},
+and a stochastic semantics is used. The temporal logic TCTL is also
+extended conservatively to support probabilistic queries. The main
+interest of these extension is to have model checking go beyond worst
+case analyses, like the worst case response time of a recurrent task
+following a given schedule, and assess the average case behaviour of
+real\hyp{}time systems. In other words, statistical model checking
+decides whether a system statisfies a property \emph{with some degree
+  of confidence}. There are two extensions to \UPPAAL supporting this
+new paradigm: \UPPAALTRON \citep{LarsenMikucionisNielsen:2009} and
+\UPPAALSMC \citep{Bulychev_et_al:2012}.
+
+\subsection{Comparison}
+
+Perhaps the most obvious differences between the modelling languages
+of \SPIN and \UPPAAL are the absence of real\hyp{}time (i.e., clocks)
+in the former and the absence of asynchronicity (i.e., buffered
+channels) in the latter. 
+
+\Promela allows several kinds of synchronisations, whilst \UPPAAL only
+offers binary rendezvous (except for broadcast) and the sharing of
+variables. In other words, \Promela features synchronisation by
+message passing, whilst \UPPAAL uses rendezvous and shared
+variables. In particular, this means that the exchange of information
+in \UPPAAL can be bidirectional. There has been a recent attempt at a
+workaround in \UPPAAL by \citet{Boudjadar_et_al:2013}, who define a
+new class of automata called \emph{communicating timed automata},
+which are timed automata extended with the concept of ``call (of
+another automaton) with parameters.'' These automata are defined by
+translation into standard \UPPAAL automata. See also
+\citet{ChandrasekaranMukund:2006} and their \emph{timed
+  message\hyp{}passing automata}.
+
+As far as data types are concerned, both \Promela and \UPPAAL have
+primitive and structured data types, including arrays, although
+\Promela does not allow arrays to be passed as a parameter during
+synchronisation.
+
+Buffered channels can be modelled explicitly in \UPPAAL as timed
+automata with an array of messages as a local variable
+\citep{ChandrasekaranMukund:2006}, but this may quickly overload the
+state space, as all permutations of the messages are observable. In \Promela, channels are first\hyp{}class objects, that is, they are
+values and they can be sent from one process to another in order to
+create a private communication channel. By contrast, in \UPPAAL,
+channels are not a concept and they have to be inferred on the basis
+of the synchronisations, i.e., if two automata can synchronise, an
+implicit channel exists between them.
+
+There have been some proposals
+\citep{TripakisCourcoubetis:1996,Bosnacki:2002,NabialekJanowskaJanowski:2008}
+to extend \Promela with real\hyp{}time features, but they are not
+widely used.
+
+It is possible in \Promela to create at most~255 processes at
+run\hyp{}time, whilst \UPPAAL requires a statically fixed number of
+automata (so\hyp{}called template instanciations). The idea of
+\citet{Boudjadar_et_al:2013} to extend \UPPAAL with dynamic automaton
+creation is not entirely convincing here because it relies implicitly
+on some unstated static analysis to determine an upper bound on the
+maximum number of automata active simultaneously.
+
+Some industrial applications have been carried out with the
+side\hyp{}effect or main intent to compare \SPIN and \UPPAAL
+\citep{JensenLarsenSkou:1996,Lingegowda:2006,NabialekJanowskaJanowski:2008,GuentherMiliusMoeller:2012,AlzahraniGeorgieva:2013}. Also
+worth of notice is the extensive dual tutorial by
+\citet{Kluppelholz:2012}. Therefore, to a certain extent, \Promela and
+\UPPAAL can simulate each other (it is an open question as to what are
+the largest subsets of these languages that are equivalent by
+bisimulation), but, in practice, the models of the former often use
+asynchronous channels and the models of the latter often rely
+prominently on clocks, which makes the two languages incommensurable
+in general.
+
+As for the temporal logics, LTL versus TCTL, the timed nature of TCTL
+makes then trivially incomparable. The untimed fragment of TCTL, which
+is CTL, has \emph{not} the same expressive power as LTL. A CTL formula
+and a LTL formula are said equivalent if, for all models expressed as
+Labelled Transition Systems, they have the same truth value. It can be
+shown that there are formulas in CTL which have no equivalent in LTL,
+and vice versa, although there exists equivalent formulas. For a
+discussion of their respective merits, on practical and theoretical
+grounds, see \citet{Vardi:2001} and the tutorials by
+\citet{Katoen:2007} and \citet{Bellarmine_Krug:2010}.
+
+\subsection{Translations}
+
+We briefly consider here three sorts of translations involving the
+models of \SPIN and \UPPAAL, either as source or target: from one
+model to another, from a model to an implementation and from an
+implementation to a model.
+
+An example of translation from \UPPAAL to another modelling language
+is given by \citet{Abel:2009}, who does not build the product
+automaton before translation but uses a stepwise algorithm based on
+the semantics of timed automata. Another example of intermodel
+translation is that of \citet{NabialekJanowskaJanowski:2008}, whom we
+mentioned earlier because their source is a discrete\hyp{}time
+extension of \Promela. Their target is a general language of timed
+automata, compatible with that of \UPPAAL.
+
+There have been a few studies on the automatic generation of
+implementations from models, for example from \Promela and \UPPAAL to
+\Clang or \Clang-like languages
+\citep{KristensenMejlholmPedersen:XXXX,Loefller:1996,Hendriks:2001}.
+
+As far as model extraction is concerned, we would mention a recent
+translation from \Clang to \Promela by \citet{Jiang:2009}. Another way
+to proceed is that of \McErlang
+\citep{Benac_EarleFredlund:2010,Benac_EarleFredlund:2012} with a timed
+semantics of \Erlang programs. With this system, \Erlang programs need
+to use a library providing time\hyp{}related functions, for example,
+to obtain or record the current time, and a dedicated run\hyp{}time
+must be used instead of the standard virtual machine. More precisely,
+the run\hyp{}time is an interpreter for \Erlang in \Erlang. Time is
+discrete and, by default, there is no global clock ticks: the
+difference between two successive timeouts defines a time slice. The
+vertices of the state graph consist of the virtual time elapsed since
+the start, and the edges are annotated by send, receive or timeout
+statements. Some restrictions ensure that the graph is always finite,
+so model checking is possible. \McErlang can also be integrated with
+\QuickCheck, a popular tool for unit testing
+\citep{Anonymous:XXXX,Svensson:XXX}.
+
+\section{Testing}
+
+Statistical model checking is closely related to the use of model
+checkers for testing \citep{LarsenMikucionisNielsen:2004}, because
+randomness is often needed by the heuristics deriving test sequences
+according to a given objective, like the coverage of an embedded
+component (that is, a part of a system under test which has no direct
+connection with the tester).
+
+The specificity of testing (an implementation derived from) an \UPPAAL
+model is that real\hyp{}time constraints must be taken into account
+when deriving the test suite; in fact, the test system becomes itself
+a real\hyp{}time system. One interesting technique proposed by
+\citet{Hessel_et_al:2008} consists in adding a timed automata (an
+\emph{observer automaton}) to a given \UPPAAL model, as well as
+annotations to assign test objectives, coverage and verdicts. These
+annotations are then translated into pure \UPPAAL in such a way that
+model checking itself will generate the test sequences. More
+precisely, a formula $\psi$ is devised so that it specifies the
+desired structural criterion, like coverage of some part of the
+control flow graph, and we check for ``always not $\psi$'': the
+counterexample given by the model checker is the test case. The
+caveat, as usual with model checking, is that the state space must be
+finite.
+
+Another closely related issue is the matching of scenarios with time
+constraints against a given model. These scenarios can be conceived as
+test sequences, with a positive or a negative expected verdict.
+\citet{ChandrasekaranMukund:2006} propose an extension of the classic
+\UPPAAL timed automata, called \emph{timed message\hyp{}passing
+  automata}, and Timed Message Sequence Charts, a timed extension of
+MSC. They show how to translate these into \UPPAAL, at the cost of
+some restrictions on expressiveness and efficiency.
+
+
+\section{Proposals}
+
+This section outlines two research proposals for the programming of
+CPS.
+
+\subsection{Model-based design for CPS}
+
+We assume that we have a library of \Erlang combinators for tasks and
+workflows, inspired by the \textsf{iTasks} framework in \Clean. Its
+usage is eased by an extension of \Erlang with infix
+operators. Moreover, we suppose that we have at our disposal some
+static analyses applicable to \Erlang programs, either dedicated by
+means of \RefactorErl, or generic by means of \McErlang.
+
+Different model\hyp{}driven designs should be supported by our
+framework.
+\begin{enumerate}
+
+  \item \emph{Design with combinators.} If the workflow of the CPS
+    application fits the scope of the combinators' library, we may
+    simply want to directly and only use combinators.
+
+  \item \emph{Model checking with \SPIN.} If model checking is
+    required or deemed valuable, we may want to model the CPS in
+    \Promela. The limitation is that the model must be finite, in
+    particular, a maximum of~255 processes can be active
+    simultaneously, and no real\hyp{}time constraints are possible.
+    \begin{enumerate}
+
+      \item \label{lab:gen_erl} \emph{Generation of \Erlang.} If this
+        is not an issue, model checking can be done and a mapping from
+        processes to network (\Erlang) nodes shoud be provided. Some
+        research would be then necessary to translate \Promela to
+        \Erlang, perhaps targeting the combinators' library or the
+        \textsf{OTP} behaviour \texttt{gen\_fsm}.
+
+      \item \emph{Model refinement.} If \Promela proves to be too
+        restrictive, or if we had to hide some behaviours from the
+        state space due to memory limitations, we may consider a model
+        refinement whereby the system is divided into one global model
+        and several local (sub)models, each being the refinement of a
+        \Promela process considered as a stub or abstract, and being
+        mapped to one network node. When creating submodels which,
+        collectively, define the behaviour of one \Promela process
+        (one network node), we must make sure that we indeed make a
+        refinement, so we do not invalidate any assumption at the
+        global level (the observable timed traces of the submodels
+        must be included in the timed traces of the corresponding
+        abstract \Promela process). From there, different routes open.
+        \begin{enumerate}
+
+          \item \emph{Generation of \Erlang.} As in step
+            \ref{lab:gen_erl}, \Erlang could be produced from the
+            local \Promela models.
+
+          \item \emph{Translation to \UPPAAL.} If real\hyp{}time
+            constraints are important, we could opt for another way
+            and translate our model such that the global model is
+            asynchronous and written in \Promela, and the local models
+            are synchronous and written in \UPPAAL. (In control
+            systems, this kind of design is called ``Globally
+            Asynchronous, Locally Synchronous'' or GALS.) The simpler
+            way to achieve that is to rely on \Promela declarations of
+            unbuffered channels and translate the process involved
+            into \UPPAAL. Each remaining local asynchronous
+            communication, for example with physical sensors, would be
+            simulated by one timed automata (one per \Promela channel)
+            holding a bounded array of messages as a local variable.
+
+           The translation from \Promela to \UPPAAL should introduce
+           real\hyp{}time constraints. One solution would perhaps
+           define a Domain Specific Language (DSL) as a superset of
+           \Promela, which includes real\hyp{}time annotations. These
+           annotations would be stripped every time standard \Promela
+           is required. Another way is to revive some of the
+           real\hyp{}time extensions to \Promela proposed by some
+           researchers. It would be interesting also to consider
+           whether \UPPAAL textual models could be directly embedded
+           in (deterministic) atomic sections in an extension of
+           \Promela, differing to \UPPAAL all analyses about
+           these. Yet another angle would be to consider an existing
+           DSL for specifying program transformations, like in the
+           \Spoofax workbench, and both inject and remove
+           real\hyp{}time constraints, akin to parsing and
+           pretty\hyp{}printing, the latter being useful when the
+           untimed design has to be modified. After the model checking
+           and simulation of the \UPPAAL submodels, some research is
+           needed to automatically translate these into \Erlang, as we
+           envisaged it in step \ref{lab:gen_erl} for \Promela models.
+
+        \end{enumerate}
+
+    \end{enumerate}
+
+\end{enumerate}
+
+
+\subsection{Model-based testing of CPS}
+
+\subsubsection{TTCN-3}
+
+\TTCN (\emph{Testing and Test Control Notation version~3}) is a
+programming language strongly and statically typed, specialised for
+the conformance testing of telecommunication systems, but it is also a
+language used to specify interfaces for the test infrastructures. It
+is used for large projects in telecommunication, for instance mobile
+telephony, rather than software engineering in general. (By the way,
+it would be interesting to determine if this difference is cultural or
+technical in nature.)
+
+From the point of view of programming theory, this language presents
+many interesting features which definitely merit attention. For
+instance, \TTCN features
+\begin{itemize}
+
+  \item a standardised operational semantic,
+
+  \item an expressive type system,
+
+  \item pattern matching on expressions,
+
+  \item dynamic creation of processes,
+
+  \item multiple paradigms of communication, as asynchronous exchange
+    of messages, RPC (synchronous) etc.
+
+\end{itemize}
+Some of these characteristics are also found in the functional
+programming language \Erlang, used for implementing distributed, fault
+tolerant systems. Others aspects, not mentioned here (like
+\emph{snapshot semantic}), are very specific to the domain of
+application of \TTCN. Nevertheless, the resemblance suggests that a
+semantic of \TTCN could be defined by translation to
+\Erlang. Moreover, since \TTCN can be used to test distributed systems
+and embedded systems, it makes sense to use it on CPS.
+
+\subsubsection{Testable workflows}
+
+A different approach would be to generate a testable workflow instead
+of a workflow for operational deployment. This would entail the
+creation of additional tasks whose purpose would be to \emph{trace},
+via pipes and taps, the communication of the other tasks. Beyond pure
+tracing, we could envisage also \emph{passive testing}, whereby the
+testers would carry test objectives and stop when a verdict is
+reached, without disturbing the whole system while it is running. Some
+test tasks would also define \emph{Message Sequence Charts} (MSC), or
+some equivalent formalism, to be matched against the exchanges of a
+set of communicating tasks, distributed in general on different
+network nodes.
+
+In other words, we propose to create tasks, using the same framework
+of combinators, whose sole purpose would be to support tracing,
+passive testing and conformance testing (with respect to MSC). The
+specification of a testing workflow would be provided at the same time
+as the operational workflow, hence meeting the requirement of ``Task
+and Test Driven Development''.
+
+\subsection{Workflows for business processes}
+
+Many papers have been written about the design of business processes
+by means of patterns and workflows and recent years have seen the
+emergence of standard catalogs which are used as benchmarks by
+researchers and software companies alike. The combinator approach of
+the CPS project seems to share some common tasks with the business
+workflows, although the languages (\BPEL, \YAWL) appear very specific
+to the business framework. The checking of these models has attracted
+an increasing attention, in particular with the model checker
+\SPIN. It would be interesting to assess how far these business
+workflows overlap with our task-oriented worflows for CPS and how the
+published patterns of translation to \Promela can be reused for model
+checking.
+
+\subsection{Functional Reactive Programming}
+
+\emph{Reactive Programming} is a paradigm for programming
+communicating processes in the manner of synchonous data\hyp{}flow
+languages. In particular, this type of programming, or programming
+languages, is seen as an attractive alternative to the pervasive use
+of callback functions, which tend to obscure the control flow. When
+reactive programming is supported by means of a DSL embedded in a
+functional language, it is said \emph{Functional Reactive Programming}
+(FRP). The other approach consists in designing a full\hyp{}fledged
+FRP, but it requires more work, although it offers potentially more
+options for static analysis of the reactive behaviour. Moreover, with
+the DSL, the features of the embedding language can be used, allowing
+more expressivity for the logic part.
+
+Roughly speaking, in FRP, certain variables, called \emph{signals} or
+\emph{behaviours}, have time\hyp{}varying values. The difference with
+side\hyp{}effects is that the mutation is implicit and all expressions
+depending on behaviours are automatically updated. (In case of a FRP
+standalone language, the run\hyp{}time must analyse the data flow to
+minimally propagate the changes.) The other distinctive feature of FRP
+is \emph{events}, which are timed values denoting physical events,
+like a mouse button being pressed, or predicates. Depending on the
+semantics, signals and events can be first\hyp{}class values or
+not. Many behaviours can be naturally expressed in terms of reactions
+to events, giving rise to reactive behaviours. Since time is not
+present in the semantic of functional languages, signals and events
+are defined as abstract data types which are created and destructured
+by functions, e.g., events may be specified in terms of boolean
+functions of continuous, implicit time or by, in non\hyp{}strict
+functional languages, signals can be modelled by infinite (lazy)
+streams of values. A library is provided to \emph{lift} (convert)
+static values (constants) into behaviours and it is convenient if the
+language offers syntactical to implicit lift static values.
+
+FRP is a good theoretical framework for the CPS project, because it
+can account for concurrency, migration (that is, code mobility) and
+dynamic creation of processes. We would have to add features like
+fault tolerance, either by extending a FRP library or by implementing
+some abstract types with \Erlang during code generation. Recently,
+several backends have been developed for different functional
+languages, which produce \JavaScript in order to implement web
+services. There have been some work to translate \JavaScript to
+\Scheme, hopefully it would help to translated it to \Erlang as well.
+
+\Agda is a system providing a programming language with dependent
+types which are leveraged by a theorem prover. Recent works have shown
+the equivalence of Linear-time Temporal Logic (LTL), used in the model
+checker \SPIN, and FRP. A reactive library has been written in \Agda,
+using the type checker to verify LTL properties on the reactive
+(client) programs. The possibility to have an infinite space state,
+thanks to the availability of induction, makes \Agda an appealing
+option, although the learning curve is steep. There is also a backend
+to the \Agda compiler, which produces \JavaScript and therefore would
+allow us to translate automatically the \Agda programs (not the
+theorems) to \Erlang.
+
+%\bibliographystyle{unsrt}
+%\bibliography{verif}
+\printbibliography
+\nocite{*}
+
+\end{document}

@@ -1,0 +1,467 @@
+%%-*-latex-*-
+
+\begin{figure}[b]
+\framebox[\columnwidth]{
+  \begin{tabular}{cc}
+    \subfloat[Tree\hyp{}like pattern\label{fig:pat_tree}]{
+      \includegraphics[bb=61 601 157 721]{pat_tree_ex}
+    }
+    &
+    \subfloat[Source parse tree\label{fig:src_tree}]{
+      \includegraphics[bb=61 601 166 721]{match_ex}
+    }
+  \end{tabular}
+}
+\caption{Tree pattern matching \texttt{a = a - b*c - d}}
+\label{fig:match_ex}
+\end{figure}
+
+
+\section{A Backtracking Algorithm}
+\label{backtracking}
+
+Before presenting a precise algorithm for unparsed\hyp{}pattern
+matching, let us discuss informally an example. Consider the problem
+of matching the pattern \texttt{\%x = \%y - \%z} against the \Clang
+expression \texttt{a = a - b * c - d}. Pattern\hyp{}tree matching
+would first parse the expression into the parse tree in
+Figure~\ref{fig:src_tree}, then parse the pattern using an extended
+parser into the parse tree in Figure~\ref{fig:pat_tree}, and then
+match the latter against the former. As a result, all the
+meta\-variables are correctly bound with respect to the grammar in the
+substitution \(\{\textsf{x} \mapsto \texttt{"a"}, \textsf{y} \mapsto
+\texttt{"a-b*c"}, \textsf{z} \mapsto \texttt{"d"}\}\). The key idea of
+unparsed patterns is to avoid parsing the pattern by going the other
+way around, i.e., by unparsing the source parse tree and comparing the
+result with a textual pattern. However, if the parse tree is simply
+unparsed into a string, matching would fall back to the case of
+matching between two strings, which is very imprecise, because it
+would yield both the substitution \(\{\textsf{x} \mapsto \texttt{"a"},
+\textsf{y} \mapsto \texttt{"a-b*c"}, \textsf{z} \mapsto
+\texttt{"d"}\}\), which is correct, and \(\{\textsf{x} \mapsto
+\texttt{"a"}, \textsf{y} \mapsto \texttt{"a"}, \textsf{z} \mapsto
+\texttt{"b*c-d"}\}\), which is incorrect, since the subtraction
+operator is left\hyp{}associative. Moreover, meta\-variables are bound
+to strings, i.e., concrete syntax, rather than being bound to subtrees
+of the parse tree. This is not suitable when using pattern matching to
+manipulate the matched subtrees, which is a quite common case within
+parsing\hyp{}based tools.
+
+The technical issue is that the whole parse tree is fully unparsed,
+i.e., de\-structured, at once, dropping the references to all the
+subtrees. In order to avoid that, the parse tree should be unparsed
+level by level (in a breadth\hyp{}first traversal), and the unparsed
+pattern (which is a list of lexemes and meta\-variables here) should
+either be partially matched against the current unparsed forest or the
+latter should be further unparsed. These two alternatives are
+sometimes possible for a given parse forest and unparsed pattern. In
+the first option, i.e., partial matching, can be tried first and if it
+leads to a failure, the second option, i.e., unparsing, is tried
+instead. If both options lead to a failure, then the whole matching is
+deemed a failure. This technique is called \emph{backtracking} and
+does not lead to a linear\hyp{}time algorithm in the worst\hyp{}case
+(in the size of the pattern plus the size of the source tree). Also,
+the order in which matching or unparsing are tried is not significant
+as there is no way to guess which would me more likely to be
+successful \emph{a priori}. More precisely, firstly, the source parse
+tree is pushed on an empty analysis stack. This stack is, in general,
+a parse forest. We shall speak of the ``left of the forest'' instead
+of the ``top of the stack.'' Secondly, the textual pattern, here the
+string \texttt{\%x = \%y - \%z}, is transformed into a list of lexemes
+and meta\-variables. (In practice, this is not necessary because the
+leaves of the source parse tree contain all the lexical information
+needed to realise a match step (read further). But, as much as the
+theory of unparsed patterns is concerned, it is simpler to assume some
+tokenisation of the pattern, hence avoiding the use of regular
+expressions in the formal model or the algorithm itself.)  Thirdly,
+given an initial empty substitution \(\sigma\), the algorithm
+non\hyp{}deterministically chooses one of the two following actions,
+and backtrack in case of failure.
+\begin{enumerate}
+
+  \item \textbf{Matching.} The first element \(e\) of the pattern is
+    matched against the leftmost tree \(h\) of the forest. This can be
+    achieved in two different situations:
+    \begin{enumerate}
+    
+      \item \textbf{Elimination.} If \(h\) and \(e\) are the same
+        lexeme, then the remaining pattern is matched against the
+        remaining forest, with the same substitution \(\sigma\).
+
+      \item \textbf{Binding.} If \(h\) is not a lexeme (i.e., it is
+        not a leaf) and \(e\) is the meta\-variable \(x\), which is
+        either already bound to a subtree equal to \(h\) (Unparsed
+        patterns are not linear, i.e., a meta\-variable can occur more
+        than once.) or unbound in \(\sigma\), then the remaining
+        pattern is matched against the remaining forest, with
+        \(\sigma\) updated with \(x\) bound to \(h\).
+
+  \end{enumerate}
+
+  \item \textbf{Unparsing.} If the forest starts with a tree \(t\),
+    unparsing consists in replacing \(t\) by the forest of its direct
+    subtrees (in other words, the root of \(t\) is cut out) and trying
+    again with the same pattern and the same substitution.
+
+\end{enumerate}
+The algorithm always stops because either the pattern length or the
+forest size strictly decreases at each step. It fails if and only if
+the final pattern is not empty. In case of success, the final
+substitution is the result (it contains all the bindings of the
+meta\-variables to subtrees of the source parse tree).
+
+
+\subsection{Pattern Matching}
+\label{backtracking:definitions}
+
+Unparsed patterns are noted \(\overline{p}\) and the set of unparsed
+patterns is inductively defined as the smallest set \(\overline{\cal
+  P}\) such that
+\begin{itemize}
+
+  \item \(\el \in \overline{\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(\overline{p} \in \overline{\cal
+    P}\), then \(\cons{l}{\overline{p}} \in \overline{\cal P}\);
+
+  \item if \(x \in {\cal V}\) and \(\overline{p} \in \overline{\cal
+    P}\), then \(\cons{\meta{x}}{\overline{p}} \in \overline{\cal P}\).
+
+\end{itemize}
+Let us extend the substitutions defined in section~\ref{model}, in
+order to cope with unparsed patterns, not just meta\-variables. The
+effect of a substitution on a pattern will be to replace every
+occurrence in the pattern of the meta\-variables in its domain by the
+corresponding parse trees. The substitutions computed by any of our
+matching algorithms are total, i.e., they replace \emph{all} the
+meta\-variables of the pattern. It is handy to distinguish the forests
+which contain no meta\-variables by calling them \emph{closed forests}
+or \emph{closed patterns}, and their contents \emph{closed trees}. In
+order to distinguish a substitution applied to a meta\-variable \(x\)
+from a substitution on an unparsed pattern \(\overline{p}\), we shall
+note \(\sigma(x)\) the former and \(\subst{\overline{p}}{\sigma}\) the
+latter. Consider the formal definition of substitutions in
+Figure~\ref{x_subst_def}.  The first equation \((\eqn{1})\) means that
+the substitution on the empty pattern is always the empty forest. The
+second equation \((\eqn{2})\) defines the substitution of a
+meta\-variable by its associated tree: the tree is added to the left
+of the resulting forest and the substitution proceeds recursively over
+the remaining unparsed pattern. The third equation \((\eqn{3})\)
+specifies that the substitutions always leave lexemes unchanged.
+\begin{figure}[b]
+\framebox[\columnwidth]{%
+\(
+\begin{aligned}
+\subst{\el}{\sigma} 
+&\eqn{1} \el\\
+\subst{\cons{\meta{x}}{\overline{p}}}{\sigma}
+&\eqn{2} \cons{\sigma(x)}{\subst{\overline{p}}{\sigma}}\\
+\subst{\cons{l}{\overline{p}}}{\sigma}
+&\eqn{3} \cons{l}{\subst{\overline{p}}{\sigma}} 
+\end{aligned}
+\)
+}
+\caption{Substitutions on unparsed patterns\label{x_subst_def}}
+\end{figure}
+
+\begin{figure}[H]
+\framebox[\columnwidth]{%
+\begin{mathpar}
+\inferrule{}{\smj{\el}{\el}{\sigma_\varnothing}}
+\quad\TirName{\text{\sf END}}
+
+\inferrule
+{\smj{f}{\overline{p}}{\sigma}}
+{\smj{\cons{l}{f}}{\cons{l}{\overline{p}}}{\sigma}}
+\,\TirName{\text{\sf ELIM}}
+
+\inferrule*[right=\text{\sf BIND}]
+{\smj{f}{\overline{p}}{\sigma}\\
+ \sigma \subseteq \sigma \oplus x \mapsto t}
+{\smj{\cons{t}{f}}%
+     {\cons{\meta{x}}{\overline{p}}}%
+     {\sigma \oplus x \mapsto t}}
+
+\inferrule*[right=\text{\sf UNPAR}]
+  {\smj{f_1 \cdot f_2}{\overline{p}}{\sigma}}
+  {\smj{\cons{c(f_1)}{f_2}}{\overline{p}}{\sigma}}
+\end{mathpar}
+}
+\caption{A backtracking pattern matching\label{x_match_def}}
+\end{figure}
+
+Pattern matching is defined by the inference system given in
+Figure~\ref{x_match_def}, where the rules are unordered and in
+\Prolog, in Figure~\ref{x_match_prolog}. Let us call a
+\emph{configuration} the pair \(\smat{f}{\overline{p}}\). In case the
+forest contains only one tree \(h\), let us write
+\(\smat{h}{\overline{p}}\) instead of
+\(\smat{[h]}{\overline{p}}\). The pattern matching associates a
+configuration to a substitution. This system of inference rules is not
+syntax\hyp{}directed, because the conclusions of rules \textsf{BIND}
+and \textsf{UNPAR} overlap: a non\hyp{}deterministic choice between
+binding and unparsing must be done. This dilemma cannot be decided
+solely based on the shape of the configuration and thus the
+implementation must rely on a backtracking mechanism, as we said
+before. Note that no rule has more than one premise involving the
+\((\twoheadrightarrow)\) relation, hence the proof trees (i.e.,
+derivations, when read deductively) are actually lists. Rule
+\textsf{END} rewrites the empty configuration to the empty
+substitution; this happens as the last rewrite step---from whence its
+name. Let us read the rules inductively, since this reading
+corresponds to an algorithm.
+\begin{itemize}
+
+  \item Rule \textsf{ELIM}: if the pattern and the tree start with the
+    same lexeme, then remove the lexemes and try to rewrite the
+    remaining configuration.
+
+  \item Rule \textsf{BIND}: a meta\-variable \(x\) is bound to a tree
+    \(t\), i.e., \(x \mapsto t\), if the remaining configuration
+    rewrites to a substitution \(\sigma\) which either already
+    contains the binding or whose domain does not contain \(x\) (i.e.,
+    \(\sigma \subseteq \sigma \oplus x \mapsto t\)); the resulting
+    substitution is the updating of \(\sigma\) with the new binding.
+
+  \item Rule \textsf{UNPAR}: to match the same pattern against the
+    same tree \(t = c(f_1)\) whose root has been cut off (i.e.,
+    \(f_1\) remains); this is \emph{unparsing}. Note that the
+    configuration
+    \(\smat{\cons{c(f_1)}{f_2}}{\cons{\meta{x}}{\overline{p}}}\) can
+    lead both to an unparsing or a binding.
+\end{itemize}
+\begin{figure}[t]
+\VerbatimInput[frame=single]{backtrack.pl}
+\caption{The algorithm of Figure~\ref{x_match_def} in
+  \Prolog\label{x_match_prolog}}
+\end{figure}
+The encoding in \Prolog is shown in Figure~\ref{x_match_prolog}. Patterns
+are noted \texttt{P}, variables \texttt{X}, forests \texttt{F},
+substitutions \texttt{S}, trees \texttt{T}. A binding between a
+meta\-variable and a tree is a pair \texttt{\{X,T\}} and a
+substitution is a list of such
+bindings. \(\smj{f}{\overline{p}}{\sigma}\) is \texttt{match(P,F,S)};
+\(c(f)\) is \texttt{node(C,F)}; \(\meta{x}\) is \texttt{meta(X)};
+\(l\) is \texttt{lex(L)} and `\(\sigma \oplus x \mapsto t\) if
+\(\sigma \subseteq \sigma \oplus x \mapsto t\)' is implemented by
+\texttt{add(S1,\{X,T\},S2)}, where \(\sigma\) is \texttt{S1}, \(x
+\mapsto t\) is \texttt{\{X,T\}} and \(\sigma \oplus x \mapsto t\) is
+\texttt{S2}.
+
+\paragraph{Example.}
+
+Consider the source tree in Figure~\ref{fig:src_tree} and the unparsed
+pattern \texttt{\%x = \%y - \%z}. The tree of all possible choices for
+the rules of the backtracking system in Figure~\ref{x_match_def} is
+given in Figure~\ref{fig:backtracking_example}. The unique successful
+trace is in bold. In general, several traces may be successful.
+\begin{figure}[H]
+\framebox[\columnwidth]{
+  \includegraphics[bb=71 523 221 721]{backtracking_example}
+}
+\caption{Matching \texttt{\%x = \%y - \%z} (in bold)}
+\label{fig:backtracking_example}
+\end{figure}
+
+
+\paragraph{Termination.} 
+
+As said before, termination is entailed by the observation that either
+the pattern length (i.e., the number of lexemes and meta\-lexemes), or
+the forest size (i.e., the number of nodes) strictly decreases after
+any rule is applied to any given configuration.
+
+
+\subsection{Closed\hyp{}Tree Inclusion}
+
+\begin{figure}[b]
+\framebox[\columnwidth]{%
+  \includegraphics[scale=0.5]{sqsubseteq}
+}
+\caption{Closed\hyp{}tree inclusion \([a,b,c] \sqsubseteq h\)}
+\label{fig:sqsubseteq}
+\end{figure}
+
+We need to defined what it means for a closed tree to be included in a
+parse tree. This is the \emph{closed\hyp{}tree matching}, which is a
+variation on the classic tree matching, as, in the latter, the pattern
+tree may embed meta\-variables and the roots are matched. This way, it
+becomes possible to compare the expressive power of the backtracking
+pattern matching with respect to the more familiar tree matching, used
+by many existing tools. Informally, let us say that a tree \(h_1\) is
+included in a tree \(h_2\) if and only if \(h_1\) is included in
+\(h_2\) and the fringe of \(h_1\) is included in the fringe of
+\(h_2\), as shown in Figure~\ref{fig:sqsubseteq}. Let us note \(h_1
+\sqsubseteq h_2\) this relationship. Technically, we only need to
+define \((\sqsubseteq)\) between a forest \(f\) and a tree \(h\) in
+such a manner that \(f \sqsubseteq h\) implies that there exists a
+constructor \(c\) such that \(c(f) \sqsubseteq h\). But we shall not
+precise this further. The formal definition we propose here is based
+on partially ordered inference rules (see section~\ref{model}),
+displayed in Figure~\ref{x_tree_matching_def}. We give now a logical
+reading of the rules.
+
+\begin{figure}[t]
+\framebox[\columnwidth]{
+\begin{mathpar}
+\inferrule*{}{\el \sqsubseteq \el}
+\quad\TirName{\text{\sf EMP}}
+
+\inferrule
+  {f_1 \sqsubseteq f_2}
+  {\cons{h}{f_1} \sqsubseteq \cons{h}{f_2}}
+\,\TirName{\text{\sf EQ}}
+
+\inferrule*[right=\text{\sf SUB}]
+  {f \sqsubseteq f_1 \cdot f_2}
+  {f \sqsubseteq \cons{c(f_1)}{f_2}}
+
+\inferrule*[right=\text{\sf ONE}]
+  {f \sqsubseteq [h]}
+  {f \sqsubseteq h}
+\end{mathpar}
+}
+\caption{Closed\hyp{}forest inclusion\label{x_tree_matching_def}}
+\end{figure}
+\begin{itemize}
+
+  \item Rule \textsf{ONE} states that if the forest \(f\) is included
+    in a forest made of a single tree \(h\), then it is included in
+    \(h\). This relates a closed forest and a tree.
+
+  \item Axiom \textsf{EMP} says that the empty forest is included in
+    the empty forest.
+
+  \item Rule \textsf{EQ} specifies that if a non\hyp{}empty forest
+    \(f_1\) is included in another non\hyp{}empty forest (possibly the
+    same), then the forest \(\cons{h}{f_1}\) is included in the forest
+    \(\cons{h}{f_2}\), where \(h\) is a tree (possibly a lexeme).
+
+  \item Rule \textsf{SUB} states that if a forest \(f\) is included in
+    the catenation of forests \(f_1\) and \(f_2\), such that the
+    constructor \(c\) can have \(f_1\) as direct subtrees, then \(f\)
+    is included in \(\cons{c(f_1)}{f_2}\) (i.e., grouping some trees
+    into a new tree changes nothing). When reading the rules
+    inductively, i.e., bottom\hyp{}up, or, in other words,
+    algorithmically, we must add the constraint that rule \textsf{SUB}
+    must always be considered last, i.e., if a derivation (i.e., a
+    proof tree) ends with \textsf{SUB}, its conclusion has the shape
+    \(f \sqsubseteq \cons{c(f_1)}{f_2}\) \emph{and it is implied that
+      there is no forest} \(f'\) \emph{such that} \(f =
+    \cons{c(f_1)}{f'}\) (which would conclude \textsf{EQ}).
+
+\end{itemize}
+There are other ways to define closed\hyp{}tree matching, such as
+asserting the existence of a certain morphism between two trees, but
+our approach is more direct. It does not matter that it is very
+inefficient (for instance, consider that, in rule \textsf{EQ}, the
+equality of two trees must be checked), since it does not serve the
+purpose of an implementation but of a reference for the backtracking
+algorithm, in order to allow the definition of its soundness and
+completeness.
+
+\subsection{Soundness}
+
+The soundness of the pattern matching means that all computed
+substitutions, once applied to the original pattern, yield a closed
+forest which is included, in the sense above, in the original
+tree. Informally: all successful pattern matchings lead to successful
+closed\hyp{}tree matchings. Formally:
+\begin{theorem}[Soundness]\hfill
+\label{backtracking:soundness}
+\begin{center}
+If \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma\),
+then \(\subst{\overline{p}}{\sigma} \sqsubseteq h\).
+\end{center}
+\end{theorem}
+
+\input{backtracking_soundness}
+
+\subsection{Completeness}
+
+The completeness of our algorithm means that every time a complete
+substitution on a pattern matches a tree, our algorithm computes a
+substitution which is included in the first one. Indeed, the computed
+substitution never contains useless bindings, but the other one
+may. Therefore, the completeness property is perhaps better stated by
+referring to \emph{minimal substitutions}: all minimal substitutions
+that enable a closed\hyp{}tree inclusion are computed by our pattern
+matching. Formally, this can be expressed as follows.
+\begin{theorem}[Completeness]\hfill
+\label{backtracking:completeness}
+\begin{center}
+If   \(\subst{\overline{p}}{\sigma} \sqsubseteq h\),
+then \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\) 
+and  \(\sigma' \subseteq \sigma\).
+\end{center}
+\end{theorem}
+
+\noindent\textsc{Proof Sketch~\ref{backtracking:completeness}}
+(Completeness). By structural induction on the patterns.\hfill\(\Box\)
+
+\begin{lemma}[Minimality]\hfill
+\label{minimality}
+\begin{center}
+If \(\sigma \subseteq \sigma'\) 
+then \(\subst{\overline{p}}{\sigma} = \subst{\overline{p}}{\sigma'}\).
+\end{center}
+\end{lemma}
+\noindent In other words, for a given substitution, there exists a
+minimal substitution yielding the same result (if defined) for any
+pattern.
+
+\noindent\textsc{Proof Sketch~\ref{minimality}} (Minimality) By
+structural induction on the patterns.\hfill\(\Box\)
+
+\subsection{Compliance}
+
+As a corollary, the algorithm is sound and complete with respect to
+the closed\hyp{}tree inclusion:
+\begin{corollary}[Compliance]\hfill
+\label{backtracking:compliance}
+\begin{center}
+\(\subst{\overline{p}}{\sigma} \sqsubseteq h\) if and only if
+\(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\) 
+and  \(\sigma' \subseteq \sigma\).
+\end{center}
+\end{corollary}
+\noindent In other words, the concept of closed\hyp{}tree inclusion
+coincides exactly with the backtracking algorithm.
+
+\noindent\textsc{Proof~\ref{backtracking:compliance}}
+(Compliance). The way from left to right is the completeness. From the
+soundness, it comes that
+\emph{If \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\), then
+\(\subst{\overline{p}}{\sigma'} \sqsubseteq h\).}
+The minimality lemma~\ref{minimality} implies then
+\(\subst{\overline{p}}{\sigma} \sqsubseteq h\).\hfill\(\Box\)
+
+\subsection{Further Discussion}
+
+One solution to overcome the inefficiency of non\hyp{}determinacy is
+to make explicit the tree structure in the textual pattern by adding
+some kind of parentheses, so each step becomes uniquely
+determined. For example, to match the pattern \texttt{\%x = \%y - \%z}
+against the parse tree in Figure~\ref{fig:src_tree}, we would add to
+the pattern meta\-lexemes called \emph{meta\-parentheses} (i.e.,
+parentheses that do not belong to the object language), which are here
+represented as escaped parentheses: \texttt{\%(} and \texttt{\%)}. For
+example, we may use the pattern \texttt{\%(\%x = \%(\%(\%y\%) -
+\%z\%)\%)}. Note that in general we cannot use plain parentheses to
+unveil the structure because the language may already contain
+parentheses which may have a completely different meaning other than
+grouping. For instance, in the following \textsf{Korn shell}
+(\textsf{ksh}) pattern:
+\begin{verbatim} 
+case %x in [yY]) echo yes;; *) echo no;; esac
+\end{verbatim}
+we must use meta\-parentheses to explicit the tree structure, because
+parentheses would not pair the way we want---in fact, they would not
+pair at all. Fully meta\-parenthesised patterns enable
+linear\hyp{}time pattern matching. However, the explicit structure
+comes at the price of seriously obfuscating the pattern. Clearly, if
+we may say, fully meta\-parenthesised patterns are quite difficult to
+read and write. The legibility of the pattern can be improved if the
+matching algorithm allows some of the meta\-parentheses to be
+dropped. This is what is shown in the next section, where the system
+is syntax\hyp{}directed.

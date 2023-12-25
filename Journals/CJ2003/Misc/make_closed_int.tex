@@ -1,0 +1,109 @@
+%%-*-latex-*-
+
+        $\ocamlkwd{let} \,\, \ocamlvaluename{make\_closed\_int} \,\,
+        ((v_0, b_0), (b_1, v_1)) =$\\
+        \hspace*{3mm}
+        $\ocamlkwd{match} \,\, ((v_0, b_0), (b_1, v_1)) \,\, \ocamlkwd{with}$ \\ 
+        \begin{tabular}{rl}
+           $\mid$
+             & $((\MinInfInt, \wild), (\wild, \PlusInfInt)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\MinInfInt, \PlusInfInt)$\\
+           $\mid$
+             & $((\MinInfInt, \wild), (<, \NegInt
+                \, n)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\MinInfInt, \NegInt \, (n + 1))$\\
+           $\mid$
+             & $((\MinInfInt, \wild), (<, \PosInt \, n)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\MinInfInt, \PosInt \, (n + 1))$\\
+           $\mid$ 
+             & $((\NegInt \, n, <), (\wild, \PlusInfInt)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, (n + 1), \PlusInfInt)$\\
+           $\mid$
+             & $((\PosInt \, n, <), (\wild, \PlusInfInt))
+               \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, (n + 1), \PlusInfInt)$\\
+           $\mid$
+             & $((\NegInt \, n, \leqslant), (<, \PosInt \, m))
+                \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, n, \PosInt \, (n + 1))$\\
+           $\mid$
+             & $((\NegInt \, n, <), (<, \PosInt \, m)) \,\,
+               \ocamlkwd{when} \,\, n = 1 \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, 0, \PosInt \, (m + 1))$\\
+           $\mid$
+             & $((\NegInt \, n, <), (<, \PosInt \, m)) \,\,
+               \ocamlkwd{when} \,\, n <> 1 \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, (n + 1), \PosInt \, (m +
+                1))$\\ 
+           $\mid$
+             & $((\NegInt \, n, <), (\leqslant, \PosInt \, m)) \,\,
+               \ocamlkwd{when} \,\, n = 1 \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, 0, \PosInt \, m)$\\
+           $\mid$
+             & $((\NegInt \, n, <), (\leqslant, \PosInt \, m)) \,\,
+               \ocamlkwd{when} \,\, n <> 1 \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, (n + 1), \PosInt \, m)$\\
+           $\mid$
+             & $((\NegInt \, n, \leqslant), (\leqslant, \NegInt \, m))
+                \,\, \ocamlkwd{when} \,\, m \leqslant n \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, n, \NegInt \, m)$\\
+           $\mid$
+             & $((\NegInt \, n, \leqslant), (<, \NegInt \, m))
+                \,\, \ocamlkwd{when} \,\, m < n \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, n, \NegInt \, (m + 1))$\\
+           $\mid$
+             & $((\NegInt \, n, <), (<, \NegInt \, m))
+                \,\, \ocamlkwd{when} \,\, m < n \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, (n + 1), \NegInt \, (m + 1))$\\
+           $\mid$
+             & $((\NegInt \, n, <), (\leqslant, \NegInt \, m))
+                \,\, \ocamlkwd{when} \,\, m < n \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\NegInt \, (n + 1), \NegInt \, m)$\\
+           $\mid$
+             & $((\PosInt \, n, \leqslant), (\leqslant, \PosInt \, m))
+                \,\, \ocamlkwd{when} \,\, n \leqslant m \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, n, \PosInt \, m)$\\
+           $\mid$
+             & $((\PosInt \, n, \leqslant), (<, \PosInt \, m))
+                \,\, \ocamlkwd{when} \,\, n < m \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, n, \PosInt \, (m + 1))$\\
+           $\mid$
+             & $((\PosInt \, n, <), (<, \PosInt \, m))
+                \,\, \ocamlkwd{when} \,\, n < m \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, (n + 1), \PosInt \, (m +
+                1))$\\ 
+           $\mid$
+             & $((\PosInt \, n, <), (\leqslant, \PosInt \, m))
+                \,\, \ocamlkwd{when} \,\, n < m \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\PosInt \, (n + 1), \PosInt \, m)$\\
+           $\mid$
+             & $((\MinInfInt, \wild), (\leqslant, \NegInt
+                \, \wild \mid \PosInt \, \wild))$\\
+           $\mid$ 
+             & $((\NegInt \, \wild \mid \PosInt \, \wild, \leqslant),
+               (\wild, \PlusInfInt))$\\  
+           $\mid$
+             & $((\NegInt \, \wild, \leqslant), (\leqslant, \PosInt \,
+                \wild)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\Interval \, (\mu(v_0), \mu(v_1)) \,\, \ocamlkwd{in}$\\ 
+        \end{tabular}\\
+ 

@@ -1,0 +1,213 @@
+%%-*-latex-*-
+
+\section{Introduction}
+Pattern matching of source code is a very useful mechanism in tools
+for program analysis and transformation, such as compilers,
+interpreters, tools for legacy program understanding, code inspectors,
+refactoring tools, model checkers, code translators, etc. Source code
+matching is not only useful when implementing these tools, but
+especially for building extensible versions of these tools with
+user-defined behavior \cite{mc, mj, mops, blast, mygcc, pmd}.
+
+As the problem of tree matching has been
+extensively studied and efficient algorithms are known, the problem of
+source code matching has usually been reduced to tree matching,
+according to two different approaches.
+
+\paragraph{Tree patterns.}
+In the first approach, code patterns are written as trees, using a
+domain-specific notation to describe an abstract syntax tree
+(AST). This approach based on tree patterns has been used for a long
+time, either supported by pattern matching mechanisms available in the
+implementation language, e.g., for tools written in ML, or otherwise
+by explicitly implementing a tree pattern matching mechanism, e.g. in
+inspection tools such as tawk \cite{tawk} or SCRUPLE \cite{scruple} or
+in model checking tools such as MOPS \cite{mops}. More recently, some
+extensible code inspectors such as PMD \cite{pmd} represent ASTs in
+XML notation (which constitutes a standardized notation for
+trees). This allows using other standardized notations such as
+XPath/XQuery for expressing tree patterns, and thus reusing existing
+pattern matchers. The main advantage of expressing patterns as trees
+is that the implementation of pattern matching is simple, because any
+appropriate tree-matching algorithm can be directly used on this
+representation. However, an important shortcoming of this approach is
+that programmers writing patterns should be aware of the internal AST
+representation of programs, and also of a specific notation for it.
+
+As a motivating example, consider a very simple user-defined
+inspection rule over C programs that searches for code fragments
+resetting all the elements in an array, such as the following
+fragment:
+\begin{verbatim}
+for(i=0; i<100; ++i)
+  a[i]=0;
+\end{verbatim}
+When such initialization code is found, the inspection rule may
+suggest that the same operation would be implemented more efficiently
+using the ``bzero()'' standard library function. Alternatively, the
+same rule might be predefined in a compiler in order to recognize such
+initializations and automatically implement them more efficiently
+using the ``bzero()'' function.
+
+Depending on the AST representation of the C program in a particular
+tool, the tree pattern corresponding to the example above would
+typically be expressed as follows (where the name of the array, its
+bound, and its index variable have been abstracted as variables in the
+pattern):
+\begin{verbatim}
+for_stmt(assign_expr(X, N), 
+         less_expr(X, M), 
+         preincr_expr(X),
+         expr_stmt(assign_expr(array_expr(Y, X), 
+                               int_literal(0))))
+\end{verbatim}
+
+As can be seen in the above tree pattern, the programmer writing the
+inspection rule must be aware of both the AST structure (for instance,
+that an assignment in C is an expression encapsulated in an
+``expression statement'') and of a specific notation for it (for
+instance, that the assignment operator is called ``assign\_expr'',
+that the ``for\_stmt'' operator takes four arguments in a given order,
+etc.). Writing the same pattern in a language such as XPath doesn't
+simplify things, and the pattern becomes even more verbose.
+
+\paragraph{Concrete syntax patterns.}
+In the second approach to source code matching, code patterns are
+expressed using the native syntax (i.e., the concrete syntax) of the
+subject programming language, augmented with pattern variables. Then,
+patterns are parsed to trees before being matched with the program
+AST. In this approach, the pattern to be searched can be written much
+more naturally and concisely as follows (where variables in the
+pattern are prefixed by a special character such as ``\%''):
+\begin{verbatim}
+for(%x=0; %x<%n; ++%x) %y[%x]=0;
+\end{verbatim}
+
+This second approach based on concrete syntax patterns has been used,
+for instance, in several extensible model checkers \cite{cecil, mc,
+mj, blast}, and extensible tools for legacy program understanding and
+transformation \cite{native, behavioral}. The main advantage of
+concrete syntax patterns is that they are trivial to write and read
+back by any programmer, without knowledge of the AST
+representation. However, as far as the implementation is concerned,
+parsing the pattern requires a modified parser of the subject
+programing language, extended to:
+\begin{itemize}
+\item allow pattern variables, which do not occur in ordinary code, and
+\item parse patterns that represent program {\em fragments}
+(statements, expressions, declarations), whereas the base grammar only
+parsed whole programs.
+\end{itemize}
+Extending the parser of a programing language in these ways is not a
+simple task, even in frameworks that automate the addition of the
+extra grammar productions \cite{refine}, because it typically
+introduces many conflicts in the parser. These conflicts may
+correspond to real ambiguities in the extended language (for example,
+in C, the pattern ``f(\%x);'' may represent either a function call or
+a function declaration with an implicit return type of ``int''), or
+may be just be caused by a parsing algorithm with limited
+lookahead. Indeed, existing parsers most commonly use limited
+lookahead algorithms such as LALR(1) or LL(1). Solving many such
+conflicts in a complex grammar of a real programming language may be
+very hard to do. Moreover, the resolution of some conflicts may
+require introducing special pattern syntax (such as ``\#stmt f(\%x);''
+in the previous example), which make the patterns look less similar to
+native code. This is the reason why most of the existing tools
+following this approach allow only restricted forms of concrete syntax
+patterns, described by a limited pattern grammar (e.g., matching only
+assignments and function calls \cite{blast-ql}).
+
+In theory, generalized parsers, handling the general class of
+context-free grammars, can deal with both kinds of conflicts, by
+computing all possible parses: conflicts due to limited lookahead are
+rejected later during the parsing; conflicts due to the ambiguity of
+the grammar itself result in several possible ASTs. However,
+mainstream generalized parsers such as Bison \cite{bison} use an
+extremely inefficient, exponential-time algorithm, creating a new
+process at each local ambiguity. This scheme may quickly prove
+infeasible when parsing even small fragments in a pattern grammar
+where conflicts are scattered everywhere.
+
+Alternatively, the polynomial-time GLR parsing algorithm \cite{glr}
+was used to implement tools such as SDF \cite{sdf}, used by ASF+SDF
+\cite{asf+sdf} and Stratego/XT \cite{metaprog} to implement concrete
+syntax rewriting rules, or very recently BRNGLR \cite{brnglr}. Even
+so, there is still a performance issue, because GLR parsers are
+typically much less efficient than LALR(1) parsers (a factor of 10 is
+not uncommon \cite{elkhound}). Also recently, a hybrid GLR/LALR parser
+called Elkhound \cite{elkhound} has been delivered whose running time
+is close to that of a standard LALR(1) parser on all the portions of a
+grammar that are LALR(1). But as discussed above, an extended pattern
+grammar is highly ambiguous (unless we severely restrict the
+patterns), so then GLR parsing time would fall back to usual GLR-class
+performance. Therefore, GLR parsing may not be in general an
+efficient, production-quality, solution to the problem of parsing
+source code patterns. Other generalized parsing algorithms such as
+Earley \cite{earley} may eventually perform better on such highly
+ambiguous grammars.
+
+Besides this performance issue, there is also an even more important
+porting issue, when talking about legacy parsers. Indeed, for either
+performance or historical reasons, generalized parsers are very rarely
+used in existing tools. Porting an existing parser to a different
+technology may be difficult --- typically, the grammar has to be
+rewritten from scratch. Furthermore, rewriting the parser may
+profoundly impact the rest of the tool. This effort is simply
+unaffordable for most legacy tools.
+
+\paragraph{Our solution.}
+Summarizing, there is no simple solution today for adding concrete
+syntax pattern matching in existing parser-based tools without either
+profoundly restructuring the parser, rewriting it in another
+framework, severely restricting the patterns, or compromising
+performance. As a consequence, concrete patterns are rarely used in
+existing parser-based tools such as mainstream compilers. In
+particular, the lack of concrete patterns is particularly limiting
+the implementation of convenient user extensions in tools such as
+extensible compilers, code inspectors, model checkers, etc.
+
+To solve this problem in a pragmatic way, we designed a pattern
+matching technique based on ``unparsed patterns'', that allows using
+efficient, unrestricted, concrete syntax patterns while requiring no
+extension of the parser for the subject programing language. In
+particular, this technique is applicable to existing parsers, based on
+any parsing technology, without porting them to a different framework.
+
+In a previous paper \cite{ppdp}, we showed some concrete application
+of unparsed patterns within a checking compiler called mygcc. That
+application paper first introduced the idea of unparsed patterns, and
+briefly mentioned that they work by unparsing the AST, rather than
+parsing the pattern. However, no details were previously published
+about their implementation, nor about the theoretical aspects raised
+by these patterns. Both are the subject of the current paper. As we
+will show in the following, the simple idea of unparsing the AST must
+be combined non-trivially with other ingredients in order to obtain
+a usable pattern matching algorithm.
+
+The main contributions of this paper can be summarized as follows:
+\begin{itemize}
+\item we describe in detail the novel paradigm of pattern matching of
+source code in concrete syntax, based on unparsing;
+\item we describe a family of linear-time pattern matching algorithms
+combining in different ways: unparsing, laziness, token analysis,
+lookahead and parenthesizing;
+\item we show how our pattern matching technology can be implemented
+in a completely language-independent way;
+\item from a theoretical point of view, our approach goes beyond the
+presented algorithms, by opening a series of interesting questions
+about: optimal parenthesizing, classes of grammars needing no
+parentheses in the patterns, pattern extensions, etc.;
+\item from a practical point of view, we expect that our approach will
+have a significant impact on existing parser-based tools written in
+imperative languages, by providing them pattern matching at a minimal
+cost, as demonstrated by our very concise implementation within the
+gcc compiler.
+\end{itemize}
+
+The rest of this paper is organized as follows. Section~\ref{defs}
+defines unparsed patterns. Section~\ref{informal} informally describes
+and Section~\ref{algos} precisely defines a family of pattern matching
+algorithms for unparsed patterns. Section~\ref{implem} describes two
+implementations of unparsed patterns. Section~\ref{assess} puts into
+perspective unparsed patterns. Section~\ref{relwork} discusses related
+work and Section~\ref{concl} concludes.

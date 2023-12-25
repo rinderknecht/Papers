@@ -1,0 +1,166 @@
+%%-*-latex-*-
+
+\noindent\textsc{Proof~\ref{backtracking:soundness}} (Soundness).\\
+\noindent Let \(\ind{R}(\overline{p}, f, \sigma)\) be the proposition
+`\emph{If} \(\smj{f}{\overline{p}}{\sigma}\),
+\emph{then} \(\subst{\overline{p}}{\sigma} \sqsubseteq f\).'
+Then \(\ind{R}(p, [h], \sigma)\) is equivalent to the soundness
+property (by rule \textsf{ONE}). Firstly, let us assume that
+\begin{equation}
+  \smj{f}{\overline{p}}{\sigma} \label{x:sound:head}
+\end{equation}
+is true (otherwise the theorem is trivially true). This means that
+there exists a pattern\hyp{}matching derivation \(\Delta\) whose
+conclusion is \(\smj{f}{\overline{p}}{\sigma}\). This derivation is a
+list, which makes it possible to reckon by induction on its structure,
+i.e., one assumes that \(\ind{R}\) holds for the premise of the last
+rule in \(\Delta\) (this is the \emph{induction hypothesis}) and then
+proves that \(\ind{R}\) holds for \(\smj{f}{\overline{p}}{\sigma}\). A
+case by case analysis on the kind of rule that can end the derivation
+guides the proof.
+\begin{enumerate}
+
+   \item Case where \(\Delta\) ends with \textsf{END}.\\ In this case,
+     \(\overline{p} = \el\) and \(f = \el\). Therefore
+     \(\subst{\overline{p}}{\sigma} = \subst{\el}{\sigma} \eqn{1} \el
+       \sqsubseteq \el = f.\)
+     We conclude that \(\ind{R}(\el, \el, \sigma)\) holds.
+ 
+%     \medskip
+
+   \item Case where \(\Delta\) ends with \textsf{ELIM}.
+        \begin{mathpar}
+          \inferrule*[right=\text{\sf ELIM}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\smj{f'}{\overline{p}'}{\sigma}}
+            }
+            {\smj{\cons{l}{f'}}{\cons{l}{\overline{p}'}}{\sigma}}
+       \end{mathpar}
+       where, since we assumed \eqref{x:sound:head},
+       \begin{enumerate}
+          
+         \item \label{x:sound:13} \(f \triangleq \cons{l}{f'}\),
+
+         \item \label{x:sound:14} \(\overline{p} \triangleq
+           \cons{l}{\overline{p}'}\).
+
+       \end{enumerate}
+       Let us assume that the induction hypothesis holds for the
+       premise of \textsf{ELIM}, i.e., \(\ind{R}(\overline{p}', f',
+       \sigma)\) holds:
+       \begin{gather}
+         \subst{\overline{p}'}{\sigma} \sqsubseteq f'.
+         \label{x:sound:2}
+       \end{gather}
+        Besides, \ref{x:sound:14}, \eqref{x:sound:2}, \textsf{EQ}, and
+        \ref{x:sound:13} imply
+        \begin{align}
+          \subst{\overline{p}}{\sigma}
+          &= \subst{\cons{l}{\overline{p}'}}{\sigma}
+          \sqsubseteq \cons{l}{f'}
+          \eqn{3} \cons{l}{\subst{\overline{p}'}{\sigma}} =
+          f.\label{x:sound:5} 
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:sound:head} imply \eqref{x:sound:5}, so
+        \(\ind{R}(\cons{l}{\overline{p}'}, \cons{l}{f'}, \sigma)\)
+        holds.
+
+%     \medskip
+
+   \item Case where \(\Delta\) ends with \textsf{BIND}.
+        \begin{mathpar}
+          \inferrule*[right=\text{\sf BIND}]
+            {\inferrule*
+                {\inferrule*[vdots=1.5em]{}{ }}
+                {\smj{f'}{\overline{p}'}{\sigma'}}}
+            {\smj{\cons{t}{\!f'}}%
+                {\cons{\meta{x}\!}{\!\overline{p}'}}%
+                {\sigma' \oplus x \mapsto t}}
+        \end{mathpar}
+        where, because we assumed \eqref{x:sound:head},
+        \begin{enumerate}
+
+          \item \label{x:sound:17} \(f \triangleq \cons{t}{f'}\),
+
+          \item \label{x:sound:18} \(\overline{p} \triangleq
+            \cons{\meta{x}}{\overline{p}'}\),
+
+          \item \label{bind_x} \(\sigma' \subseteq \sigma' \oplus x
+            \mapsto t\),
+
+            \item \label{bind_rho} \(\sigma \triangleq \sigma' \oplus
+              x \mapsto t\).
+
+        \end{enumerate}
+        Let us assume that the induction hypothesis holds for the
+        premise of \textsf{BIND}, i.e., \(\ind{R}(\overline{p}', f',
+        \sigma')\) holds:
+        \begin{gather}
+          \subst{\overline{p}'}{\sigma'} \sqsubseteq f'.
+          \label{x:sound:7}
+        \end{gather}
+        Also, \ref{bind_rho} and \eqref{model:oplus} imply
+        \begin{align}
+           \sigma(x) 
+          &\triangleq (\sigma' \oplus x \mapsto t)(x) = t,
+          \label{x:sound:8}\\
+          \intertext{and \ref{bind_x}, Lem.~\ref{minimality} and
+            \ref{bind_rho} yield}
+           \subst{\overline{p}'}{\sigma'}
+           &= \subst{\overline{p}'}{(\sigma' \oplus x \mapsto t)} =
+           \subst{\overline{p}'}{\sigma}.\label{x:sound:19}
+        \end{align}
+        Besides, \ref{x:sound:18} and Fig.~\ref{x_subst_def} imply
+        \begin{align}
+           \subst{\overline{p}}{\sigma}
+        &\triangleq \subst{\cons{\meta{x}}{\overline{p}'}}{\sigma}\notag
+         \eqn{2}
+         \cons{\sigma(x)}{\subst{\overline{p}'}{\sigma}}\notag\\
+        &= \cons{t}{\subst{\overline{p}'}{\sigma}}
+         = \cons{t}{\subst{\overline{p}'}{\sigma'}},
+        \;\,\text{by} \,\; \eqref{x:sound:8} \,\; \text{and} \,\;
+        \eqref{x:sound:19}\notag\\
+        &\sqsubseteq \cons{t}{f'} \triangleq f;\,\;
+        \text{by} \,\; \eqref{x:sound:7},
+           \textsf{EQ} \,\; \text{and} \,\;
+           \text{\ref{x:sound:17}}.\label{x:sound:9}
+        \end{align}
+        In the end, the induction hypothesis and \eqref{x:sound:head}
+        imply \eqref{x:sound:9}, so
+        \(\ind{R}(\cons{\meta{x}}{\overline{p}'}, \cons{t}{f'},
+        \sigma)\) holds.
+
+%     \medskip
+
+   \item \label{unpar} Case where \(\Delta\) ends with
+       \textsf{UNPAR}.
+       \begin{mathpar}
+         \inferrule*[right=\text{\sf UNPAR}]
+           {\inferrule*
+              {\inferrule*[vdots=1.5em]{}{ }}
+              {\smj{f_1 \cdot f_2}{\overline{p}}{\sigma}}}
+           {\smj{\cons{c(f_1)}{f_2}}{\overline{p}}{\sigma}}
+       \end{mathpar}
+       where, since we assumed \eqref{x:sound:head},
+       \begin{enumerate}
+
+         \item \label{x:sound:15} \(f = \cons{c(f_1)}{f_2}\).
+       
+       \end{enumerate}
+       Let us assume that the induction hypothesis holds for the
+       premise of \textsf{UNPAR}, i.e., \(\ind{R}(\overline{p}, f_1
+       \cdot f_2, \sigma)\) holds. Then, \textsf{SUB}
+       (Fig.~\ref{x_tree_matching_def}) and \ref{x:sound:15} imply
+       \begin{align}
+         \subst{\overline{p}}{\sigma} &\sqsubseteq f_1 \cdot f_2
+          \sqsubseteq \cons{c(f_1)}{f_2} = f.
+          \label{x:sound:I}
+       \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:sound:head} imply \eqref{x:sound:I}, so
+        \(\ind{R}(\cons{l}{\overline{p}'}, \cons{c(f_1)}{f_2},
+        \sigma)\) holds.\hfill \(\Box\)
+
+\end{enumerate}

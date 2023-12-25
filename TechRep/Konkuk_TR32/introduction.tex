@@ -1,0 +1,83 @@
+%%-*-latex-*-
+
+\section{Introduction}
+
+\noindent The \XPath expression \texttt{\small a//b[//c]} is
+interpreted as ``\texttt{\small a//b} and \texttt{\small a//c}'', if
+we omit the unique target semantics, according to which \XPath
+expressions evaluate to a 
+\begin{wrapfigure}[6]{l}{40pt}
+\centering
+\includegraphics[bb=71 694 100 721]{binary_query}
+\caption{\textsf{\small a//b[//c]}\label{fig:binary_query}}
+\end{wrapfigure}
+sequence of nodes with same tag, here~\texttt{\small b}. Many research
+papers~\cite{Cooper:2001,Li:2001,Zhang:2001} are devoted to matching
+efficiently these expressions, considered as tree patterns or queries,
+against \XML trees as a whole or streams of \XML elements, either by
+solving the binary joins and then stitching them back to answer the
+original query~\cite{AlKhalifa:2002,Chien:2002,Jiang:1:2003,Wu:2003}
+or by considering them as a
+whole~\cite{Bruno:2002,Jiang:2:2003,Jiao:2005}.  The standard
+interpretation of the \XPath expressions implies that, in the previous
+example, \texttt{\small b} may be an ancestor or a descendant
+of~\texttt{\small c}, but it is striking that most authors assume in
+their examples that the nodes matched by~\texttt{\small b}
+and~\texttt{\small c} are \emph{not} in an ancestor or descendant
+relationship. We surmise that this tacit assumption for picking
+examples is often closer to what the query specifier or reader has in
+mind, rather than the usual interpretation. In other words, the reader
+of an \XPath query probably tends to conceive the query as a tree, as
+in \fig{fig:binary_query}, and to assume that the matching subtree is
+isomorphic, instead of reading the query as a set of binary joins
+that, once stitched together, may yield a degenerate case, that is, a
+path. In particular, the expression \texttt{\small a//b[//b]} is
+equivalent to \texttt{\small a//b} and there is no way in \XPath to
+actually denote two different \texttt{\small b} nodes on two divergent
+paths, i.e., no path including the other, as the graphic
+representation seems to suggest.
+
+But can we rely solely on this psychological assumption to convey
+another interpretation of the \XPath expressions? We believe that,
+beyond the useful purpose of avoiding misunderstandings by making more
+assumptions explicit, it is indeed useful to suppose sometimes that
+the matched subtree is isomorphic to the query tree, because this
+allows some additional constraints to be implicitly included in the
+query.
+
+As an illustration, consider in \fig{fig:mathml}
+\begin{figure}
+\centering
+\subfloat[\(\cos x - \sin y \)\label{fig:cos_minus_sin}]
+         {\includegraphics[bb=71 632 168 721]{cos_minus_sin}}
+\qquad
+\subfloat[\(\cos(\sin x) - y\)\label{fig:cos_sin_minus}]
+         {\includegraphics[bb=71 632 142 721]{cos_sin_minus}}
+\qquad
+\subfloat[Pattern with variables \(a\)~and~\(b\). \label{fig:mathml_query}]%
+         {\includegraphics[bb=63 632 187 721]{mathml_query}}
+\caption{Two \MathML trees and a query.\label{fig:mathml}}
+\end{figure}
+the \MathML trees corresponding to the expressions \(\cos x - \sin y\)
+and \(\cos(\sin x) - y\). These trees have very different
+interpretations, despite having a structure close enough to be matched
+by the same pattern. By interpreting the query pattern in a more
+restrictive way than in \XPath, we can get less matches. For example,
+if we want to match the difference between a possibly nested sine
+application and a possibly nested cosine application, \emph{but not
+  their composition}, we can say that the two nodes \textsf{apply} in
+the query in \fig{fig:mathml_query} cannot match nodes which are in a
+descendant or ancestor relationship, and then the query only matches
+the tree in \fig{fig:cos_minus_sin}. Furthermore, since we know that
+the subtraction is not commutative when interpreting these formulas,
+we can impose that the two matched nodes \textsf{apply} must follow
+the \emph{same order} as in the pattern, i.e., the sibling order,
+yielding here no match at all.
+
+The paper is structured as follows. We start with the next
+section~\ref{problem} by stating mode precisely the problem we want to
+solve; then we propose a naive solution in section~\ref{naive};
+follows a stack\hyp{}based algorithm, in section~\ref{stack}, and an
+index\hyp{}based procedure, in section~\ref{table}; this paper being
+concluded in section~\ref{conclusion} with a short comparison of the
+proposed algorithms and possible future work.

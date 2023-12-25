@@ -1,0 +1,31 @@
+%%-*-latex-*-
+
+We denote \emph{type references} by $x$, and \emph{value references}
+by $y$.
+%%, sets of type references by ${\cal A}$, sets of value
+%%references by ${\cal B}$.
+
+A \emph{type} is noted \T, a
+\emph{value} is noted $v$, a \emph{constraint} is noted ${\cal C}$. A
+\emph{subtype} is denoted by $s$.
+
+A \emph{type binding} is a couple made of a type reference $x$ and a
+subtype $s$; we note them $x \mapsto s$, or $\gamma$.
+
+A \emph{value binding} is a couple made of a value reference $y$ and a
+couple made of a value $v$ and a subtype $s$; we note them $y \mapsto
+(v, s)$, or $\delta$.
+
+A \emph{type environment} is a couple made of a set of type references
+${\cal A}$ and a function $\Gamma$ from type references $x$ to
+subtypes $s$; we note them $\TypeEnv$.
+
+A \emph{value environment} is a couple made of a set of value
+references ${\cal B}$ and a function $\Delta$ from value references
+$y$ to pairs $(v,s)$; we note them $\ValueEnv$.
+
+We note $\oplus$ the function extending the type and value environment
+with a new binding; we use it in infix position like in: $\TypeEnv
+\oplus x \mapsto s$
+
+Labels are noted $l$, and a list of labels $\Lambda$.

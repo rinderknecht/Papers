@@ -1,0 +1,6 @@
+Christian Rinderknecht is an expert in compilers. He was an Assistant
+Professor in France, Korea and Hungary. He graduated from
+Universit\'{e} Pierre et Marie Curie, in Paris, and did his doctoral
+studies at INRIA. He is the author of \emph{Design and Analysis of
+Purely Functional Programs} (College Publications, 3rd edition,
+London).

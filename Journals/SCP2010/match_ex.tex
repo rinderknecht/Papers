@@ -1,0 +1,56 @@
+%%-*-latex-*-
+
+%% bb=71 601 156 721
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\newcommand\pcdata[1]{\Tr{\psframebox{\rule{0pt}{7pt}\texttt{#1}}}}
+\newcommand\element[1]{\Tr{#1}}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[treemode=D,levelsep=7.5mm,nodesep=2pt,treesep=8pt,framearc=.4]{\element{assign}}{
+  \pstree{\element{var}}{
+    \psset{nodesepB=0pt}
+    \pcdata{a}
+  }
+  {\psset{nodesepB=0pt}
+   \pcdata{=}
+  }
+  \pstree{\element{sub}}{
+    \pstree{\element{sub}}{
+      \pstree{\element{var}}{
+        \psset{nodesepB=0pt}
+        \pcdata{a}
+      }
+      {\psset{nodesepB=0pt}
+       \pcdata{-}
+      }
+      \pstree{\element{mul}}{
+        \pstree{\element{var}}{
+          \psset{nodesepB=0pt}
+          \pcdata{b}
+        }
+        {\psset{nodesepB=0pt}
+         \pcdata{*}
+        }
+        \pstree{\element{var}}{
+          \psset{nodesepB=0pt}
+          \pcdata{c}
+        }
+      }
+    }
+    {\psset{nodesepB=0pt}
+    \pcdata{-}}
+    \pstree{\element{var}}{
+      \psset{nodesepB=0pt}
+      \pcdata{d}
+    }
+  }
+}
+\endTeXtoEPS
+
+\end{document}

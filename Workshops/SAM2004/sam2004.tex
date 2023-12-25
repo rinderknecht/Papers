@@ -1,0 +1,75 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage[british]{babel}
+\usepackage{xspace}
+\usepackage{amsmath,amssymb,amsthm}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\allowdisplaybreaks
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{stmaryrd}
+\usepackage{cite}
+\usepackage{hyphenat}
+\usepackage{mathpartir}
+\usepackage{etoolbox}
+\apptocmd{\thebibliography}{\raggedright}{}{} % No Underfull \hbox
+
+% Typesetting of ASN.1 and BER
+%
+\input{asn1}
+\input{ber}
+
+% Typesetting of O'Caml
+%
+\input{ocaml_syntax}
+
+% Hyperlinks with PDF
+%
+%\usepackage{hrefpdf}
+
+% Typesetting of judgements
+%
+\newcommand{\coding}[4]{#1 \vdash #2 : #3 \rightarrow #4}
+\newcommand{\decoding}[3]{{\cal D}(#1,#2,#3)}
+\newcommand{\dom}[1]{\mathrm{dom} (#1)}
+
+% Miscellanea
+%
+\newcommand{\bitem}{\item[$\bullet$]}
+\newcommand{\ITU}{\mbox{ITU-T}\xspace}
+
+\title{Proving a soundness property for the joint design of \ASN and
+  the Basic Encoding Rules}
+\author{Christian Rinderknecht\\
+Groupe L\'eonard de Vinci\\
+\'Ecole Sup\'erieure d'Ing\'enieurs L\'eonard de Vinci\\
+{\small\url{Christian.Rinderknecht@devinci.fr}}
+}
+\date{June 2004}
+
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+
+\noindent\textbf{Key words:} Abstract Syntax Notation One, \ASN, Basic
+Encoding Rules, BER, protocol, specification, vulnerabilities, formal
+methods.
+
+\input{introduction}
+\input{modeling}
+\input{core_asn1}
+\input{codec}
+\input{equiv_sound}
+\input{conclusion}
+
+\bibliographystyle{plain}
+\bibliography{sam2004}
+
+\end{document}

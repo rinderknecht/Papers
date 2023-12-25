@@ -1,0 +1,234 @@
+%%-*-latex-*-
+
+We give the list of rewritings to be performed on the original \ASN
+specification in order to get its normal form. 
+
+First, the following rewritings are aimed at placing at top-level some
+types that are not subtrees of type terms, and hence would be ignored
+by the checks on the types only.
+
+\begin{enumerate}
+
+  \item uncoupling of default values:
+
+        \begin{tabular}{rcl} 
+           \verb+T ::= SET {a REAL DEFAULT 0}+\\
+             $\longrightarrow$
+           & $\left\{
+                \begin{tabular}{l}
+                  \verb+T ::= SET {a A DEFAULT v}+\\
+                  \verb+A ::= REAL+\\
+                  \verb+v A ::= 0+
+                \end{tabular}
+              \right.$\\
+        \end{tabular} \\
+        where \texttt{A} is a fresh type reference and \texttt{v} is
+        a fresh value reference;
+
+  \item uncoupling of enumerated constants, integer constants and bit
+        string constants:
+
+        \begin{tabular}{rcl}
+           \verb+T ::= ENUMERATED {a(0)}+\\
+             $\longrightarrow$
+           & $\left\{
+                \begin{tabular}{l}
+                  \verb+T ::= ENUMERATED {a(v)}+\\
+                  \verb+v INTEGER ::= 0+
+                \end{tabular}
+              \right.$\\
+            \verb+T ::= INTEGER {off(0)}+\\
+              $\longrightarrow$
+           & $\left\{
+                \begin{tabular}{l}
+                   \verb+T ::= INTEGER {off(v)}+\\
+                   \verb+v INTEGER ::= 0+
+                \end{tabular}
+              \right.$\\
+            \verb+T ::= BIT STRING {lsb(0)}+\\
+              $\longrightarrow$
+           & $\left\{
+                \begin{tabular}{l} 
+                   \verb+T ::= BIT STRING {lsb(v)}+\\
+                   \verb+v INTEGER ::= 0+\\
+                \end{tabular}
+              \right.$
+        \end{tabular} \\
+        where \texttt{v} is a fresh value reference;
+
+  \item for each value declaration:
+
+        \begin{tabular}{rcl}
+           \verb+y INTEGER (0..9) ::= 1+
+           & $\longrightarrow$ 
+           & $\left\{
+                \begin{tabular}{l} 
+                   \verb+y A ::= 1+ \\
+                   \verb+A ::= INTEGER (0..9)+ \\
+                   \verb+B ::= A (y)+
+                \end{tabular}
+              \right.$
+        \end{tabular} \\
+        where \verb+A+ and \verb+B+ are fresh type references;
+
+  \item for each \kwdINCLUDES constraint, replace the included type by
+        a fresh reference and add a corresponding new type
+        declaration:
+
+        \begin{tabular}{rcl}
+           \verb+FrenchWE ::= Day (WeekEnd)+
+           & $\longrightarrow$
+           & $\left\{
+                \begin{tabular}{l}
+                   \verb+FrenchWE ::= Day (A)+ \\
+                   \verb+A ::= WeekEnd+
+                \end{tabular}
+              \right.$
+        \end{tabular} \\
+        where \verb+A+ is a fresh type reference;
+
+  \item unfolding of selection types and top-level reference types:
+
+        \begin{tabular}{rcl} 
+          $\left\{
+             \begin{tabular}{l}
+                \verb+A ::= i < B+\\
+                \verb+B ::= C+\\
+                \verb+C ::= CHOICE {i D}+\\
+                \verb+D ::= INTEGER+
+             \end{tabular}
+            \right.$
+          & $\longrightarrow$
+          & $\left\{
+               \begin{tabular}{l}
+                  \verb+A ::= INTEGER+\\
+                  \verb+B ::= CHOICE {i D}+\\
+                  \verb+C ::= CHOICE {i D}+\\
+                  \verb+D ::= INTEGER+
+               \end{tabular}
+             \right.$
+        \end{tabular} \\
+        beware:
+
+        \begin{tabular}{rcl}
+          $\left\{
+             \begin{tabular}{l}
+               \verb+A ::= SET OF S+\\
+               \verb+B ::= A (SIZE (7))+
+             \end{tabular}
+           \right.$
+          & $\longrightarrow$
+          & $\left\{
+             \begin{tabular}{l}
+               \verb+A ::= SET OF S+\\ 
+               \verb+B ::= SET (SIZE (7)) OF S+
+             \end{tabular}
+             \right.$
+        \end{tabular}
+
+  \item for each \kwdCOMPONENTSOF clause, replace the given type by
+        its components;
+
+  \item each value of the type associated to \kwdREAL are rewritten
+        using the decimal (dotted) notation:
+ 
+        \verb+v REAL ::= {mantissa 1, base 10, exponent -3}+\\
+        \begin{tabular}{rcl}
+           & $\longrightarrow$
+           & \verb+v REAL ::= 1E-3+
+        \end{tabular}
+
+  \item each integer token of type \kwdREAL are rewritten with the
+        decimal notation: \verb+v REAL ::= 5+ $\, \longrightarrow \,$
+        \verb+v REAL ::= 5.0+
+
+  \item resolution of the integer constants and the bit string
+        constants:
+
+        \begin{tabular}{lcl}
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(x)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.$
+         & $\longrightarrow$
+         & $\left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= x+
+              \end{tabular}
+            \right.$ \\
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= BIT STRING {msb(7)}+\\
+                 \verb+v T ::= {msb}+
+              \end{tabular}
+            \right.$
+         & $\longrightarrow$
+         & $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= BIT STRING+\\
+                 \verb+v T = '10000000'B+
+              \end{tabular} 
+            \right.$
+        \end{tabular} \\
+        beware:
+
+        \begin{tabular}{rcl}
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(v)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.$
+         & $\longrightarrow$
+         & $\left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= v+
+              \end{tabular}
+            \right.$
+        \end{tabular}
+
+\end{enumerate}
+
+
+
+
+We omit \kwdOBJECTIDENTIFIER and \kwdRELATIVEOID types, for sake of simplicity.
+
+\noindent 
+\ocamlkwd{type} $\overline{\cal T}$ = 
+\kwdCHOICE \ocamlkwd{of} \ocamltypename{label}
+           $\rightarrow$ $\overline{\cal T}$
+$\mid$ \kwdSETOF \ocamlkwd{of} $\overline{\cal T}$
+  $\mid$   \kwdSEQUENCEOF \ocamlkwd{of} $\overline{\cal T}$ \\
+\begin{tabular}{rl}
+    $\mid$ & \kwdSET \ocamlkwd{of} \ocamltypename{components} 
+  $\mid$   \kwdSEQUENCE \ocamlkwd{of}
+           \ocamltypename{components} \\
+  $\mid$ & \TRef \ocamlkwd{of} \ocamltypename{string}
+  $\mid$   \kwdBITSTRING
+  $\mid$   \kwdENUMERATED \ocamlkwd{of}
+           \ocamltypename{name} \ocamlconstr{list} \\
+  $\mid$ & \kwdINTEGER 
+  $\mid$   \kwdREAL
+  $\mid$   \kwdBOOLEAN
+  $\mid$   \kwdNULL
+  $\mid$   \kwdOCTETSTRING
+  $\mid$   \String 
+%%  $\mid$ & \kwdOBJECTIDENTIFIER
+%%  $\mid$   \kwdRELATIVEOID
+  
+\end{tabular}
+
+\medskip
+
+\noindent \ocamlkwd{and} \ocamltypename{components} = 
+\ocamltypename{label} $\rightarrow$ $\overline{\cal T}$ $\times$  [\kwdOPTIONAL
+$\mid$ \kwdDEFAULT \ocamlkwd{of} $\V$] \ocamlconstr{option}
+
+
+
+

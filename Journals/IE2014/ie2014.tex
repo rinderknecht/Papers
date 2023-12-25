@@ -1,0 +1,1449 @@
+%% -*- ispell-dictionary: "british" -*-
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{xspace}
+\usepackage{hyphenat}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage[style=authoryear,backend=bibtex,natbib=true]{biblatex}
+\addbibresource{ie2014.bib}
+%\usepackage[comma]{natbib}
+%\bibliographystyle{plainnat}
+\usepackage{amsmath,amssymb}
+\usepackage[scaled]{beramono}
+
+\newcommand\plang[1]{\textsf{#1}\xspace}
+\newcommand{\cpp}{\textsf{C} \hspace*{-2.5mm} \raise 0.7mm \hbox {${\scriptscriptstyle ++}$}}
+\newcommand\exc[1]{\texttt{\small #1}}
+
+\hyphenation{va-gue-ly}
+
+\title{A Survey on Teaching and Learning Recursive Programming}
+%\author{}
+\date{}
+\author{Christian Rinderknecht\\
+\small \url{rinderkn@caesar.elte.hu}\\
+\small Department of Programming Languages and Compilers\\
+\small E\"otv\"os Lor\'and University\\
+\small Budapest, Hungary}
+
+% Main
+%           
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+
+\bigskip
+
+\noindent\textbf{Keywords:} computer science education, didactics of
+programming, recursion, tail recursion, embedded recursion, iteration,
+loop, mental models.
+
+\section*{Foreword}
+
+In this article, we survey how practitioners and educators have been
+teaching recursion, both as a concept and a programming technique, and
+how pupils have been learning it. After a brief historical account, we
+opt for a thematic presentation with cross\hyp{}references, and we
+append an extensive bibliography which was very carefully
+collated. The bibliography is the foundation of our contribution in
+the sense that we started from it, instead of gathering it in support
+of our own ideas, as is usual in research papers.
+
+In writing this survey, we committed ourself to several guidelines
+which the reader is advised to keep in mind while reading.
+\begin{enumerate}
+
+  \item We restricted ourself exclusively to the published literature
+    on teaching and learning recursive programming, not computer
+    programming in general. While it may be argued that, for example,
+    articles and books about functional programming almost constantly
+    make use of recursion, we preferred to focus on the papers
+    presenting didactical issues explicitly and exclusively related to
+    recursion.
+
+  \item We did not review the emergence of the concept of recursion
+    from its mathematical roots, and we paint a historical account
+    with our fingers, just enough to address the main issues of this
+    survey with a minimal background information.
+
+  \item We did not want to mix our personal opinion and assessment of
+    the literature with its description, because we wanted this
+    article to be in effect a \emph{thematic index to the literature},
+    even though it is not possible to cite all references in the text,
+    for room's sake. The only places where we explicitly express our
+    own ideas are in our own publications, in the definitions found in
+    the introduction (in the absence of bibliographic reference) and
+    in the conclusion.
+
+  \item We did not cover topics like the teaching of recursion and
+    co\hyp{}recursion in the context of lazy evaluation, or
+    programming languages based on process algebras or dataflow,
+    because they have not been addressed specifically in didactics
+    publications, perhaps because they are advanced topics usually
+    best suited for postgraduate students, who are expected to master
+    recursion, and most publications deal with undergraduates or
+    younger learners.
+
+  \item Despite our best efforts in structuring the ideas found in the
+    literature, the following presentation contains some measure of
+    repetition because papers often cover mutually related topics, so
+    a printed survey cannot capture exactly what is actually a
+    semantic graph, and such a graph would better support a
+    meta\hyp{}analysis of the literature (where
+    cross\hyp{}referencing, publication timelines, experimental
+    protocols and statistics would be in scope) rather than a survey.
+
+\end{enumerate}
+
+\section*{Introduction}
+
+In abstract terms, a definition is \emph{recursive} if it is
+self\hyp{}referential. For instance, in programming languages,
+function definitions may be recursive, and type definitions as
+well. \textcite{Giveon:1990} provided an insightful discussion of the
+didactical issues involved in the different meanings ascribed to the
+word, which appeared first in print by Robert Boyle in
+\oldstylenums{1660} (\emph{New Experiments Physico\hyp{}Mechanicall},
+chap.~XXVI, p.~203) to qualify the movement of a moving pendulum,
+which returns or ``runs back''. (Beware the incorrect and ominous ``to
+recurse''.)
+
+\paragraph{A short history}
+
+Formal definitions based on recursion played an important role in the
+foundation of arithmetic \citep{Peano:1889} and constructive
+mathematics \citep{Skolem:1923,Robinson:1947,Robinson:1948}, as well
+as in the nascent theories of computability
+\citep{Soare:1996,vanOudheusden:2009,Daylight:2010,Lobina:2012}, with
+the caveat that recursion theory is only named so for historical
+reasons. The first computers were programmed in assembly languages and
+machine codes \citep{Knuth:1996}, but the first step towards recursion
+is the advent of labelled subroutines and hardware stacks, by the end
+of the \oldstylenums{1950}s. \plang{BASIC} epitomises an early attempt
+at lifting these features into a language more abstract than assembly:
+recursion is simulated by explicitly pushing (\exc{GOSUB}) program
+pointers (line numbers) on the (implicit) control stack, and by
+popping (\exc{RETURN}) them. According to the definition above,
+this is not recursion, which is to be understood as being purely
+syntactic (a function definition), not semantic (the evaluation of an
+expression). Moreover, the lack of local scoping precludes passing
+parameters recursively. Nevertheless, ``recursion'' has been taught
+with \plang{BASIC} by \textcite{Daykin:1974}.
+
+With even more abstract programming languages, fully\hyp{}fledged
+recursion became a design option, first advocated in print by
+\textcite{Dijkstra:1960} and \textcite{McCarthy:1960}, and implemented in
+\plang{LISP}, \plang{ALGOL}, \plang{PL/I} and \plang{Logo}
+\citep{Martin:1985,Lavallade:1985}, with the notable exceptions of
+\plang{Fortran} and \plang{COBOL}. Formal logic was then used to
+ascribe meanings to programs, some semantics relying on recursion,
+like rewrite systems, some others not, like set theory or
+\(\lambda\)-calculus (where recursion is simulated with
+fixed\hyp{}point combinators). Even though the opinion of
+\textcite{Dijkstra:1974} \citeyearpar{Dijkstra:1975} varied, recursion
+proved a powerful means for expressing algorithms
+\citep{Dijkstra:1999} \citep{Reingold:2012}, especially on recursive
+data structures like lists, \emph{i.e.}, stacks, and trees. With the
+legacy of \plang{LISP} and \plang{ALGOL}, together with the rise and
+spread of personal computers, recursion became a common feature of
+modern programming languages, and arguably an essential one
+\citep{Papert:1980,Ford:1982,Astrachan:1994}.
+
+\section{Recursion, iteration and loops}
+
+Recursion is often not clearly understood, as demonstrated by the
+frequent heated or misguided discussions on internet forums, in
+particular about the optimisation of tail calls. Moreover, some
+researchers implicitly equate loop and iteration, use the expression
+``iterative loop'', or call recursion a process implemented by means
+of a control stack, whilst others use a syntactic criterion. We must
+define recursion in order to relate it to other concepts, like loops,
+iteration, tail recursion, embedded recursion, structural recursion
+etc.
+
+\paragraph{Definitions}
+\label{definitions}
+
+\textcite{Giveon:1990} remarked: ``the concept of recursion is being
+vaguely and inconsistently constructed from some syntactical
+properties of the program, from its associated semantics and from
+features borrowed from models of execution of programs.'' Indeed,
+broadly speaking, there are two angles to approach the question: the
+static (syntactic) approach and the dynamic approach to
+recursion. Sometimes the dichotomy is put in terms of \emph{programs}
+(structured texts or abstract syntax trees) versus \emph{processes}
+(autonomous agents or stateful actors). In fact, to address the vast
+literature about the teaching and learning of recursion, it is
+essential to understand both views and their relationship.
+
+In the static comprehension, recursion is restricted to the general
+definition we gave at the start of this introduction: the occurrence
+of the symbol being defined inside its definition (what is called
+impredicativity in logic). Implicitly, this means of course that it
+must be clear what the denotation of the occurring symbol is, in order
+to determine whether it is an instance of the definition. For example,
+in the language \plang{OCaml}, the function definition
+{\small
+\begin{alltt}
+\textbf{let rec} f x = (\textbf{fun} _ -> x) f
+\end{alltt}
+}
+\noindent is recursive because the name~\exc{f} in the right\hyp{}hand
+side refers to the~\exc{f} in the left\hyp{}hand side. Note that there
+is no call to~\exc{f} in the definition of~\exc{f}, so the concept of
+\emph{recursive call} is actually irrelevant: recursion in this
+context is a property of definitions based on lexical scoping rules,
+not of the objects potentially computed (values), nor the way they are
+computed (semantics). In particular, the recursive definition of a
+function does not necessarily entails that it is total, hence
+terminates for all inputs. (A type system may enforce that property,
+as in \plang{Coq} or \plang{Agda}.)
+
+Sometimes, an examination of the program cannot determine
+whether the occurrence of a symbol refers to the definition at
+hand. For instance, let us consider the following fragment of
+\plang{Java}:
+{\small
+\begin{alltt}
+\textbf{public class} T \{ \textbf{public void} g(T t) \{ ... t.g(t); ... \} \}
+\end{alltt}}
+\noindent The occurrence of~\exc{g} in the expression \exc{t.g(t)}
+does not necessarily refers to the current definition of the
+method~\exc{g}, because that method may be overridden in
+subclasses. Therefore, here, we cannot conclude that~\exc{g} is
+recursive according to the static criterion. (It can be argued,
+though, that the class~\exc{T} is recursive because its definition
+includes the declaration (type) of its method~\exc{g}, where
+\exc{T}~occurs---Interfaces perhaps illustrate this better.)
+
+The dynamic comprehension of recursive functions can be expressed
+abstractly as a property about \emph{dynamic call graphs}: recursion
+is a reachable cycle, which means, in operational terms, that the
+control flow of calls returns to a vertex (a function) which was
+previously called. Here, the notion of \emph{recursive definition} is
+not central, and it makes sense to speak of \emph{recursive call} (a
+back edge closing a path). Another, less general, approach to a
+dynamic definition of recursion relies on a particular execution
+model, often based on stack frames allocated to function calls and
+their lexical context. Anyway, as a property about the control flow,
+recursion in that sense becomes undecidable in general for
+Turing\hyp{}complete languages.
+
+It should be noted that the static and dynamic definitions of
+recursion may overlap, but are different in general, that is, if a
+function is recursive according to the syntactic criterion, it may not
+be recursive according to the dynamic criterion (as the above
+\plang{OCaml} function~\exc{f} illustrates), and vice versa. Consider
+the following \plang{OCaml} program implementing the factorial
+function:
+{\small
+\begin{alltt}
+# \textbf{let} pre self n = \textbf{if} n = 0 \textbf{then} 1 \textbf{else} n * self(n-1);;
+\emph{val pre : (int -> int) -> int -> int = <fun>}
+# \textbf{let rec} fact n = pre fact n;;
+\emph{val fact : int -> int = <fun>}
+# fact 5;;
+\emph{- : int = 120}
+\end{alltt}
+}
+\noindent The syntactic criterion decides that~\exc{pre} is not
+recursive and~\exc{fact} is; the dynamic criterion sees these two
+functions as \emph{mutually recursive}, that is, the control flow goes
+from one to the other, and vice versa. Furthermore, there are
+different techniques to achieve dynamic recursion without static
+recursion at all. For example, using fixed\hyp{}point combinators in
+\plang{OCaml} with the command\hyp{}line option \exc{-rectypes}:
+{\small
+\begin{alltt}
+# \textbf{let} pre self n = \textbf{if} n = 0 \textbf{then} 1 \textbf{else} n * self(n-1);;
+\emph{val pre : (int -> int) -> int -> int = <fun>}
+# \textbf{let} y f = (\textbf{fun} x a -> f (x x) a) (\textbf{fun} x a -> f (x x) a);;
+\emph{val y : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>}
+# \textbf{let} fact = y pre;;
+\emph{val fact : int -> int = <fun>}
+# fact 5;;
+\emph{- : int = 120}
+\end{alltt}
+}
+\noindent Here, neither the higher\hyp{}order function~\exc{y} (called
+the \emph{call\hyp{}by\hyp{}value Y combinator}), nor the function
+\exc{pre} are statically recursive (as the absence of the keyword
+\exc{rec} shows well), but they are mutually recursive in the dynamic
+sense. (The rationale behind the definition of~\exc{y} is obscure, but
+relies on the fact that \exc{(y f) x} yields the computation of
+\exc{(f(y f)) x}, showing that \exc{y f} is the fixed point
+of~\exc{f}.) It is even possible to define the factorial function
+without recursion, loops or jumps (\exc{goto}) in~\plang{C}, but the
+program is cryptic: {\small
+\begin{alltt}
+\textbf{#include}<stdio.h>
+\textbf{#include}<stdlib.h>
+
+\textbf{typedef int} (*fp)();
+
+\textbf{int} fact(fp f, \textbf{int} n) \{
+  \textbf{return} n? n * ((\textbf{int} (*)(fp,\textbf{int}))f)(f,n-1) : 1; \}
+
+\textbf{int} read(\textbf{int} dec, \textbf{char} arg[]) \{
+  \textbf{return} ('0' <= *arg && *arg <= '9')? 
+         read(10*dec+(*arg - '0'),arg+1) : dec; \}
+
+\textbf{int main}(\textbf{int} argc, \textbf{char}** argv) \{
+  \textbf{if} (argc == 2) printf("%u\textbackslash{n}",fact(&fact,read(0,argv[1])));
+  \textbf{else} printf("Only one integer allowed.\textbackslash{n}");
+  \textbf{return} 0; \}
+\end{alltt}}
+\noindent (See \textcite{GoldbergWiener:2009} for a practical use of such
+a simulated recursion in \plang{Erlang}.) References can also be used
+to define the factorial function without static recursion, with a
+technique called \emph{Landin's knot}: {\small
+\begin{alltt}
+# \textbf{let} g = ref (\textbf{fun} n -> 42);;
+\emph{val g : ('_a -> int) ref = \{contents = <fun>\}}
+# \textbf{let} f n = \textbf{if} n = 0 \textbf{then} 1 \textbf{else} n * !g(n-1);;
+\emph{val f : int -> int = <fun>}
+# \textbf{let} fact = g := f; \textbf{fun} n -> !g(n);;
+\emph{val fact : int -> int = <fun>}
+# fact 5;;
+\emph{- : int = 120}
+\end{alltt}
+}
+\noindent Here, none of the definitions are statically recursive,
+although~\exc{f} is dynamically recursive.
+
+Finally, it is perhaps worth insisting on the case where there are
+more than one definition, like \(f(x) := g(x-1)\) and \(g(x) :=
+h(x+1,f(x-1))\). Neither definition is statically recursive, although
+they are mutually recursive according to the dynamic
+interpretation. Furthermore, it is clear that these definitions are
+equivalent to \(f(x) := h(x,f(x-2))\), which is statically
+recursive. This shows that the concept of mutual recursion is dynamic,
+but the static criterion could be extended to apply transitively to
+the \emph{static call graph}, which is an over\hyp{}approximation of
+the dynamic call graph, so we can speak of mutual recursion in a
+static sense as well, but keeping in mind that there can be mutual
+recursion statically when there is none dynamically.
+
+\paragraph{Tail recursion, iteration and loops}
+
+The concept of \emph{tail recursion} is difficult to apprehend because
+it is built upon both the dynamic call graph and the \emph{data
+  flow}. We have already seen that recursion can be defined as a cycle
+in the dynamic call graph. Here, we define the \emph{dataflow graph}
+as the dynamic call graph with an additional kind of edges oriented
+according to the direction where the data flows (it is a multigraph):
+if a caller passes arguments to the callee, there is a \emph{data
+  edge} doubling the \emph{control edge}; if the value of a function
+call is needed to further compute an expression or complete an
+instruction, there is a data edge from the callee to the caller, that
+is, a backward data edge with respect to the control edge. Since, in
+the absence of run\hyp{}time errors, the result of a call is needed,
+at the very least, to stand for the result of the caller itself, there
+is always a back edge. Therefore, we could make those edges implicit
+and only retain them when the value of the call is needed in a
+strictly embedding expression, not just to be returned in turn. Tail
+recursion is then a cycle along the control edges, which is not a
+retrograde cycle following the data edges. In other words, the data
+flows solely in the same direction as the control flows. (Note that,
+in general, there may be no data flow between two calls.)
+
+For instance, the value of the recursive call in \(f(x,y) :=
+f(x,g(y))\) is the value of~\(f(x,y)\) being defined, so the call is
+tail recursive. On the other hand, the value of the call \(f(x-1)\) in
+\(f(x) := x \times f(x-1)\) is not the value of the call \(f(x)\)
+being defined because a multiplication by~\(x\) is pending, so it is
+not tail recursive. The same holds for \(f(x) := g(x,f(x-1))\). Note
+that, within the dynamic interpretation of recursion, the concept of
+tail recursion applies to function calls, not to function definitions
+as a whole, so it is technically incorrect to say that a function
+definition is tail recursive.
+
+Within the static understanding of recursion, it is not possible to
+define tail recursion in general because only definitions may be
+recursive and only calls may be in \emph{tail position}. The latter
+refers to a syntactic criterion which implies that the value of a call
+is only used to become the value of the current function being
+called. In practice, however, it is possible to speak of a tail
+recursive call when the static and dynamic interpretations agree, that
+is, when a definition includes non\hyp{}ambiguously a call to the
+function defined (a special case of static recursion) and that call is
+in tail position. Nevertheless, since the very reason to distinguish
+tail recursive calls is that they can often be compiled as efficiently
+as loops are (a technique known as \emph{tail call optimisation}), the
+interaction between the control flow and the data flow must be made
+explicit anyway, even within a static framework, and this proves
+challenging to students and professors alike. Even more puzzling is
+the fact that the optimisation applies to non\hyp{}recursive calls as
+well, as long as they are in tail position.
+
+When a recursive call is not tail recursive, it is sometimes called an
+instance of \emph{embedded recursion}. In theory, it is always
+possible to rewrite any embedded recursion into tail recursion, but
+the result can be rather hard to understand, hence difficult to design
+directly. Moreover, in programming languages featuring conditional
+loops (\exc{while}), recursion can be avoided in theory, but, in
+practice, many algorithms are expressed more compactly or more legibly
+if recursive.  A \emph{loop} is a segment of code syntactically
+distinguished and whose evaluation is repeated until a condition on
+the state of the memory is met. The syntactic condition, \emph{e.g.,}
+a keyword and markers for a block, is meant to differentiate loops
+from source code whose control flow relies on jumps (\exc{goto}) and
+could actually be an unstructured implementation of loops (using
+backward jumps), but are not loops. \emph{Iteration} is none other
+than the concept of repetition applied to a piece of source code,
+therefore, from a theoretical standpoint, it should include recursion
+and loops, but, in practice, iteration is often used as a synonym for
+the execution of a loop in an imperative language (\emph{looping}); in
+a purely functional language, iteration is tail recursion. Conditional
+loops (\exc{while}) and recursion have the same expressive power, so
+using one form or the other is a matter of style as long as
+side\hyp{}effects are allowed, because loops require a model of
+computation where data is mutable.
+
+As we mentioned earlier, some researchers prefer to define recursion
+not on programs, but on \emph{processes}, that is, on the dynamic
+interpretation of programs. For instance, \textcite{Kahney:1983}
+defines recursion as a process ``that is capable of triggering new
+instantiations of itself, with control passing forward to successive
+instantiations and back from terminated ones.'' Of course, one data
+structure suitable for implementing this mechanism is the
+\emph{control stack}, which we already mentioned about ``recursion in
+\plang{BASIC}'' \citep{Daykin:1974}. It is perhaps interesting to
+notice the use of the ``forward'' and ``backward'' terminology about
+the control flow on the call graph, although that graph is oriented
+from callers to callees and there are no back edges because these
+would not denote calls but returns. (Our own definition of dynamic
+recursion is a cycle in the dynamic call graph, where ``backward''
+qualifies the data flow superimposed on the call graph.) We will see
+in a forthcoming section that this operational interpretation of
+recursion can be suitably exploited by kinesthetic teaching. The
+sections on analogies and mental models also revisit this
+choice. Finally, when contrasting the static (syntactic) and dynamic
+(control stack) definitions, it is worth keeping in mind that it is
+possible to compile recursive definitions of functions in such a way
+that the size of the control stack remains statically bounded; in
+other words, recursion can always be transformed into iteration.
+
+\paragraph{Teaching}
+
+Clearly, recursion and loops are not mutually exclusive and may serve
+the same purpose, which often bewilders the beginner. Consequently, a
+simple attempt at a remedy consists in clearly separating the
+different concepts at stake in the evaluation of a program
+\citep{Velazquez:2000}, so that side\hyp{}effects, for instance, do
+not get in the way of learning recursion declaratively. To teach the
+difference between iteration and embedded recursion, some researchers
+have proposed to teach how to translate an embedded recursive
+definition into an iteration, while remaining in the same programming
+language
+\citep{AugensteinTenenbaum:1976,RubioVelazquez:2009,Rubio:2010,Rinderknecht:2012}. \textcite{Foltynowicz:2007}
+went even further by deriving loops from embedded recursion, and vice
+versa, which is of great theoretical and practical interest, in
+particular for understanding compilers and interpreters. By exhibiting
+a systematic way to move back and forth from recursion to loops, while
+maintaining the meaning invariant, these didactic approaches aim at
+demystifying recursion without resorting to a low\hyp{}level view of
+evaluation with the control stack.
+
+Finite iteration is unidirectional in the sense that the control flow
+does not return to a previous program location where the environment,
+\emph{i.e.}, the bindings of the variables to their values, is the
+same. Embedded recursion is often called bidirectional when it is
+based on the strict interpretation of the composition of functions, as
+opposed to a non\hyp{}strict semantics, like lazy evaluation, which is
+perhaps better explained by graph rewriting. Consider for instance
+\(f(g(x))\), where~\(x\) is a value. First, the value of \(g(x)\) is
+computed (control and data flow forward), that value is bound to an
+implicit variable~\(y\) (control and data flow back) and then the call
+\(f(y)\) is evaluated (control and data flow forward).
+
+Finally, let us take note of a radical and contrarian view: to avoid
+recursion as much as possible
+\citep{Anonymous:1977,BunemanLevy:1980}. For instance,
+\textcite{Harvey:1992} advocates the use of a functional style where
+recursion is hidden inside higher\hyp{}order functions like maps and
+folds. This is indeed the approach often taken when teaching purely
+functional programming languages, especially those with a non-strict
+semantics like \plang{Miranda} or \plang{Haskell}.
+
+\section{Functional programming}
+
+\textcite{Segal:1994} notes that, in the context of the functional
+programming language \plang{Miranda}, ``by using the library of
+functions as a toolbox, recursion, the underlying structure of many of
+the functions and the only repetitive construct provided by the
+language, can remain largely hidden.'' \textcite{Er:1984} argued that
+recursion is made difficult by block\hyp{}structured programming
+languages, which suggests that one way of encouraging the use of
+desirable constructs, like recursion, would be to employ or develop
+domain\hyp{}specific languages \citep{SinhaVessey:1992}; \emph{cf.}\@
+\textcite{BrooksMillerRoperWood:1992}. It would then make sense to
+teach recursion with functional languages, because these feature
+prominently mathematical functions and immutable data, forcing the
+programmer to think recursively
+\citep{HendersonRomero:1989,Howland:1998}.
+
+Because it is possible, for the purpose of teaching, to define a
+semantics for functional languages based on term or graph rewriting,
+\textcite{Velazquez:1999}, \textcite{ParejaUrquizaVelazquez:2007} and
+\textcite{Rinderknecht:2012} can ask learners to trace by hand the
+evaluation of their small programs. \textcite{Segal:1994} remarks that
+``we would argue [...] that the ability to be able to evaluate a
+recursive function mentally or `by hand' (that is, independent of a
+machine), is an essential component of recursive knowledge for both
+learners and experts.'' In the case of teaching higher\hyp{}order
+functions, using manual reductions is also a recommendation of
+\textcite{ClackMyers:1995}, who also list a long series of typical
+errors and their analysis. Furthermore, \textcite{Burton:1995}
+observes that
+\begin{quote}
+\it perhaps students are puzzled, unnecessarily, by the the language
+(I refer to natural language here) with which we talk to them about
+recursion. Peter Landin is fond of pointing out the numerous
+inconsistencies with which such language is riddled (the phrase
+``calls itself'', for instance, probably elides all kinds of different
+semantic levels). An advantage of teaching via reduction sequences is
+that it enables us to take the (natural) language out---just reduce,
+reduce, reduce (perhaps with the aid of a machine).
+\end{quote}
+He also recommends what he calls a ``separation of concerns'' in
+teaching at first list processing, pattern matching and recursion in
+isolation: this avoids the issue for the students to assimilate
+recursion at the same time as other imperfectly understood
+concepts. \textcite{Velazquez:1999} also relies on term rewriting to
+teach recursion before moving to recursion in an imperative language
+with recursive data types.
+
+By writing down the rewrite system in the exact order of a
+top\hyp{}down design, students become accustomed to laying out calls
+to functions yet to be defined; by also asking them to write down all
+the left\hyp{}hand sides of the rules (patterns) before proceeding to
+the right\hyp{}hand sides in random order, not only completeness is
+improved, but also the conception of a program as a text written in
+one pass is undermined, and the model of a form or a blueprint is
+proposed instead. This twofold method seems to defuse a bit the
+typical question of a recursive call (right\hyp{}hand side) to the
+current function ``still under construction'', because at least all
+the configurations of the input (left\hyp{}hand side) have been
+already laid out and it is also normal to call yet undefined
+functions, just like it is normal to have pending references in a map
+being drawn to other parts yet to be filled. This view seems to be one
+of the conclusions of \textcite{Vitale:1989}, when he writes, in
+abstract terms:
+\begin{quote}
+\it It is proposed that a restricted notion of ``recursion'' could be
+usefully defined, entailing:
+\begin{enumerate}
+
+  \item that the attitude of the subject, with respect to the
+    definition of a notion, the solution of a problem, the answer to a
+    question, etc., should contain a measure of \emph{suspended
+      attention}, deferring in a way the final restructuring of the
+    definition, solution, answer, etc., to the completion of a
+    downward and then upward spiralling path;
+
+  \item that the spiralling path should be describable by the
+    dialectical coexistence of \emph{permanence} (the path, global
+    because relying on the various steps) and \emph{change} (the pitch
+    of the spiral, local because defined---and possibly changing---at
+    every turn).
+
+\end{enumerate}
+\end{quote}
+(For some technical corrections on the article of
+\textcite{Vitale:1989} and some context on the relevance of recursion
+in the cognitive sciences and artificial intelligence, see the
+follow\hyp{}ups by \textcite{Trautteur:1989} and
+\textcite{Apostel:1991}, as well as \textcite{Kieren:1989} in the
+context of \plang{Logo}.) Furthermore, by using directed acyclic
+graphs to represent programs and data, instead of abstract syntax
+trees, \emph{aliasing} (data sharing) becomes visible and the control
+stack and heap can arise from this model without resorting to
+low\hyp{}level descriptions \citep{Rinderknecht:2012}.
+
+Another approach, advocated by
+\textcite{FelleisenFindlerFlattKrishnamurthi:2001}, consists in
+systematically starting with the definition of recursive data types,
+because such types already suggest the recursive structure of the
+function definition to process their values. We will revisit this
+method when presenting \emph{structural
+  recursion}. \textcite{Pirolli:1986} showed that focusing the
+teaching of recursion on the structure of the function definition is
+more effective than insisting on the evaluation process, with traces
+of the control and data flows.
+
+When loops are taught after recursion in a functional language, no
+\emph{transfer of skills} seems to be observed, undermining the idea
+that iteration is inherently simpler than recursion
+\citep{Mirolo:2011}. For an equivalent study with logic programming in
+\plang{Prolog}, see \textcite{Haberman:2004}. Moreover, simple
+functional programs on lists can be translated systematically in
+\plang{Java} \citep{Rinderknecht:2012}, following design patterns
+similar to those by \textcite{FelleisenFriedman:1997},
+\textcite{Bloch:2003} and \textcite{Sher:2004}. The programs which are
+derived are in static single assignment form and eschew the \exc{null}
+from Pandora's vase \citep{Cobbe:2008,Hoare:2009}. However,
+\textcite{Segal:1994}, \textcite{ClackMyers:1995} noted that inducing
+students to think recursively with functional languages may yield some
+of the problems encountered with imperative languages, and
+\textcite{PazLapidot:2004} showed how prior experience with imperative
+programming influences the learning of functional programming. This
+brings us to examine when is recursion taught.
+
+
+\section{Curricular approaches}
+
+The scheduling of the teaching of recursion in school curriculums has
+long been debated
+\citep{Olson:1987,BarfurthRetschitzki:1987,Greer:1989}. For example,
+\textcite{ZmudaHatch:2007} compare two approaches: the scheduling of
+consecutive units of teaching on recursion versus the intermittent
+teaching of recursion, whereby two units about recursion are separated
+by a different topic.
+
+\paragraph{Secondary schools}
+\label{secondary_to_college}
+
+In many countries, programming literacy, as opposed to vocational
+training on software products (\emph{e.g.}, ICT in the United Kingdom
+since the \oldstylenums{1990}s), is still absent in the secondary
+schools curriculums. For instance, the French government officially
+introduced it only in July \oldstylenums{2011}, as an option for
+science majors, and recursion is not even mentioned in the new
+regulation, whose implementation started in September
+\oldstylenums{2012}. (The mathematics curriculum contains only one
+paragraph about algorithms, which must be explicitly iterative
+\citep{Modeste:2012}.) Wherever programming is featured in
+introductory courses, recursion is usually avoided, even though it is
+present in mathematics courses, usually in the guise of numerical
+progressions, Euclid's algorithm, Newton\hyp{}Raphson approximation
+method, and proofs by mathematical induction
+\citep{Buck:1963}. Therefore, because university students often
+experience significant difficulties in grasping recursive programming
+\citep{Sooriamurthi:2001,Ginat:2004}, some educators have insisted on
+a better articulation between secondary and post\hyp{}secondary
+curriculums. For instance, some researchers have been promoting a
+greater presence of discrete mathematics and proof techniques in
+secondary schools
+\citep{AbramovichPieper:1996,daRosa:2002,RosensteinFranzblauRoberts:1997,ZDM:A,ZDM:B},
+as well as the creation of computing clubs with activities about
+recursion \citep{GunionMilfordStege:2009a}. Others have emphasised the
+duality between recursive programming and mathematical induction
+\citep{Peelle:1976,Ford:1984,LeronZazkis:1986,Anderson:1992,BrandtRichey:2004,Polycarpou:2006},
+which may be used as means to a transfer of skills from secondary
+mathematics, as is, into college informatics. Even a reverse transfer
+of skills, from recursive programming to problem solving in
+mathematics, has been envisaged by \textcite{Hausmann:1985}.
+
+The teachers gleaning recursive definitions in the fields of secondary
+mathematics often come up with numerical progressions, including the
+versatile Fibonacci numbers
+\citep{RubioPajak:2006,RubioHernan:2007,Rubio:2008}, combinatorial
+identities from Pascal's triangle, the pervasive factorial or the game
+known as ``The Tower(s) of Hanoi (or Brahma).\@''
+\citep{BunemanLevy:1980,Anderson:1992,BenanderBenander:2008}
+Unfortunately, the pertinence of such examples is undermined by the
+fact that they frequently enjoy closed forms (like \(1 + 2 + \dots + n
+= n(n+1)/2\)) or they are computationally inefficient
+\citep{Er:1984,Knight:1988,Costello:1990,Robertson:1999,Stojmenovic:2000,Manolopoulos:2005},
+which may not be an issue for a mathematician. Furthermore, to
+university students interested in programming or professional
+training, these contrived exercises may appear useless and fail to
+match their expectations, tainting recursion by association. The same
+reaction is likely when outbidding with functions defined by more
+complex recurrent equations, like McCarthy's ``91 function,''
+Takeuchi's function \citep{Knuth:2000} or the simplified form of
+Ackermann's function \citep{Robinson:1947,Robinson:1948}.
+
+Fortunately, most textbooks avoid these pitfalls.
+
+\paragraph{Textbooks}
+\label{textbooks}
+
+Since the aim of a textbook is to cover a given curriculum, it should
+not come as a surprise that there are no textbook exclusively devoted
+to recursive programming, but there have been some companion books, at
+least up to the \oldstylenums{1990}s, when computer programming
+entered mainstream education with the spread of personal
+computers. (As mentioned before, during the same period, hardware
+architectures and programming languages widely enabled recursion.)
+
+In university education, from about \oldstylenums{1965} to
+\oldstylenums{1975}, computer science emerged as a discipline
+independent from mathematics, which explains the rigorous approach of
+the books and the interest in theoretical explanations, as well as
+low\hyp{}level implementations of recursion. This didactic choice was
+enabled by the mathematical savvy of the students and the few
+abstraction layers between programming languages and the hardware of
+the time. For example, \textcite{Barron:1968} is concerned with the
+pragmatics of recursion, its implementation in run\hyp{}time
+environments, the comparison with iteration, the natural application
+to sorting, the mechanisms for recursion in compilers and numerical
+algorithms---all this with \plang{ALGOL}. \textcite{Burge:1975} starts
+with \(\lambda\)\hyp{}calculus and combinatory logic, and proceeds
+with the evaluation of mathematical expressions, the definition and
+traversal of recursive data structures (lists and trees), parsing,
+sorting algorithms---also in \plang{ALGOL}.
+
+The following period, from about \oldstylenums{1975} to
+\oldstylenums{1985}, saw recursion uprooted from theoretical grounds
+and presented both as a method and a programming technique for solving
+problems whose data structures are recursive (structural recursion),
+making plain the benefit because the program structure itself then
+matches that of the data it processes. For instance,
+\textcite{Rohl:1984} begins with linked lists and binary trees,
+explains the solving strategy ``divide and conquer'' (The input is
+split, each non\hyp{}atomic part is recursively processed and the
+partial solutions are finally combined to form the complete solution.)
+and widens the scope to include mutual recursion
+\citep{RubioUrquizaPareja:2008} and recursion on graphs---all with
+\plang{Pascal}. \textcite{Roberts:1986} \citeyearpar{Roberts:2006}
+wrote the most enduring book, first using \plang{Pascal} and now
+\plang{Java}, where the main difference with previous volumes lies in
+recursion being illustrated by drawing fractals and backtracking when
+stuck in a labyrinth, whereas implementation issues make up the last
+chapter only.
+
+
+\paragraph{Methodology}
+\label{methodology}
+
+To tackle the understanding of the control flow, it is useful to work
+on design methodology \citep{KesslerAnderson:1986}. Indeed, embedded
+recursion is wrongly conceived as an expression of the familiar
+counting or accumulation technique within loops, not the consequence
+of the analysis of the original problem. As a remedy, students could
+be taught to think declaratively when programming recursively in
+imperative languages \citep{Giveon:1989,GinatShifroni:1999}, that is,
+to distinguish specification (what) from evaluation (how)
+\citep{Ford:1984}. Equivalently, this means that recursion could be
+taught first as a method for solving problems (analysis and synthesis,
+familiar to mathematicians since Antiquity), before showing it to be
+also a programming technique
+\citep{McKavanagh:1992,McKavanagh:2004}. In the same vein,
+\textcite{Ginat:2005}, \textcite{GinatArmoni:2006} follow a principle
+of P\'olya distinguishing \emph{working forwards}, which is a
+heuristics consisting in approaching the solution by stepwise
+deductions, and \emph{working backwards}, which supposes the goal
+attained and concentrating on the inductive chain, back to the
+problem. In the context of functional programming,
+\textcite{Rinderknecht:2012} calls the first method
+\emph{small\hyp{}step design} because the programmer focuses on the
+least that can be done in one evaluation step towards the solution,
+and the second \emph{big\hyp{}step design} because they assume that
+the final value is obtained in one step and it has to be (recursively)
+decomposed in terms of the input. In general, the first way leads to
+iteration, whereas the second yields embedded recursion. These two
+methods should be taught as complementary heuristics, because, for the
+same problem, they may not bear definitions of commensurable
+efficiency.
+
+\paragraph{Curriculum}
+\label{curriculum}
+
+To overcome students' reluctance to use recursion within a course on
+procedural or object\hyp{}oriented programming, it has been proposed
+to teach singly\hyp{}linked lists before arrays and loops
+\citep{TurbakRoydenStephanHerbst:1999,BruceDanylukMurtagh:2005,GoldwasserLetscher:2007},
+which makes recursion appear as a rather natural way to move to and
+fro inside a unidirectional data structure. It is not surprising that
+this proposal, where recursion in data types comes before recursion in
+functions, often originates from the context of object\hyp{}oriented
+programming languages
+\citep{FelleisenFriedman:1997,Levine:2000,Bloch:2003,Sher:2004}, but
+is also prominent in statically typed functional languages---refer to
+the book by
+\textcite{FelleisenFindlerFlattKrishnamurthi:2001}. Indeed, when
+generalised to other recursive data types, like trees, this kind of
+recursion is called \emph{structural recursion} and, as mentioned
+earlier, it yields programs reflecting the structure of the data type,
+which is helpful since the latter is designed first. For instance, a
+binary tree is either empty or made of a root and two subtrees, thus
+the complete traversal of such a tree is expected to require a test
+for the tree emptiness and two recursive calls.
+
+\paragraph{Didactics}
+\label{didactics}
+
+Some researchers have been tackling the issue of teaching and learning
+recursion through the lenses of cognitive sciences and psychology,
+inferring the \emph{mental models} of recursion
+\citep{SandersGalpinGotschi:2006,Mirolo:2009}, in particular the
+faulty ones that novices construct by interacting with experts and the
+problem to solve. As explained by \textcite{BhuiyanGreerGordon:1994},
+a mental model is twofold: ``(1)~a knowledge structure in a person's
+mind that incorporates \emph{descriptive knowledge} and
+\emph{functional knowledge} about a concept or device; (2)~a control
+mechanism that determines how this knowledge is used in problem
+solving.'' Many of the references we gave in previous sections already
+contain significant discussions and analyses of mental models, as they
+are used as a rationale for guiding the design, for example, of a
+tutoring system or a curriculum. In the introduction, we also have
+mentioned \textcite{Giveon:1990}, who discusses some pedagogical
+issues with the different meanings of the word \emph{recursion}, and
+it is fitting now to cite as well \textcite{LobinaGarcia:2009} and
+\textcite{Lobina:2011,Lobina:2012}, who bring forth a thoughtful
+analysis of the usages of the same word in the cognitive sciences,
+with an emphasis on linguistics and psychology. Indeed, these
+disciplines are essential to the didactics of
+programming. \textcite{LobinaGarcia:2009} write: ``In the 1950's,
+linguists correctly employed recursion in reference to specific
+rewrite rules, but ever since their elimination from linguistic
+theory, most linguists have used recursion, rather puzzlingly, to
+refer to those structures that recursive rewrite rules were used to
+generate. This may well be the unfortunate legacy of employing rewrite
+rules.'' Consequently, they recommend to reserve the term recursion
+for processes, not the products of these, because not all hierarchy
+(self\hyp{}embedding) is generated by recursive processes. With these
+distinctions in mind, which will be touched upon again in the section
+about analogies, it is further worth reading
+\textcite{Kilpatrick:1985}, who discusses the analogical use of the
+words \emph{reflection} and \emph{recursion} in the didactics of
+mathematics.
+
+According to the \emph{constructivist theory of learning}
+\citep{WuDaleBethel:1998,Ben-Ari:2001} promoted by Jean Piaget,
+learners construct mental models to understand the world and act
+proactively, instead of passively reproducing a series of facts and
+being enjoined belief in a theory, as happens with too many
+traditional lectures. \textcite{InhelderPiaget:1963} write: ``the
+source of thinking making possible to design recursive solutions to
+problems lies in elemental forms of reasoning arising from students'
+comprehension of the relations between the elements to which his/her
+\emph{actions} are applied when attempting to solve instances of
+problems.'' (The emphasis is ours.) The study of
+\textcite{daRosa:2005} argues that the role of the teacher is to help
+the student to transform this instrumental knowledge into a conceptual
+knowledge, and finally into formalisation, that is, program
+writing. Some researchers speak of ``misconceptions'', others do not
+because they consider that these are simply transient stages,
+non-viable conceptions---a \emph{viable} conception allowing to
+predict the outcome of new
+experiments. \textcite{GotschiSandersGalpin:2003} explain: ``Teachers
+should generate perturbations in the students' existing conceptual
+structures and hence foster new combinations of concepts. This means
+that lecturers should present students with problems and examples that
+challenge their current understanding and reveal non-viable
+constructions.''
+
+In the same vein, a \emph{constructionist theory}, developed by
+\textcite{Papert:1980}, goes further by insisting that learning is
+best or truly achieved by making tangible objects in interaction with
+the environment, which includes the educator. These approaches do not
+diminish in any way the role of the teacher, who is simply encouraged
+to engage constructively with the pupils, and not to act as an oracle
+or a judge. It is assumed that the learners build their knowledge
+themselves, based upon previous idiosyncratic conceptions, which they
+reassess by means of interactive experiments under the benevolent
+supervision of an expert. Within this framework, where reassessment
+entails either reinforcement or refutation, the self\hyp{}referential
+nature of recursive definitions may seem a priori a cognitive
+challenge, which \textcite{Papert:1960b} expresses as ``the property
+of recursion being not the repetition of the same act as such, but the
+repetition of an act that is at the same time the same act and a
+different one.'' In fact, the interest in mental models of recursion
+did not wait for the personal computers to reach homes and classrooms,
+as it can be traced (in the context of the psychology of mathematics
+first, and then computing) back to \textcite{Papert:1960a}
+\citeyearpar{Papert:1960b} and Piaget
+\citep{InhelderPiaget:1963,PiagetStratz:1974}. (See
+\textcite{Matalon:1963,EliotLovellDaytonMcGrady:1979} also for early
+research on children.) Children and adolescents were at the centre of
+pedagogical investigations with the programming language
+\plang{Logo}. One hypothesis of Papert is that the \emph{syntonicity}
+enabled by \plang{Logo} helps the children to learn: ``Turtle geometry
+is learnable because it is syntonic.\@'' \cite[p.~68]{Papert:1980}
+Roughly speaking, syntonicity is a psychological feeling of
+identification with a putative external agent, in this case the cursor
+on the screen, called the turtle. This feeling, supported by the fact
+that the movements of the turtle are relative to its current position
+(\emph{cf.}\@ \plang{PostScript} below, in the section about
+\plang{Logo}), entices the children to engage and enjoy what they
+make, which is more than a drawing since it involves a (projected)
+whole body experience.
+
+\paragraph{Mental models}
+
+According to \textcite{Kahney:1983}, \textcite{KahneyEisenstadt:1982},
+the mental model of experts, called \emph{copies model}, is based on
+dynamic instances of procedures, \emph{i.e.}, processes, either
+passing (``forwards'') the control to newly created instances, or, if
+terminated, returning it (``backwards'') to the instance who passed
+it---\textcite{George:2000a} called the former \emph{active flow}, and
+the latter \emph{passive flow}. The copies model is the only one
+viable, that is, consistent with the operational semantics of
+recursive definitions. Students, on the other hand, seem to often
+build the \emph{looping model} of recursion, whereby embedded
+recursion is wrongly understood as a kind of iteration and, typically
+will consider the base cases as halting conditions
+\citep{HabermanAverbuch:2002}. To reduce the risk of confusion,
+\textcite{McDougall:1985} recommended that, when teaching
+\plang{Logo}, the ``use of tail recursion for iterative situations be
+deliberately avoided. [...] Avoidance of early use in programming of
+tail recursion for repetition might avoid confusion with iteration in
+children's mental models of recursion.'' Indeed, according to
+\textcite{Tempel:1985}, ``other flavors of recursion may not be
+encountered at all'' by the learners.
+
+Experiments with experts and novices were set up by Kahney to validate
+or refute the hypothesis that students had a looping mental
+model. With high probability, it appeared that most of the students
+held the looping model instead of the copies model, and some of them
+had idiosyncratic models in mind, like the \emph{null model} (when
+recursion is rejected), the \emph{syntactic model} (when the structure
+of the program is used to predict its outcome, or, when writing it,
+the necessity of base and recursive cases is understood, but not the
+derivation of the actions), and the \emph{odd model} (when the meaning
+of some keywords, \emph{e.g.,} \exc{EXIT} and \exc{CONTINUE}, is taken
+from their English usage).
+
+To explain the odd model, \textcite{PazLapidot:2004} suggest to
+consider the interference of natural language in learning recursion,
+in the context of learning \plang{DrScheme}:
+\begin{quote}
+\it It may be that some students attribute to the function the ability
+to change the parameter's value, because of the association they
+create between the programming language and natural language. It is
+possible that students [...]  interpret the expression \exc{(first L)}
+as, for example, `take the first element'. The meaning of taking the
+first element, for them, is to extract it and drop the remaining
+elements, so that \exc{L}~is left only with the first element.
+\end{quote}
+In the same vein, some researchers insist on bringing to the fore and
+qualifying the linguistic aspect of the relationship between learners
+and teachers. They set up experiments, record all interactions with
+software and video, then analyse the transcripts to pinpoint the
+misunderstandings, trace them back to plausible causes and try to
+capture the mental model at work
+\citep{AndersonPirolliFarrell:1984,LevyLapidot:2000,LevyLapidotPaz:2001,Levy:2001,MurnaneWarner:2001,LevyLapidot:2002}.
+Furthermore, these verbal exchanges can be conducted not solely to
+infer a mental model of the student and reach a diagnostic and remedy,
+but even to become a maieutic process on its own right
+\citep{ChangWangDaiSung:1999,ChangLinSungChen:2000}.
+
+G\"otschi and some collaborators
+\citep{Gotschi:2003,GotschiSandersGalpin:2003,SandersGalpinGotschi:2006}
+refined and extended Kahney's classification of mental models; for
+instance, they identified amongst their university students an
+\emph{active model}, when they understand the instantiations of
+recursive calls with smaller arguments and the reaching of the base
+cases, but they nevertheless fail to grasp the backward, or passive,
+flow of control from the completed instances to the current, pending
+one. They also proposed the \emph{step model}, whereby students have
+not a complete concept of recursive flow of control and execute only
+one recursive call yielding a base case. There is also the
+\emph{return value model}, which stems from misconceptions about when
+the values of function calls are constructed. The two last models are
+linked to some confusion about the evaluation of function calls in
+general, like parameter passing and making a function's return value.
+
+\textcite{BhuiyanGreerGordon:1989}
+\citeyearpar{BhuiyanGreerMcCalla:1991} prefer the expression
+\emph{mental method} instead of \emph{mental model} and proposed a
+more detailed classification where \emph{generative methods} comprise
+the \emph{loop method}, the \emph{syntactic method}, the
+\emph{analytic method}, and the \emph{analysis/synthesis method};
+moreover, \emph{trace methods}
+\citep{Bhuiyan:1992,ScholtzSanders:2010} are used by students to
+verify the correctness of their solutions.
+(\textcite{GotschiSandersGalpin:2003} define a trace as ``a student's
+representation of the flow of control and the calculation of the
+solution of a recursive program.'') The loop method is the obvious
+consequence of the flawed loop mental model. The syntactic method is
+frequently used by novices who have little understanding of recursion
+as a problem\hyp{}solving method, but a good declarative knowledge
+about it. They know how to lie out a recursive template with base
+cases and recursive cases fitting into simple categories, and it works
+well for a wide variety of simple problems, but they have difficulties
+for more complex ones, for example when \emph{generative recursion}
+\citep{FelleisenFindlerFlattKrishnamurthi:2004} is needed, that is,
+when a recursive call does not apply directly to a substructure of the
+input, but to a transformed substructure. This issue is linked to a
+lack of understanding of recursion as a design method, therefore, the
+next method, \emph{i.e.,} the analytic method, applies to slightly
+complex problems and proceeds from input and output requirements to an
+intermediary solution, before writing the code. The analysis/synthesis
+method goes further by dividing the problem into subproblems whose
+solutions must be combined: this is the most general method. (See
+earlier paragraph on methodology.) \textcite{dichevaClose:1996}
+\citeyearpar{CloseDicheva:1997} focused on
+misconceptions. \textcite{Wu:1993} and \textcite{WuDaleBethel:1998}
+explored the learning of recursion in the framework of David Kolb's
+model (\emph{experiential learning theory}), which we cannot detail
+here. For yet other angles, like programming competences, concrete
+vs. abstract models, static vs. dynamic copies model, classes of
+recursive functions etc.\@ see \textcite{Er:1995},
+\textcite{Burton:1995}, \textcite{Chen:1998} and
+\textcite{Mirolo:2010}.
+
+\textcite{AnzaiUesato:1982} found that children's understanding of a
+recursive definition in the context of mathematics is eased by prior
+experience with iteration, although they added that it may be the case
+that \emph{writing} recursive definitions in a programming language
+requires different, additional skills. \textcite{KesslerAnderson:1986}
+worked in the context of programming languages and searched for
+transfer of skills between tail recursion and iteration for novices
+and they confirmed the conclusion of \textcite{AnzaiUesato:1982}: both
+studies found a positive transfer from writing loops to writing
+recursive definitions, but not vice versa (although tail recursion is
+arguably too similar to iteration). Moreover, it seems that the
+incorrect looping model of recursion, previously acquired on loops, is
+more helpful than learning recursion directly. By contrast,
+\textcite{Wiedenbeck:1988} found that previous knowledge of iterative
+examples does not seem to facilitate subsequent learning on similar
+recursive problems, although \emph{comprehension} was slightly
+improved. Furthermore, \textcite{KurlandPea:1985} studied how
+\oldstylenums{12}~year old subjects understood recursive definitions
+and iterations in \plang{Logo}. They found that previous familiarity
+with iteration helps understanding tail recursion but hampers the
+correct grasping of embedded recursion, in accord with later work by
+\textcite{Murnane:1992}. Note that this is not a direct contradiction
+of \textcite{KesslerAnderson:1986}, because the latter used tail
+recursion, and, for \textcite{Wiedenbeck:1988}, the transfer of skills
+is about comprehension, not design.
+
+The role of examples in learning recursion has been investigated by
+\textcite{PirolliAnderson:1985}, \textcite{Wiedenbeck:1989},
+\textcite{Pirolli:1991} and
+\textcite{TasconRinderknechtKimKim:2010}. Examples should be used to
+develop \emph{analogical} problem\hyp{}solving mechanisms, but care
+must be taken not to rely too much on them too early, lest the
+learners get stuck in the syntactic model of Kahney, and
+\emph{knowledge compilation} mechanisms should also be built from past
+experiences.
+
+\section{Visualisation and animation}
+
+Many educators try to capitalise on the fact that vision plays an
+important role in acquiring concepts and informing their composition
+to build new ones. This opens different lines of inquiry: visual
+analogies of recursion, animating the evaluation of programs, visual
+programming languages, integrated development environments, virtual
+worlds and games.
+
+\subsection{Analogies}
+\label{analogies}
+
+\paragraph{Objects}
+
+It is often claimed that everyday life lacks analogies for the concept
+of recursion \citep{PirolliAnderson:1985}, so it is no surprise that
+most authors come up with the same objects, such as cauliflowers,
+including the healthy broccoli, ringed targets, tree branches,
+reflections on facing mirrors, tilings \citep{ChuJohnsonbaugh:1987},
+ladders \citep{LevyLapidot:2002} and Russian dolls
+\citep{BrewerSeagraves:1985}. Typical geometric figures are fractals
+\citep{Riordon:1984c,ElenbogenOKennon:1988,Wakin:1989,BruceDanylukMurtagh:2005,Ammari:2005,Stephenson:2009a,Gordon:2006}
+and certain kinds of artwork, most notably by the Dutch graphic artist
+M.~C.~Escher \citep{GunionMilfordStege:2009b}. Their structures are
+characterised by self\hyp{}replication with self\hyp{}embedding (also
+called \emph{nesting}), but, unfortunately, these examples are perhaps
+more likely to suggest infinity than recursion (whose evaluation must
+terminate to be useful and, in the case of embedded recursion, may
+require backtracking), and this involuntary association of infinity
+and recursion may explain the avoidance of the latter by novices
+\citep{Wiedenbeck:1989}. By contrast, and with a more optimistic tone,
+\textcite{Papert:1980} (p.~71) wrote the following about an exercise
+with \plang{Logo} aimed at demonstrating recursion:
+\begin{quote}
+\it Thus we have a trick called ``recursion'' for setting up a
+never\hyp{}ending process whose initial steps are shown [...]. Of all
+ideas I have introduced to children, recursion stands out as the one
+idea that is particularly able to evoke an excited response. I think
+this is partly because the idea of going on forever touches on every
+child's fantasies and partly because recursion itself has roots in
+popular culture. For example, there is the recursion riddle: If you
+have two wishes what is the second? (Two more wishes.) And there is
+the evocative picture of a label with a picture of itself. By opening
+the rich opportunities of playing with infinity the cluster of ideas
+represented by the [...] procedure puts a child in touch with
+something of what it is like to be a mathematician.
+\end{quote}
+But it seems difficult to generalise this observation, as
+\textcite{Turkle:1984} reports that ``Matthew, a good\hyp{}natured and
+precocious child of five, was eagerly learning to write computer
+programs to make graphic designs on the screen. His mood changed
+abruptly and he left the computer in tears when he understood how to
+make a recursive program: a program whose action includes setting in
+motion an exactly similar program whose action includes setting in
+motion an exactly similar program, and so on.''
+\textcite{McDougall:1991}, also using \plang{Logo}, reported that
+recursion in objects (figures produced by \plang{Logo} processes) is
+firmly conceived by her daughter as different from recursion in
+processes or programs, but claimed that this conception is
+nevertheless useful because her daughter, who did not confuse
+iteration and embedded recursion, used it for teaching a
+peer. Earlier, \textcite{Thompson:1985}, also observing the dichotomy,
+asked the students to describe verbally the recursive structure and
+move towards the recursive \plang{Logo}
+program. \textcite{Murnane:1991} discussed the demerits and merits of
+various models of recursion, and also uses
+\plang{Logo}. (Section~\ref{logo} will be devoted to \plang{Logo}.)
+
+\paragraph{Processes}
+
+Researchers have also looked at everyday examples of recursive
+processes, instead of objects, for example, the fall of dominoes
+aligned in a row, which seems to suggest recurrent reasoning to
+children who are \oldstylenums{12}~years old or so, in the sense that
+they almost express the fall of \emph{any} domino by the fall of the
+previous one (a local property), but descriptions by younger children
+are of the iterative type: the first domino falls and lets the second
+fall, and so the third will fall etc.\@ \citep{PiagetStratz:1974} Of
+course, the recursion suggested here by the experiment is tail
+recursion, because it ends with the fall of the last
+domino. Nevertheless, \textcite{Yang:2004} \citeyearpar{Yang:2008}
+went further and claimed that such series of dominoes are an analogy
+for \emph{linear recursion}, which is an embedded recursion with one
+recursive call. More accurate are the processes which use
+backtracking, a distinctive feature of embedded recursion, to model
+the behaviour of an avatar or robot stuck in a labyrinth
+\citep{LissMcMillan:1988,Dorf:1992,Roberts:2006}.
+
+\textcite{Wirth:2008} provided an entertaining recursive method to
+randomly park cars in a street, and \textcite{Brown:1972} tried to
+familiarise social scientists with recursion through examples in
+\plang{Logo}.
+
+\textcite{Schiemenz:2002} came up with an application of recursion to
+business management, with more examples of recursive objects and
+recursive problem\hyp{}solving. \textcite{Kimura:1977} used businesses
+too as a framework for explaining the notions of program, processor
+and process. Embedded recursion is then expressed as the delegation of
+a task to a group of assistants working on complementary sets of the
+input. The same analogy is found in a paper by
+\textcite{Edgington:2007}, and, if enacted by the students as
+theatrical roles, it becomes \emph{kinesthesis} and a
+multi\hyp{}sensory experience for learning recursion in the classroom
+\citep{Dorf:1992,Levine:2000,BegelGarciaWolfman:2004,Katai:2009}. In
+particular, \textcite{Ben-AriReich:1996} proposed to dramatise
+recursive algorithms, that is, to associate the solution to a
+real\hyp{}world task with an algorithm having the same recursive
+structure, \emph{e.g.}, eating a chocolate bar and searching an
+array. The students enact the solution and later write the
+program. These playful activities can be considered as kinds of
+parlour games, which leads us now to review computer games dedicated
+to recursion.
+
+\subsection{Computer games} 
+
+There is an increasing interest for games, or game\hyp{}like features
+(\emph{e.g.}, achievement badges), for supporting educational purposes
+(so-called \emph{gamification} of education), even in higher
+education. Although it was mentioned in
+section~\ref{secondary_to_college} that ``The Tower(s) of Hanoi'' has
+long been quite popular, very few studies have been carried out
+specifically about teaching recursion with video games. Amongst them,
+the setting of \textcite{RossiouPapadakis:2007} is a virtual
+classroom, and \textcite{ChaffinDoranHicksBarnes:2009} designed a game
+to facilitate the transfer of skills to writing recursive
+programs. While very limited in time and number of participants, both
+studies support the use of computer games for teaching and learning
+recursion as a concept. As an alternative to games, recursive
+processes can also be merely illustrated by a series of snapshots or
+by an animation. The simplest form of visualisation consists in
+augmenting the text of a program with semantic annotations and
+pictures.
+
+\subsection{Augmented text}
+\label{augmented_text}
+
+Since the \oldstylenums{1970}s, many graphical notations for inputs
+and \emph{activation trees}, sometimes called \emph{recursion graphs},
+have been proposed, allowing novices to record and follow the
+evaluation of function calls
+\citep{Jackson:1976,Kruse:1982,Haynes:1995,Hsin:2008}. For example, if
+the input is a binary tree to be traversed, the activation tree is
+also a binary tree because each node is a call to the same function
+but with different subtrees as arguments. The teacher can show on the
+blackboard the location in the data diagram at the same moment that
+the activation tree is extended. \textcite{WeiMurray:2008} draw
+activation trees within a hyperbolic geometry. Moreover, memory
+allocation and variable assignments decorate the corresponding
+\plang{Java} program. \textcite{KurtzJohnson:1985} animated the data
+diagram only.
+
+The syntax of many imperative languages, like \plang{Pascal}, is based
+on blocks, which makes it hard to trace the execution of function
+calls, particularly in the presence of recursion \citep{Er:1984}. This
+leads some instructors to recur to a low\hyp{}level simulation of the
+execution, reifying the otherwise invisible control stack
+\citep{LeeMitchell:1985,Dupuis:1989}, but, according to
+\textcite{GinatShifroni:1999}, this puts too much emphasis on the
+computing model (see also the paragraph about methodology). See also
+\textcite{Pirolli:1986}, whom we mentioned earlier in the section
+about functional programming.
+
+\textcite{BellGilbert:1974} proposed to use Wirth's syntax diagrams,
+designed for specifying grammars of programming languages like
+\plang{Pascal}. The usefulness of Backus\hyp{}Naur Forms (defining
+context\hyp{}free languages) and Lindenmayer systems (L-systems) to
+teach recursion has also been noted by \textcite{Er:1984},
+\textcite{Proulx:1997} and \textcite{Velazquez:1999}
+\citeyearpar{Velazquez:2000}. \textcite{Zelenski:1999} proposed the
+generation of random sentences to experiment recursion and
+\textcite{Levine:2000} then commented that students have no trouble at
+all, perhaps because the textual expansion of a non\hyp{}terminal is
+hardly seen as a procedure call, let alone calling itself.
+
+For other closely related approaches, also based on annotations and
+pictures, see \textcite{Er:1995}, \textcite{HuiIverson:1995},
+\textcite{JehngTungChang:1999}, \textcite{George:1995}
+\citeyearpar{George:1996} \citeyearpar{George:2000a}
+\citeyearpar{George:2000b} and \textcite{TungChangWongJehng:2001},
+some of whom we mentioned earlier about rewrite systems and functional
+languages.
+
+\subsection{Multimedia environments}
+\label{multimedia}
+
+Animation has been more widely implemented by means of dedicated
+multimedia environments \citep{Rosenthal:2005}, either in isolation
+(for didactic purposes only), or in connection with programming
+environments \citep{WilcoksSanders:1994}. Here, we will only review
+briefly those systems designed specifically to teach recursion.
+
+\textcite{SternNaish:2002a} \citeyearpar{SternNaish:2002b} proposed a
+classification based on an analysis of recursive algorithms for
+sorting arrays and updating dictionaries: the first category groups
+searches, the second sorts and the last insertions. They claim that
+such distinctions enable the tailoring of better animations, aimed at
+reinforcing the understanding of
+recursion. \textcite{FernandezPerezVelazquezUrquiza:2007} proposed and
+implemented an automated classification based on source code
+inspection from which a dedicated animation is generated. That system
+was developed extensively \citep{VelazquezPerezUrquiza:2008}
+\citeyearpar{VelazquezPerezUrquiza:2009b}
+\citeyearpar{VelazquezPerezUrquiza:2009a}
+\citep{VelazquezPerez:2010}. The approach is practical and eclectic,
+with animations not only of the activation tree, but also of the data
+structure, the trace and the control stack.
+
+Another direction is open by \emph{intelligent tutoring systems}
+\citep{Pirolli:1986} (or \emph{interactive learning environments}),
+which are multimedia environments that provide interactive feedback
+and advice to the programmer. The system contains typical beginners'
+strategies so it can comment upon the code being written
+\citep{McCallaGreer:1993}. These strategies are based on mental models
+of the learners. It seems that the system designed by
+\textcite{Greer:1987} became a reference for
+\textcite{BhuiyanGreerGordon:1989} \citeyearpar{BhuiyanGreerGordon:1992}
+\citeyearpar{BhuiyanGreerGordon:1994}, \textcite{Bhuiyan:1992} and
+\textcite{GreerMcCallaPriceHolt:1994}.
+
+As miscellanea, see
+\textcite{Moreno:1992,WuLinChiou:1996,WuLeeMei:1998}. For a structured
+text editor guaranteeing the termination of recursive predicates in
+\plang{Prolog}, see \textcite{BundyGrosseBrna:1991}.
+
+\paragraph{Visual programming}
+
+Visual programming languages enable the composition of program
+constructs by manipulating graphical representations instead of
+writing text. \textcite{GoodBrna:1996} were the first to investigate
+whether these languages provided a better support for learning
+recursion than textual languages, and concluded negatively.
+Spreadsheet languages are sometimes considered as visual programming
+languages or even functional languages, and
+\textcite{BurnettRenKoCookRothermel:2001} focused on testing recursive
+programs with them. \textcite{Kim:2003} proposed a string of classroom
+exercises to learn recursion with \plang{Excel}.
+
+\paragraph{Virtual worlds}
+
+\textcite{TasconRinderknechtKimKim:2010} designed an interactive
+interface based on a tangible block\hyp{}world with augmented reality
+to learn iteration on lists and aiming at the transfer of skills to
+directly write tail recursive definitions in \plang{Erlang}. An
+earlier, three\hyp{}dimensional virtual world was designed by
+\textcite{DannCooperPausch:2001}. For two\hyp{}dimensional geometry
+considered as a virtual world, we have \plang{Logo}.
+
+\subsection{The \plang{Logo} years}
+\label{logo}
+
+We would be remiss not to devote a whole section to \plang{Logo}. The
+first thing that strikes the reader of the abundant literature about
+\plang{Logo} is the enthusiasm that blows, page after page.
+Microcomputers were arriving in the classrooms and everyone was
+excited and deeply interested in their programming: teachers, of
+course, but also psychologists, didacticians, mathematicians, computer
+scientists, software companies, and even the children themselves,
+whose education was the focal point of attention. The geometric
+figures produced by the execution of \plang{Logo} programs, the design
+underpinnings of the language, like its recursive, functional
+programming style and its grounding in developmental psychology, all
+this put \plang{Logo} at the confluence of almost all the streams
+surveyed here: dynamic and geometric analogies for recursion, virtual
+worlds (in a more abstract sense, they are called \emph{microworlds}
+in the context of \plang{Logo}, like the microworld of the turtle, the
+microworld of words, of lists etc.\@), integrated environments,
+functional programming, games and theory of learning.
+\textcite{Papert:1980} was a pioneer of this movement, taking part to
+the design of \plang{Logo} at the end of the \oldstylenums{1960}s, and
+we quoted him in section~\ref{analogies} about recursion.
+
+\textcite{McDougall:1985} \citeyearpar{McDougall:1988}
+\citeyearpar{McDougall:1989} \citeyearpar{McDougall:1990a}
+\citeyearpar{McDougall:1990b} \citeyearpar{McDougall:1991} has used
+\plang{Logo} to teach her nine\hyp{}year\hyp{}old daughter, who ended
+mastering embedded recursion by age eleven. According to her, this
+result confirmed what Papert conjectured, namely that young children
+in a computer\hyp{}rich environment can learn abstract or formal
+thinking---In passing, Papert never attributed this capability to
+\plang{Logo} alone. Unfortunately, the size of the study group makes
+it hard to generalise the findings. \textcite{Rouchier:1986a}
+\citeyearpar{Rouchier:1986b} \citeyearpar{Rouchier:1987} observed
+adolescents' difficulties in learning embedded recursion after
+understanding loops and iteration, and proposed to start teaching
+embedded recursion first. See also the articles by
+\textcite{Barfurth:1987}, \textcite{BarfurthRetschitzki:1987}.
+
+Following in the same footsteps, others
+\citep{GobetNunezRetschitzki:1989,RetschitzkiGobetNunez:1989,GurtnerGexGobetNunez:1990,RetschitzkiGexGobetGurtnerNunez:1991}
+noted that, in the geometric microworld of \plang{Logo}, it is
+difficult to come up with exercises which show the superiority of
+embedded recursion over iteration, whereas the microworld of lists is
+more pertinent. Perhaps the reason is that drawing is inherently a
+side\hyp{}effect, thereby it empowers loops. In the case of
+\plang{PostScript}, a concatenative programming language dedicated to
+graphics, the implicit evaluation stack is used for all computations,
+including delaying the side\hyp{}effect of drawing, which is triggered
+by an explicit \exc{showpage} instruction, so programming remains
+declarative. Unfortunately, once embedded recursion has been wrongly
+understood as an iteration in the turtle microworld, the
+misunderstanding is carried over to the microworlds of words and
+lists. Moreover, these researchers observed the same difficulties in
+recognising the base cases (\exc{STOP} rule) as with any other
+programming language. \textcite{Giveon:1991} presented a variant of
+\plang{Logo} with multiple turtles that can move concurrently, and
+advocated that this paradigm yields simpler recursive programs than
+traditional (singly threaded) dialects of \plang{Logo}.
+
+\section*{Conclusion}
+
+The teaching and learning of recursion in computer programming courses
+has long been a subject of inquiry, attracting a wide range of
+researchers from many fields of knowledge. It is not possible to
+isolate a current trend of investigation, as the hallmark of the
+newest papers can already be found in the early \oldstylenums{1990}s,
+although there seems to be a recent decline in the number of
+publications and a concentration around a few researchers. Here are a
+few points that may deserve some attention.
+\begin{itemize}
+
+\item Perhaps the common weakness of many experimental protocols lies
+  in the small number of students (usually, one class), the short span
+  of time (usually, one semester) and the difficulty to define a
+  control group. Consequently, it may help to bring on board
+  statisticians in order to design larger and longer experiments (at
+  least a three\hyp{}year period).
+
+\item Many studies lump all novices, whereas it seems useful to
+  distinguish different profiles and cater them with different
+  learning strategies, as some have proposed. But since the
+  identification of the student mental model can only be achieved by
+  teaching, this begets the question of \emph{adaptive teaching
+    strategies}, once the student has been classified.
+
+\item The approaches based on text rewriting (grammars, L-systems,
+  rewrite systems) do not seem to raise issues with learners as far as
+  recursion is concerned. It would be interesting to confirm this and
+  explore whether the purported skills can be transferred to
+  block\hyp{}structured programming languages.
+
+\item Mutual recursion has been studied by Rubio\hyp{}S\'anchez and
+  his colleagues \citep{RubioPajak:2006,RubioUrquizaPareja:2008}, who
+  deemed it sometimes easier to teach than direct recursion. If
+  confirmed, this would open a new way to teach direct recursion by
+  program transformation (inlining)
+  \citep{KaserRamakrishnanPawagi:1993}. Examples of mutual recursion
+  arise naturally in parsers, which were a favourite example in early
+  textbooks, and it was noted above that the derivation of sentences
+  from formal grammars (that is, the reverse function of parsing)
+  usually does not raise problems with recursion. Another use case is
+  finite automata, as found in telecommunication protocols, vending
+  machines, automatic teller machines etc. (One state is implemented
+  by one function whose argument is any of the labels on the
+  outgoing transitions.)
+
+\item Kinesthesis and syntonicity seem to be helpful and should be
+  compared with animation, as it may be that watching or imagining the
+  execution of a recursive function (in other words, tracing) is
+  cognitively different from involving one's own body, or a
+  psychological representation of it. Perhaps augmented reality may
+  help too, by creating an immersion
+  \citep{TasconRinderknechtKimKim:2010}.
+
+\item It should be impressed upon students that the control flow of
+  recursion, which many authors qualify as being ``bidirectional'', is
+  actually not specific to recursion by explaining the evaluation of
+  arithmetic expressions with function compositions
+  \citep{Burge:1975}. (In imperative languages where instructions are
+  separated by semi\hyp{}colons, an instruction can be shown to be an
+  implicit function---an assignment is indeed an operator in the
+  \plang{C}~family---and a semi\hyp{}colon denotes composition.)
+
+\item Many educators teaching recursion focus on the control flow,
+  except perhaps if the language is object\hyp{}oriented, because, in
+  that case, the \emph{data flow} becomes more relevant, and the
+  design is more likely to be bottom\hyp{}up. (An algorithm ends up
+  being scattered amongst several methods in different classes, so
+  recursion is obscured by the amount of code to be read and mutual
+  recursion is more likely.) That difference may explain why the
+  professors teaching structural recursion on lists before arrays and
+  loops are using some object\hyp{}oriented language or a functional
+  language. Those teaching a top\hyp{}down design may end up
+  reordering the definitions in the program to have them compiled
+  incrementally for testing purposes, and also because this
+  corresponds to the order of synthesis. (See the analysis/synthesis
+  method.) By strictly lying down the top\hyp{}down design in the
+  code, which requires, for example, to use prototypes in~\plang{C},
+  or \exc{forward} declarations in \plang{Pascal}, the students get
+  used to read incomplete programs. (The same can be said about using
+  modules, of course.) Perhaps that skill is correlated with a better
+  understanding of recursion.
+
+\item Tail call optimisation should be explained without resorting to
+  low\hyp{}level concepts~\citep{Rinderknecht:2012}.
+
+\end{itemize}
+
+\bigskip
+
+\paragraph{Acknowledgements} The author thanks the following
+researchers for providing preprints, hard copies and otherwise helpful
+information: Nell Dale, C. Mitchell Dayton, Carlisle George, David
+Ginat, Shafee Give'on, Fernand Gobet, Jean\hyp{}Luc Gurtner, K\'atai
+Zolt\'an, Anne McDougall, John Murnane, Peter Pirolli, Fran\c{c}ois
+Pottier, Ian Sanders, Manuel Rubio S\'anchez, Guiseppe Trautteur,
+\'Angel Vel\'azquez and Michael Zmuda. The anonymous reviewers helped
+improve the introduction.
+
+% Bibliographic style
+%
+%\bibliography{ie2014}
+\raggedright\printbibliography
+\nocite{*}
+
+\bigskip
+
+\input{biography}
+
+\end{document}
+
+on the \emph{control\hyp{}flow graph}, which is a a graph whose nodes
+are labelled blocks of streamlined instructions instead of calls, and
+edges are conditionals and jumps. This is a more detailed explanation
+than our own definition of dynamic recursion as a cycle in the dynamic
+call graph, where ``backward'' qualifies the data flow superimposed on
+the call graph, and its purpose is to teach students not to treat
+calls, in particular recursive ones, as if they were always in tail
+position, without the need to explicitly define what tail calls are

@@ -1,0 +1,39 @@
+\section{Introduction}
+
+Merge sort features prominently amongst the sorting algorithms most
+widely taught in colleges because it epitomises the important solving
+strategy known as \emph{divide and conquer}: the input is split, each
+non-trivial part is recursively processed and the partial
+solutions are finally combined to form the complete solution. Whilst
+merge sort is not difficult to program, expressing accurately the
+number of comparisons in terms of the input size, namely the
+\emph{cost}, requires advanced knowledge in the analysis of
+algorithms.
+
+In particular, the bottom-up variant of merge
+sort~\cite{PannyProdinger:1995,Knuth:1998} calls for a deep
+understanding of Fourier analysis and complex analytic
+combinatorics~\cite{Delange:1975, FlajoletGolin:1994, Hwang:1998,
+  ChenHwangChen:1999, FlajoletSedgewick:2009}. This version is often
+implemented when linked-lists are sorted, commonly in purely
+functional languages, and stability or onlining (the sorting process
+is temporally interleaved with the input process) is
+required~\cite{Okasaki:1998}.
+
+Whilst mathematicians find Fourier and complex analysis simple enough,
+we aim here at making the analysis of bottom-up merge sort more
+accessible to computer scientists and also at better explaining its
+relationship with the top-down variant, often used when the input is
+an array or stability is not required on linked-lists. More precisely,
+we derive the tightest bounds of the form \(\alpha n\lg n + \beta n +
+\gamma\) on the extremal and average costs of bottom-up merge sort, by
+relying only on calculus, discrete mathematics and mathematical
+induction (considered `simple' here), at the expense of a closed form
+on the linear terms, where~\(\beta\) is not a constant, but a function
+\(\beta(\lg n)\). We think that this trade-off is acceptable because
+the bounds are tight.
+
+Moreover, we propose self-contained and very detailed derivations,
+which is usually not a requirement for mathematicians, but this fact
+should be kept firmly in mind when comparing the actual length of
+previous proofs with our own.

@@ -1,0 +1,561 @@
+%%-*-latex-*-
+
+This section completes the two previous sections which present the
+constraint collection from types and subtypes and it describes the
+solving procedure for the collected constraints. As a result, either
+the constraints have no solutions (and the corresponding \ASN
+specification must be rejected) or the value sets can be finitely
+represented. It is straightforward to determine whether these value
+sets are empty; if they are empty then the specification is rejected.
+
+The constraint modeling an \ASN specification is 
+$$\overline{\kappa} = \CEbigand{x \in {\cal X}}{\denotC{\I}{\TRef \,
+(x)}{\TSEmap{}(x)}{\TSEmap{{\cal X} \backslash \{x\}}}}$$
+
+\noindent
+where ${\cal X} \subset {\cal R}$ is the finite set of the top-level
+type names of the specification and $\TSEmap{} : {\cal X} \rightarrow
+V$ maps these type names to fresh variables. The construction of a
+constraint modeling an entire specification is convenient during the
+collection (less parenthesis involved), but it is more comfortable for
+the solving procedure to use a system of constraints.
+
+\begin{Def}[Systems of constraints]\label{systems_of_constraints}
+A \emph{system of constraints} is simply a set of constraints. The
+system corresponding to the \ASN specification is $\Xi \,
+(\overline{\kappa})$, where
+
+\begin{center}
+\begin{tabular}{rcl}
+    $\Xi \, (\kappa_0 \CEand \kappa_1)$
+  & = &
+    $\Xi \, (\kappa_0) \, \cup \, \Xi \, (\kappa_1)$\\
+    $\Xi (\kappa)$
+  & = &
+    $\{\kappa\}$ otherwise.
+\end{tabular}
+\end{center}
+
+\end{Def}
+
+We introduce the solving procedure as the semantics of a system of
+constraints. In this aim, we first need to define a strict subset of
+the expressions \E{} containing no variables: the \emph{terms}. They
+can be characterised by the variables occurring in the expressions:
+
+\begin{Def}[Variables in expressions]\label{variables_in_expressions} 
+The countable set of variables $\alpha$, $\beta$, $\gamma$ etc. is
+noted $V$. The variables of an expression $e$ are given by:
+
+\begin{center}
+\begin{tabular}{rcl}
+$\VAR{\alpha}$
+              & = & $\{\alpha\}$\\
+$\VAR{\SEneg{e}}$
+              & = & $\VAR{e}$\\
+$\VAR{e_0 \, \SEcup \, e_1}$
+              & = & $\VAR{e_0} \, \cup \, \VAR{e_1}$\\
+$\VAR{e_0 \, \SEcap \, e_1}$
+              & = & $\VAR{e_0} \, \cup \, \VAR{e_1}$\\
+$\VAR{e_0 \, \SEdiff \, e_1}$
+              & = & $\VAR{e_0} \, \cup \, \VAR{e_1}$\\
+$\VAR{\Cons \, (e_0,e_1)}$
+              & = & $\VAR{e_0} \, \cup \, \VAR{e_1}$\\
+$\VAR{\Bind \, (l,e_0,e_1)}$
+              & = & $\VAR{e_0} \, \cup \, \VAR{e_1}$\\
+$\VAR{l \pmb{:} e}$
+              & = & $\VAR{e}$\\
+$\VAR{e \SEdiam \varsigma}$
+              & = & $\VAR{e}$\\
+$\VAR{e}$      
+              & = & $\varnothing$ otherwise.
+\end{tabular}
+\end{center}
+\end{Def}
+
+Now we can define the ground expressions, or terms.
+
+\begin{Def}[Terms]\label{terms} 
+A \emph{term} $t$ is an element of the set $\Herbrand \triangleq \{e
+\in \E \mid \VAR{e} = \varnothing\}$. The set of all subsets of
+$\Herbrand$ is noted $\wp \,(\Herbrand)$.
+\end{Def}
+
+Note that the terms do not only correspond to the \ASN well-typed
+values, for example the term $\Cons \, (\PosInt \, (0), \Cons \,
+(\String \, \texttt{""}, \Nil))$ is not a typable term, i.e. there is
+no \ASN type for  the \ASN value \verb+{+\texttt{\small 0,} \verb+""}+
+denoted by this term.
+
+Another necessary step is to characterise different kind of
+expressions, because the constraints in which they appear are solved
+by means of a specific algorithm: one for the integer intervals, one
+for the real intervals, one for the regular expressions, one for the
+powersets and one for the sets.
+
+\begin{Def}[Characterization of integer intervals]
+An expression $e \in \E$ denotes an integer interval if
+$\chi_{\textnormal{I}} \, (e) = \ocamlkwd{true}$,
+where
+
+\medskip
+
+\noindent
+\begin{tabular}{l}
+  $\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \chi_{\textnormal{I}}
+   = \ocamlkwd{function} \,\, \SEneg{e} \rightarrow
+   \chi_{\textnormal{I}} (e)$\\
+  \begin{tabular}{ll}
+      $\mid$
+    & \hspace*{-4mm}
+      $e_0 \SEcup e_1 \mid e_0 \SEcap e_1 \mid e_0 
+      \SEdiff e_1 \rightarrow \chi_{\textnormal{I}} (e_0)
+      \,\, \textsf{\small \&\&} \,\, \chi_{\textnormal{I}} (e_1)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, \exists e \in \E.(\alpha \CEeq
+       e) \in \Xi \, (\overline{\kappa}) \rightarrow
+       \chi_{\textnormal{I}} (e)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\SEbot \mid \Interval \, \wildcard
+       \rightarrow \ocamlkwd{true} \, \mid \,
+       \wildcard \rightarrow \ocamlkwd{false}$
+  \end{tabular}
+\end{tabular}
+
+\end{Def}
+
+\begin{Def}[Characterization of real intervals]
+An expression $e \in \E$ denotes a real interval if
+$\chi_{\textnormal{F}} \, (e) = \ocamlkwd{true}$, where
+
+\medskip
+
+\noindent
+\begin{tabular}{l}
+  $\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \chi_{\textnormal{F}}
+   = \ocamlkwd{function} \,\, \SEneg{e} \rightarrow
+   \chi_{\textnormal{F}} (e)$\\
+  \begin{tabular}{ll}
+      $\mid$
+    & \hspace*{-4mm}
+      $e_0 \SEcup e_1 \mid e_0 \SEcap e_1 \mid e_0 
+      \SEdiff e_1 \rightarrow \chi_{\textnormal{F}} (e_0)
+      \,\, \textsf{\small \&\&} \,\, \chi_{\textnormal{F}} (e_1)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, \exists e \in \E.(\alpha \CEeq
+       e) \in \Xi \, (\overline{\kappa}) \rightarrow
+       \chi_{\textnormal{F}} (e)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\SEbot \mid \wildcard \, \wildcard \,\, 
+      \asnkwdconstr{..} \,\, \wildcard \, \wildcard 
+      \rightarrow \ocamlkwd{true} \, \mid \,
+      \wildcard \rightarrow \ocamlkwd{false}$
+  \end{tabular}
+\end{tabular}
+
+\end{Def}
+
+\begin{Def}[Characterization of regular expressions]
+An expression $e \in \E$ denotes a regular expression if
+$\chi_{\textnormal{R}} \, (e) = \ocamlkwd{true}$, where
+
+\medskip
+
+\noindent
+\begin{tabular}{l}
+  $\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \chi_{\textnormal{R}}
+   = \ocamlkwd{function} \,\, \SEneg{e} \rightarrow
+   \chi_{\textnormal{R}} (e)$\\
+  \begin{tabular}{ll}
+      $\mid$
+    & \hspace*{-4mm}
+      $e_0 \SEcup e_1 \mid e_0 \SEcap e_1 \mid e_0 
+      \SEdiff e_1 \rightarrow \chi_{\textnormal{R}} (e_0)
+      \,\, \textsf{\small \&\&} \,\, \chi_{\textnormal{R}} (e_1)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, \exists e \in \E.(\alpha \CEeq
+       e) \in \Xi \, (\overline{\kappa}) \rightarrow
+       \chi_{\textnormal{R}} (e)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\Regexp \, \wildcard \rightarrow \ocamlkwd{true} \, 
+      \mid \, \wildcard \rightarrow \ocamlkwd{false}$
+  \end{tabular}
+\end{tabular}
+
+\end{Def}
+
+
+\begin{Def}[Characterization of powerset expressions]
+An expression $e \in \E$ denotes a powerset if $\chi_{\textnormal{P}}
+\, (e) = \ocamlkwd{true}$, where
+
+\medskip
+
+\noindent
+\begin{tabular}{l}
+  $\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \chi_{\textnormal{P}}
+   = \ocamlkwd{function} \,\, \SEneg{e} \rightarrow
+   \chi_{\textnormal{P}} (e)$\\
+  \begin{tabular}{ll}
+      $\mid$
+    & \hspace*{-4mm}
+      $e_0 \SEcup e_1 \mid e_0 \SEcap e_1 \mid e_0 
+      \SEdiff e_1 \rightarrow \chi_{\textnormal{P}} (e_0)
+      \,\, \textsf{\small \&\&} \,\, \chi_{\textnormal{P}} (e_1)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, \exists e \in \E.(\alpha \CEeq
+       e) \in \Xi \, (\overline{\kappa}) \rightarrow
+       \chi_{\textnormal{P}} (e)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $e \SEdiam \varsigma \rightarrow \ocamlkwd{true} \,
+       \mid \wildcard \rightarrow \ocamlkwd{false}$
+  \end{tabular}
+\end{tabular}
+
+\end{Def}
+
+
+\begin{Def}[Characterization of set expressions]
+An expression $e \in \E$ denotes a set if $\chi_{\textnormal{S}} \,
+(\varnothing) \, (e) = \ocamlkwd{true}$, where
+
+\medskip
+
+\noindent
+\begin{tabular}{l}
+  $\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \chi_{\textnormal{S}} \,
+   (\Path) = \ocamlkwd{function} \,\, \SEneg{e} \rightarrow
+   \chi_{\textnormal{S}} \, (\Path) \, (e)$\\
+  \begin{tabular}{ll}
+      $\mid$
+    & \hspace*{-4mm}
+      $e_0 \SEcup e_1 \mid e_0 \SEcap e_1 \mid e_0 
+      \SEdiff e_1 \rightarrow \chi_{\textnormal{S}} \, (\Path) \, (e_0)
+      \,\, \textsf{\small \&\&} \,\, \chi_{\textnormal{S}} \, (\Path)
+      \, (e_1)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, \alpha \in \Path \rightarrow
+       \ocamlkwd{true}$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\alpha \,\, \ocamlkwd{when} \,\, 
+       \exists e \in \E.(\alpha \CEeq e) \in \Xi \,
+       (\overline{\kappa}) \rightarrow 
+       \chi_{\textnormal{S}} \, (\{\alpha\} \cup \Path) \, (e)$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\Interval \wildcard 
+       \mid \wildcard \, \wildcard \,\, \asnkwdconstr{..} \,\,
+            \wildcard \, \wildcard  
+       \mid \Regexp \wildcard 
+       \mid e \SEdiam \varsigma \rightarrow \ocamlkwd{false}$\\
+      $\mid$
+    & \hspace*{-4mm}
+      $\wildcard \rightarrow \ocamlkwd{true}$
+  \end{tabular}
+\end{tabular}
+
+\end{Def}
+
+\noindent
+Now we can define the semantics of expressions.
+
+\begin{Def}[Semantics of expressions]\label{semantics_of_SE}
+A \emph{substitution} $\sigma$ is a function $\sigma : V \rightarrow
+\wp \,(\Herbrand)$ from vari\-ables to sets of terms. The set of
+substitutions is noted $\Sigma$. The standard semantics $\SEmu$ of
+expressions is a mapping $\SEmu : \E \times \Sigma \rightarrow \wp \,
+(\Herbrand)$ from the Cartesian product of expressions and
+substitutions into sets of terms.
+\end{Def}
+\begin{itemize}
+
+  \item 
+    if $\chi_{\textnormal{I}} \, (e) = \ocamlkwd{true}$ then $\SEmu \,
+    (e, \sigma) = \|e\|$, where\\ $\| \wildcard \,\| \colon \E
+    \rightarrow \textsf{[$>$}
+      \ocamltypename{clo\-sed\_int\_in\-ter\-val} \,\, \textsf{$\mid$}
+      \,\, \SEbot \textsf{]}$ is a function defined as follows:
+
+    \begin{center}
+    \begin{tabular}{lll}
+        $\| e \,\| =$ 
+      & \hspace*{-4mm}
+        $\ocamlkwd{let}$
+      & \hspace*{-4mm}
+        $\alpha \,\, \emph{be a fresh variable}$\\
+      & \hspace*{-4mm}
+        $\ocamlkwd{in}$
+      & \hspace{-4mm}
+        $\ocamlvaluename{solve\_integers} \, (\alpha \CEeqI e) \,
+         (\alpha)$
+    \end{tabular}
+    \end{center}
+
+  \item 
+    if $\chi_{\textnormal{F}} \, (e) = \ocamlkwd{true}$ then $\SEmu \,
+    (e, \sigma)$ is computed by a function similar to
+    $\|\wildcard\,\|$, which applies to real intervals (not presented
+    for the sake of brevity);
+ 
+    \bigskip
+
+  \item 
+    if $\chi_{\textnormal{R}} \, (e) = \ocamlkwd{true}$ then
+
+    \begin{center}
+    \begin{tabular}{rcl}
+        $\SEmu \, (e, \sigma)$
+      & \hspace*{-4mm} = &\\
+        \multicolumn{3}{l}{
+          \begin{tabular}{ll}
+              $\ocamlkwd{let}$
+            & \hspace*{-4mm}
+              $\alpha \,\, \emph{be a fresh variable}$\\
+              $\ocamlkwd{in}$
+            & \hspace*{-5mm}
+              $\ocamlkwd{match} \,\, \ocamlvaluename{solve\_regexp} \,
+               (\alpha \CEeqR e) \, (\alpha) \,\, \ocamlkwd{with}$\\
+            & 
+              $s \,\, \ocamlkwd{when} \,\, s \not= \textsf{""}
+               \rightarrow \{\Regexp \, (s)\}$
+          \end{tabular}
+        }
+    \end{tabular}
+    \end{center}
+
+  \item\label{semantics_of_PSE}
+   if $\chi_{\textnormal{P}} \, (e) = \ocamlkwd{true}$ then $\SEmu$ is
+   defined by the equations
+
+   \begin{center}
+   \begin{supertabular}{rcl} %XXX
+       $\SEmu (\alpha, \sigma)$
+     & = &
+       $\sigma \, (\alpha)$\\
+       $\SEmu (e \SEdiam \varsigma, \sigma)$ 
+     & = & 
+       $\{t \SEdiam \varsigma \mid t \in \SEmu (e, \sigma)\}$\\
+       $\SEmu (\pi_0 \SEcap \pi_1, \sigma)$
+     & = &
+       $\ocamlkwd{let} \,\, \overline{\pi} = \SEmu (\pi_0, \sigma),
+        \SEmu (\pi_1, \sigma)$\\
+     & &
+       $\ocamlkwd{in} \,\, \varphi \, (\overline{\pi}, \SEcap,
+        \SEcap)$\\  
+       $\SEmu (\pi_0 \SEdiff \pi_1, \sigma)$ 
+     & = &
+       $\ocamlkwd{let} \,\, \overline{\pi} = \SEmu (\pi_0, \sigma),
+        \SEmu (\pi_1, \sigma)$\\ 
+     & &
+       $\ocamlkwd{in} \,\, \varphi \, (\overline{\pi}, \SEcap,
+        \SEdiff) \, \disjunion \, \varphi \, (\overline{\pi},
+        \SEdiff, \ocamlvaluename{fst})$\\
+       $\SEmu (\pi_0 \SEcup \pi_1, \sigma)$
+     & = &\\
+       \multicolumn{3}{r}{
+         \begin{tabular}{ll}
+             $\ocamlkwd{let}$
+           & \hspace*{-4mm}
+             $(\overline{\pi}_0, \overline{\pi}_1) \AS \overline{\pi}
+              = \SEmu (\pi_0, \sigma), \SEmu (\pi_1, \sigma)$\\
+             $\ocamlkwd{in}$
+           & \hspace*{-5mm}
+             $\varphi \, (\overline{\pi}, \SEcap, \SEcup) \,
+              \disjunion
+              \, \varphi \, (\overline{\pi}, \SEdiff,
+              \ocamlvaluename{fst}) \, \disjunion \, \varphi \,
+              ((\overline{\pi}_1, \overline{\pi}_0), \SEdiff,
+              \ocamlvaluename{fst})$ 
+         \end{tabular}
+       }\\
+   \end{supertabular}
+   \end{center}
+
+The second equation relies on the semantics of set expressions
+presented in definition~\ref{semantics_of_SE} ($e$ ranges over the set
+expressions). The second equation gives the semantics of the
+intersection of two powersets. $\overline{\pi}$ is the pair of the
+semantics of $\pi_0$ and $\pi_1$. The function $\varphi$ is defined as
+follows:
+
+\vspace*{-4mm}
+
+\begin{center}
+\begin{tabular}{rcl}
+    $\varphi \, ((\overline{\pi}_0, \overline{\pi}_1), f, g)$
+  & \hspace*{-4mm} $\triangleq$
+  & \hspace*{-4mm}
+    $\{e \SEdiam i \mid e_0 \SEdiam i_0 \in \overline{\pi}_0, 
+       e_1 \SEdiam i_1 \in \overline{\pi}_1,$\\
+    \multicolumn{3}{r}{
+      $e \in \|g (e_0, e_1)\| \backslash \{\SEbot\}, i \in \|f (i_0,
+       i_1)\| \backslash \{\SEbot\}\}$ 
+    }
+\end{tabular}
+\end{center}
+
+\noindent
+The first argument of $\varphi$ is the pair $(\overline{\pi}_0,
+\overline{\pi}_1)$ of semantics. The second, $f$, is the set operator
+to be applied to the intervals of the elements of $\overline{\pi}_0$
+and $\overline{\pi}_1$. The last, $g$, is the set operator to be
+applied to the set expressions of $\overline{\pi}_0$ and
+$\overline{\pi}_1$. For instance, $\varphi \, (\overline{\pi}, \SEcap,
+\SEcap) = \{e \SEdiam i \mid e_0 \SEdiam i_0 \in \overline{\pi}_0, e_1
+\SEdiam i_1 \in \overline{\pi}_1, e \in \|e_0 \, \SEcap \, e_1\|
+\backslash \{\SEbot\}, i \in \|i_0 \, \SEcap \, i_1\| \backslash
+\{\SEbot\}\}$. The intuition is that the intersection of two powersets
+is the powerset whose elements are the intersection of the initial
+elements with the \emph{same} cardinal (hence we compute the
+intersection of the intervals).
+
+The fourth equation defines the semantics of the difference of two
+powersets: $\varphi \, (\overline{\pi}, \SEcap, \SEdiff) \, \disjunion
+\, \varphi \, (\overline{\pi}, \SEdiff, \ocamlvaluename{fst})$. The
+symbol $\disjunion$ is the disjunctive set union $\cup$. The elements
+of the powerset $\varphi \, (\overline{\pi}, \SEcap, \SEdiff)$ are the
+difference between the initial elements of same cardinal. The elements
+of the powerset $\varphi \, (\overline{\pi}, \SEdiff,
+\ocamlvaluename{fst})$ are the elements of $\overline{\pi}_0$ whose
+cardinals are different from the cardinals of the elements of
+$\overline{\pi}_1$. The rationale of the equation comes from the
+trivial formula $A = (A \, \cap \, B) \, \disjunion \, (A \,
+\backslash \, B)$.
+
+The last equation defines the semantics of the union of two powersets
+as $\varphi \, (\overline{\pi}, \SEcap, \SEcup) \, \disjunion \,
+\varphi \, (\overline{\pi}, \SEdiff, \ocamlvaluename{fst}) \,
+\disjunion \, \varphi \, ((\overline{\pi}_1, \overline{\pi}_0),
+\SEdiff, \ocamlvaluename{fst})$. First, the elements of the powerset
+$\varphi \, (\overline{\pi}, \SEcap, \SEcup)$ are the union of the
+initial elements of same cardinal. Second, the elements of the
+powerset $\varphi \, (\overline{\pi}, \SEdiff, \ocamlvaluename{fst})$
+are the elements of $\overline{\pi}_0$ whose cardinals are different
+from the cardinals of the elements of $\overline{\pi}_1$. Last, the
+elements of the powerset $\varphi \, ((\overline{\pi}_1,
+\overline{\pi}_0), \SEdiff, \ocamlvaluename{fst})$ are the elements of
+$\overline{\pi}_1$ whose cardinals are different from the cardinals of
+the elements of $\overline{\pi}_0$. The rationale of this equation is
+the formula: $A \, \cup \, B = (A \, \cap \, B) \, \disjunion
+\, (A \, \backslash \, B) \, \disjunion \, (B \, \backslash \, A)$.
+
+  \item 
+    Otherwise, if $\chi_{\textnormal{S}} \, (\varnothing) \, (e) =
+    \ocamlkwd{true}$ then $\SEmu$ is defined by the following
+    equations:
+
+\begin{center}
+\begin{supertabular}{rcl} %XXX
+$\SEmu(\SEbot,\sigma)$ & = & $\varnothing$ \\
+$\SEmu(\SEtop,\sigma)$ & = & $\Herbrand$ \\
+$\SEmu(\alpha,\sigma)$    & = & $\sigma \, (\alpha)$ \\
+$\SEmu(e_0 \, \SEcup \, e_1, \sigma)$
+              & = & $\SEmu(e_0,\sigma) \, \cup \, \SEmu(e_1,\sigma)$ \\
+$\SEmu(e_0 \, \SEcap \, e_1,\sigma)$
+              & = & $\SEmu(e_0,\sigma) \, \cap \, \SEmu(e_1,\sigma)$ \\
+$\SEmu(\SEneg{e},\sigma)$ 
+              & = & $\Herbrand \, \backslash \, \SEmu(e,\sigma)$ \\ 
+$\SEmu(e_0 \SEdiff e_1, \sigma)$
+              & = & $\SEmu(e_0 \, \SEcap \, \SEneg{e_1}, \sigma)$\\
+$\SEmu(\ocamlvaluename{l}\/ \pmb{:} e,\sigma)$
+              & = & $\{ \ocamlvaluename{l}\/ \pmb{:} t \mid t \in
+		    \SEmu(e,\sigma) \}$ \\
+$\SEmu(\Cons \, (e_0, e_1),\sigma)$
+              & = &\\
+\multicolumn{3}{r}{$\{\Cons \, (t_0, t_1) \mid 
+  t_0 \in \SEmu(e_0,\sigma), t_1 \in \SEmu(e_1,\sigma)\}$}\\
+$\SEmu(\Bind \, (\ocamlvaluename{y}, e_0, e_1),\sigma)$
+              & = &\\
+\multicolumn{3}{r}{$\{\Bind \, (\ocamlvaluename{y}, t_0, t_1) \mid
+  t_0 \in \SEmu(e_0,\sigma), t_1 \in \SEmu(e_1,\sigma)\}$}\\
+$\SEmu(\ocamlvaluename{e},\sigma)$
+              & = & $\{ \ocamlvaluename{e} \}$ otherwise.\\
+\end{supertabular}
+\end{center}
+
+\end{itemize}
+
+Now we can define the semantics of constraints on top of the semantics
+of expressions.
+
+\begin{Def}[Semantics of constraints]
+We define the semantics $\CEmu : {\cal K} \times \Sigma \rightarrow
+\ocamltypename{bool}$ of constraints as a predicate on the Cartesian
+product of constraints and substitutions:
+
+\begin{center}
+\begin{tabular}{rcl}
+  $\CEmu(\kappa_0 \CEand \kappa_1,\sigma)$
+    & = & $\CEmu(\kappa_0,\sigma) \BOOLand
+          \CEmu(\kappa_1,\sigma)$ \\ 
+  $\CEmu(e_0 \, \CEsubseteq \, e_1,\sigma)$
+    & = & $\SEmu(e_0,\sigma) \subseteq \SEmu(e_1,\sigma)$\\
+  $\CEmu(e_0 \, \CEeq \, e_1,\sigma)$
+    & = & 
+  $\CEmu((e_0 \, \CEsubseteq \, e_1)
+         \CEand 
+         (e_1 \, \CEsubseteq \, e_0),
+         \sigma)$
+\end{tabular}
+\end{center}
+
+\noindent
+where $\!\!\BOOLand\!\!$ is the logical boolean operator and
+$\subseteq$ is the inclusion over mathematical sets (of terms).
+\end{Def}
+
+\begin{Def}[Solutions]
+The \emph{set of solutions} ${\cal S}(\kappa)$ of a constraint
+$\kappa$ is the set of all substitutions that satisfy the semantics of
+$\kappa$: ${\cal S}(\kappa) = \{ \sigma \in \Sigma \, \mid \,
+\CEmu(\kappa,\sigma) \}$.
+\end{Def}
+
+The algorithm constructing the solutions of a system of set
+constraints may be the algorithm which was published by Aiken and
+Wimmers in 1992~\cite{AikenWimmers:1992}. We constructed our
+constraint expressions in order to almost exactly fit the input of
+this algorithm (see definition~\ref{expressions}). The only thing to
+do is to replace $\E_0 \, \SEdiff \, \E_1$ by $\E_0 \, \SEcap \,
+\SEneg\E_1$, since these two set expressions have the same semantics
+(see definition~\ref{semantics_of_SE}).
+
+\subsection{Worst-case complexity analysis}
+
+Let us say some words about the complexity of the solving
+procedure. The collecting algorithm we have presented is obviously not
+optimised, in any way. For instance, a type which is constrained by a
+combination of subtyping constraints will be analysed each time a
+basic constraint is analysed. The reason for this is that we want to
+provide an algorithm that can also be considered as a reference formal
+model, thus it must be as readable as possible. Therefore, any
+optimisation is postponed until the implementation phase (as using
+hash-consing or caches to solve the mentioned problem). Anyway, the
+reader can convince himself that the worst case complexity of the
+collecting algorithm is proportional to the size of the subtypes plus
+the complexity of the computations on integer intervals and regular
+expressions.
+
+The worst case complexity of the solving procedure is the same as the
+complexity of Aiken and Wimmers' algorithm. In their paper, they prove
+that their algorithm is in class NEXPTIME (they also published,
+together with Kozen and Vardi, a general study about the complexity of
+solving set constraints~\cite{AikenKozenVardiWimmers:1993}). This
+result may be very disappointing, but it is inherent to the high
+expressiveness of \ASN subtyping, in particular the use of a
+complement operator (hence not monotonic) with indiscriminate unions
+and intersections. As a future work, it would be interesting to
+implement our algorithm and to make some benchmarks. Also, there
+exists constraint subclasses with polynomial complexity in the
+worst case and it would be worth studying whether it is possible, in
+practice, to model \ASN with them.

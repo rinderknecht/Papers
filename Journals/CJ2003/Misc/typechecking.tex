@@ -1,0 +1,267 @@
+%%-*-latex-*-
+
+Let us recall that \ASN subtyping is powerful enough to imply the
+typechecking relationship. 
+
+\begin{center}
+\begin{inferencesystem}
+%
+% Type reference
+%
+\deduction
+%%   x \in {\cal A}
+%%   \cr
+   \Gamma(x) \lhd (\normT', \sigma')
+   \cr
+   \TypeEnv \vdash v : \normT'
+   ----------------------------------
+   \TypeEnv \vdash v : \TRef \, (x)
+\end
+\neardeductionlabel{\hspace*{-4pt}\rulename{TRef}}
+\end{inferencesystem}
+\begin{inferencesystem}
+%
+% CHOICE
+%
+\deduction
+  \cr
+  \TypeEnv \vdash v' : \FieldEnv{}(l')
+ ------------------------------------------------------------------
+  \TypeEnv \vdash (l' \colon v') : \kwdCHOICE \, \FieldEnv{}
+\end
+\neardeductionlabel{\hspace*{-4pt}\rulename{Choice}}
+\end{inferencesystem}
+\end{center}
+
+\begin{center}
+\begin{inferencesystem}
+%%====
+%% SET
+%%====
+%%
+%% Matched field
+%%
+\deduction
+   \CompEnv{}(l) \lhd (\normT', \wild)
+   \cr
+   \TypeEnv \vdash \IdEnv{}(l) : \normT'
+   \cr
+   \TypeEnv \vdash \Map \, (\IdEnv{\Labels' \backslash l}) : \kwdSET \, \CompEnv{\Labels \backslash l}
+ ------------------------------------------------------------------------------------
+   \TypeEnv \vdash \Map \, (\IdEnv{\Labels'})  : \kwdSET \, \CompEnv{\Labels}
+\end
+\neardeductionlabel{\hspace*{-4pt}\rulename{Set}}
+\end{inferencesystem}
+\begin{inferencesystem}
+%%
+%% Empty SET
+%%
+\axiom
+  \cr \cr
+   \TypeEnv \vdash \Map \, (\IdEnv{\varnothing}) : \kwdSET \, \CompEnv{\varnothing}
+\end
+\neardeductionlabel{\rulename{$\varnothing$-\textsf{set}}}
+\end{inferencesystem}
+\end{center}
+
+\begin{center}
+\begin{inferencesystem}
+%%
+%% Unmatched OPTIONAL field
+%%
+\deduction
+   \CompEnv{}(l) \lhd (\wild, \Some \, \kwdOPTIONAL)
+   \cr
+   \TypeEnv \vdash v : \kwdSET \, \CompEnv{\Labels \backslash l}
+  ----------------------------------------------------------------
+   \TypeEnv \vdash v : \kwdSET \, \CompEnv{\Labels}
+\end
+\neardeductionlabel{\rulename{OptSet}}
+\end{inferencesystem}
+\end{center}
+
+%%\begin{rules}
+%%
+%%====
+%% SEQUENCE
+%%====
+%%
+%%\deduction
+%%   \TypeEnv, x \vdash v : \kwdSET \, \Phi
+%% ----------------------------------------------
+%%   \TypeEnv, x \vdash v : \kwdSEQUENCE \, \Phi
+%%\end
+%%\neardeductionlabel{[18]} 
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%=======
+%% AXIOMS
+%%=======
+%%\deduction
+%%  -----------------------------------------------------------
+%%   \TypeEnv, x \vdash (\kwdFALSE \mid \kwdTRUE) : \kwdBOOLEAN
+%%\end
+%%\neardeductionlabel{\textsf{Bool}}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%\deduction
+%%  -------------------------------------
+%%   \TypeEnv, x \vdash \Null : \kwdNULL
+%%\end
+%%\neardeductionlabel{\textsf{Null}}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%\deduction
+%%   v \lhd \kwdMINUSINFINITY \mid \kwdPLUSINFINITY
+%%  ------------------------------------------------
+%%   \TypeEnv, \textsc{"Real"} \vdash v : \wild
+%%\end
+%%\neardeductionlabel{\textsf{Inf}}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%\deduction
+%%   \mid \!s\! \mid \, \equiv 0 \,\, [\textrm{mod} \,\, 8]
+%%  --------------------------------------------------------
+%%   \TypeEnv, x \vdash \BinStr (s) : \kwdOCTETSTRING
+%%\end
+%%\neardeductionlabel{\textsf{BinStr}}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%\deduction
+%% -----------------------------------------------------------------
+%%   \TypeEnv, x \vdash (\PosInt \wild \mid \NegInt \wild) : \wildINTEGER
+%%\end
+%%\neardeductionlabel{[6]} \\ \\
+%%
+%%\deduction
+%% ------------------------------------------------------------------------
+%%   \TypeEnv, \textsc{"Real"} \vdash (\PosInt \wild \mid \NegInt \wild) : \wild
+%%\end
+%%\neardeductionlabel{[7]}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%\deduction
+%%  -------------------------------------------------------
+%%   \TypeEnv, \textsc{"Real"} \vdash (\PosReal \wild \mid \NegReal \wild): \wild
+%%\end
+%%\neardeductionlabel{[7bis]}
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%
+%% Strings
+%%
+%%\deduction
+%%  -------------------------------------------------------
+%%   \TypeEnv, x \vdash \String \wild : \kwdCHARACTERSTRING
+%%\end
+%%\neardeductionlabel{[8]}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%\deduction
+%%   \textit{Some restriction tests here}
+%%  ----------------------------------------------------
+%%   \TypeEnv, x \vdash \String \wild : \RestrStr \wild
+%%\end
+%%\neardeductionlabel{[8bis]}
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%===========
+%% BIT STRING
+%%===========
+%%\deduction
+%%  ---------------------------------------------------
+%%   \TypeEnv, x \vdash \BinStr \wild : \wildBITSTRING
+%%\end
+%%\neardeductionlabel{[9]} 
+%%
+%%\end{rules}
+
+%%\begin{rules}
+%%
+%%===========
+%% ENUMERATED
+%%===========
+%%\deduction
+%%   \normT \lhd \kwdENUMERATED \,\, ([(y, \wild\!)] \sqcup {\cal C}')
+%%  ---------------------------------------------------------------
+%%   \TypeEnv, x \vdash \Ident \, (y) : \normT
+%%\end
+%%\neardeductionlabel{[10]} 
+%%
+%%\end{rules}
+%%
+%%\begin{rules}
+
+%%=====================
+%% SET OF / SEQUENCE OF
+%%=====================
+%%\deduction
+%%   \normT \lhd (\kwdSEQUENCEOF \mid \kwdSETOF) \,\, \normT' \, \sigma'
+%%   \cr
+%%   \TypeEnv \vdash \IntEnv{\{i\}}(i) : \normT'
+%%   \cr
+%%   \TypeEnv \vdash \List \, (\IntEnv{\I}) : \normT
+%%  ----------------------------------------------------------------------
+%%   \TypeEnv \vdash \List \, (\IntEnv{\{i\} \cup \I}) : \normT
+%%\end
+%%\neardeductionlabel{\rulename{List}} \\ \\
+
+%%
+%% Empty
+%%
+%%\deduction
+%%   \normT \lhd (\kwdSEQUENCEOF \mid \kwdSETOF) \, \wild
+%%  --------------------------------------------------
+%%   \TypeEnv, x \vdash \List \, \emptyL : \normT
+%%\end
+%%\neardeductionlabel{[12]}
+%%
+%%\end{rules}
+
+%%
+%%\deduction
+%%\label{controle_des_types_14}
+%%   \domain{{\cal A}} \Gamma, x \vdash v : {\sf CHOICE} \, \F'
+%% ----------------------------------------------------------------------------------
+%%   \domain{{\cal A}} \Gamma, x \vdash v : {\sf CHOICE} \, ([f'] \sqcup \F')
+%%\end
+%%\neardeductionlabel{[14]} 
+
+
+%\section{Types bien labellisés\label{types_bien_labellises}}
+%\input{types_bien_labellises}
+
+%%\newpage
+
+%%\section{Unicité du contrôle des types\label{unicite_du_controle_des_types}}
+%%\input{unicite_du_controle_des_types}
+
+
+
+
+

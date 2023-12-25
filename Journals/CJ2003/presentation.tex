@@ -1,0 +1,167 @@
+ %%-*-latex-*-
+
+This section provides a very short overview of \ASN. For a more
+detailed introduction, please refer to Dubuisson's
+book~\cite{Dubuisson:2000}. The subtyping features will be presented
+in section~\ref{constraints_from_subtypes} together with the
+constraint collection from subtypes. \ASN provides basic types as
+follows.
+
+\begin{itemize}
+ 
+  \item The \texttt{\small BOOLEAN} type has two predefined values
+        \texttt{\small TRUE} and \texttt{\small FALSE},
+        \emph{e.g.,} \texttt{ok} \texttt{\small BOOLEAN ::= TRUE} defines a
+        value \texttt{\small TRUE} whose name is \texttt{ok} 
+        and whose type is \texttt{\small BOOLEAN}.
+
+  \item The \texttt{\small NULL} type only has one value, also noted
+        \texttt{\small NULL}. This type is often used as a placeholder
+        in many real complete specifications to indicate that no
+        additional information is needed, or it is used to test
+        incomplete specifications.
+
+  \item The \texttt{\small INTEGER} type matches the mathematical set
+    $\mathbb{Z}$, \emph{e.g.,} \texttt{zero} \texttt{\small INTEGER
+    ::= 0}. The syntax also allows some constants to be distinguished:
+    \texttt{\small DayIn\-The\-Year ::= INTEGER \{first (1), last
+      (365)\}} defines the type \texttt{Day\-In\-The\-Year} as being
+    \texttt{\small INTEGER}, and distinguishes two integers named
+    \texttt{first} and \texttt{last}, whose respective values are
+    \texttt{\small 1} and \texttt{\small 365}. Then
+    \texttt{newYearsEve} \texttt{DayInTheYear} \texttt{\small ::=}
+    \texttt{last} defines a value \texttt{newYearsEve}. The definition
+    is valid because \texttt{last} is in the scope of
+    \texttt{Day\-In\-The\-Year}; the name \texttt{newYearsEve} is
+    bound to the value \texttt{\small 365}.
+
+  \item The \texttt{\small ENUMERATED} type defines a collection
+    of (constant) names, like \texttt{\small
+      Synchro\-Indicator ::= ENUMERATED \{serial, parallel\}} allows
+    the following value definition: \texttt{synchro
+      Synchro\-Indi\-ca\-tor} \texttt{\small ::=} \texttt{serial}. It
+    is possible, though not recommended, to specify the
+    \emph{encoding} of an enumerated value, like
+    \texttt{PositiveLogics} \texttt{\small ::= ENUMERATED}
+    \verb+{+\texttt{false} \texttt{\small (0),} \texttt{true}
+    \texttt{\small(1)}\verb+}+, but this has no impact on the values
+    themselves.
+
+  \item The \texttt{\small REAL} type corresponds to the mathematical
+        decimal numbers, defined either with a dotted notation,
+        \emph{e.g.,} \texttt{\small 5.7}, or a sequence,
+        \emph{e.g.,} \verb+{+\texttt{mantissa} \texttt{\small 1,}
+        \texttt{base} \texttt{10}\texttt{\small,} \texttt{exponent}
+        \texttt{\small -3}\verb+}+.
+
+  \item The \texttt{\small BIT STRING} type corresponds to strings of
+    bits, \emph{e.g.,} \texttt{\small '1101'B} (binary) or
+    \texttt{\small '0D'H} (hexadecimal). The syntax also allows some
+    bits to be distinguished. Given \texttt{\small T ::= BIT STRING}
+    \verb+{+\texttt{msb} \texttt{\small (7),} \texttt{lsb}
+    \texttt{\small (0)}\verb+}+, the definition \texttt{v}
+    \texttt{\small T ::=} \verb+{+\texttt{msb}\texttt{\small ,}
+    \texttt{lsb}\verb+}+ stands for \texttt{v} \texttt{\small T ::=
+      '10000001'B}.  It is also possible to restrict the size of the
+    string using a subtyping constraint: \texttt{StringOf32Bits ::=
+      BIT STRING (SIZE (32))}.
+
+  \item The \texttt{\small OCTET STRING} type is similar to the
+        \texttt{\small BIT STRING}, except that the encoded strings
+        must contain a number of bits that is a multiple of eight (and
+        no bit can be distinguished by a name).
+
+  \item The \texttt{\small OBJECT IDENTIFIER} and \texttt{\small
+        RELATIVE-OID} types are used to reference other \ASN
+        modules at an international level, by means of a path in a
+        standard tree. They can also identify a physical object, such
+        as a printer on a network, or a postal package, or an ASN.1
+        type which is carried in some larger message. They are not
+        considered here.
+
+  \item For historical reasons there are plenty of string types in
+        \ASN, like \texttt{Nu\-mer\-ic\-String}, \texttt{IA5String},
+        \texttt{UTF8String}, \texttt{GeneralString} etc. They mainly
+        differ in the alphabet they are built upon\footnote{There are
+        other factors besides just the alphabets. Some string types
+        such as \texttt{Ge\-ne\-ral\-String} allow escape characters
+        to kick into alternate character sets (such as those for
+        different languages) while others such as \texttt{UTF8String}
+        can represent characters of all languages directly.}. Here, we
+        will not make any difference between these strings,
+        and assume there is only one kind, called \texttt{String}.
+
+\end{itemize}
+
+\noindent
+These basic types can be used to construct other types:
+
+\begin{itemize}
+
+  \item The \texttt{\small SET} type corresponds to the record-like
+        structures in programming languages, \emph{e.g.,} \texttt{PersonInfo}
+        \texttt{\small ::= SET} \verb+{+\texttt{age} \texttt{\small
+        INTEGER,} \texttt{married} \texttt{\small BOOLEAN}\verb+}+ of
+        which one value may be: \texttt{i PersonInfo} \texttt{\small
+        ::=} \verb+{+\texttt{married} \texttt{\small TRUE,} \texttt{age}
+        \texttt{\small 32}\verb+}+. Some components may be marked as
+        optional or having a default value, \emph{e.g.,} \texttt{\small Point
+        ::= SET} \verb+{+\texttt{x} \texttt{\small REAL DEFAULT 0.0,}
+        \texttt{y} \texttt{\small REAL DEFAULT 0.0}\verb+}+ allows
+        defining the value \texttt{origin} \texttt{\small Point ::=}
+        \verb+{}+, which is the same as \texttt{origin} \texttt{\small
+        Point ::=} \verb+{+\texttt{x} \texttt{\small 0.0,} \texttt{y}
+        \texttt{\small 0.0}\verb+}+. Here is an example from a real
+        protocol:\\
+{\small
+\verb+DataAcknowledgementTPDU ::= SET {+\\
+\verb+  destRef        Reference,+\\
+\verb+  yr-tu-nr       TPDUnumber,+\\
+\verb+  checkSum       CheckSum OPTIONAL,+\\
+\verb+  subSeqNr       SubSequenceNumber DEFAULT 0,+\\
+\verb+  flowControlCnf FlowCntlConf OPTIONAL}+}
+
+  \item The \texttt{\small SEQUENCE} type is the same as the
+        \texttt{\small SET} type, except that the component values
+        must be given in the same order as they are declared, \emph{e.g.,},
+        given \texttt{\small Point ::= SEQUENCE} \verb+{+\texttt{x}
+        \texttt{\small REAL,} \texttt{y} \texttt{\small REAL}\verb+}+,
+        the value \texttt{origin} \texttt{\small Point ::=}
+        \verb+{+\texttt{y} \texttt{\small 0.0,} \texttt{x}
+        \texttt{\small 0.0}\verb+}+ is rejected.
+
+  \item The \texttt{\small SET OF} type corresponds to the
+    mathematical notion of sets with repetition: all elements are of
+    the same type, but their number is not known beforehand (unless
+    the set's size is constrained to a given value), and they can be
+    repeated, \emph{e.g.,} \texttt{\small T ::= SET OF INTEGER} allows
+    the value definitions \texttt{empty} \texttt{\small T ::=}
+    \verb+{}+ and \texttt{small} \texttt{\small T ::=}
+    \verb+{+\texttt{\small 7, 9, 1, 1, 3}\verb+}+.
+ 
+  \item The \texttt{\small SEQUENCE OF} type corresponds to the dynamic
+        arrays or lists of some programming languages. It is similar
+        to the \texttt{\small SET OF} type, except that the elements
+        will be encoded in the specified order. Since the encoding
+        rules are out of the scope of this paper, this difference is
+        not relevant.
+
+  \item The \texttt{\small CHOICE} type corresponds to a
+        \textsf{union} in C, a \textsf{case} in Pascal, or a sum type
+        in ML. For instance \texttt{\small T ::= CHOICE}
+        \verb+{+\texttt{x} \texttt{\small REAL,} \texttt{y}
+        \texttt{\small BOOLEAN}\verb+}+ allows the following
+        declarations: \texttt{u} \texttt{\small T ::=} \texttt{x :}
+        \texttt{\small 0.5}, where the component \texttt{x} is chosen
+        to build the value, and \texttt{v} \texttt{\small T ::=}
+        \texttt{y :} \texttt{\small FALSE} where the component
+        \texttt{y} is used. The protocol data units are \texttt{\small
+        CHOICE} types, because they model all the possible queries and
+        responses between two peers. As we show later, a
+        \texttt{\small CHOICE} type may be recursive, like the other
+        constructed types. An example from a network management
+        protocol is\\ {\small \verb+CMISFilter ::= CHOICE {+\\
+        \verb+ item FilterItem,+\\ \verb+ and SET OF CMISFilter,+\\
+        \verb+ or SET OF CMISFilter,+\\ \verb+ not CMISFilter}+}
+
+\end{itemize}

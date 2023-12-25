@@ -1,0 +1,140 @@
+%%-*-latex-*-
+
+\section{Formal model}
+\label{model}
+
+In order to reduce the gap between the program and its specification,
+we restrict ourselves to basic mathematical constructs that can be
+mapped to data structures and functions of the implementation
+programming language. Beyond the obvious integers, variables and
+tuples, the remaining terms are \emph{lists} and \emph{constructors}.
+We shall follow the \Prolog notation for lists and write \(\el\) for
+the empty list and \(\cons{e}{l}\) for the non\hyp{}empty list whose
+head is (denoted by) \(e\) and tail is (denoted by) \(l\). Some
+shorthands prove useful, e.g., \([a,b,c]\) instead of
+\(\cons{a}{\cons{b}{\cons{c}{\el}}}\), or \(\cons{a,b}{l}\) instead of
+\(\cons{a}{\cons{b}{l}}\). Constructors are names associated with a
+non\hyp{}empty list of terms, e.g., \(c([1,d([n])])\) is a term
+constructed with constructors \(c\) and \(d\). As a consequence, the
+number of terms is variable and positive, e.g., we can have
+\(c([1,d([n])])\) and \(c([e([1])])\), but not \(c(\el)\).
+
+\textbf{Parsing and Unparsing.} The converse of parsing, called
+\emph{unparsing}, is defined on the parse tree, so it is dependent
+only on the grammar. In order to cope with all programming languages,
+we make no assumptions on the nature of the lexemes. We denote a
+lexeme by \(l\) and their set is noted \(\cal L\). Each
+non\hyp{}terminal symbol of the grammar corresponds to exactly one
+constructor of the parse tree, with a variable number of
+arguments---the parse tree is an unranked tree. For example, the
+productions \verb/Exp ::= Integer | - Exp | Exp + Exp/ allow the
+constructor of \texttt{Exp} to have one, two or three arguments. Let
+\({\cal C}\) be the set of constructors of parse trees. In general, we
+write \(c(f)\), where \(f\) is the list of the arguments of
+constructor \(c \in {\cal C}\). By definition, the leaves of the parse
+trees are lexemes, so let \({\cal H}_0 = {\cal L}\) be the set of
+parse trees of height \(0\) and let us define recursively the set of
+trees of height \(n+1\) by the equation \({\cal H}_{n+1} = {\cal H}_n
+\cup \{c([h_1, h_2, \dots, h_p]) \mid c \in {\cal C}, h_i \in {\cal
+  H}_n, p > 0\}\), for all \(n \geqslant 0\). The cumulative infinite
+series \({\cal H}_0 \subseteq {\cal H}_1 \subseteq \dots\) has a
+smallest upper bound \(\cal H\), which is the set of all the parse
+trees. Let us note \(\cal T\) the set of all trees which are not
+reduced to one node, i.e., \({\cal T} = {\cal H} \setminus {\cal
+  L}\). We note \(l\) the lexemes (\(l \in {\cal L}\)), \(t\) the
+trees not reduced to one node (\(t \in {\cal T}\)) and \(h\) the
+general trees (\(h \in {\cal H}\)). The \emph{parse forest} of a given
+input is the list of its parse trees. The set of all the forests is
+inductively defined as the smallest set \(\cal F\) such that
+\begin{itemize}
+
+  \item \(\el \in {\cal F}\),
+
+  \item if \(h \in {\cal H}\) and \(f \in {\cal F}\) then
+    \(\cons{h}{f} \in {\cal F}\).
+
+\end{itemize}
+The expression \(f_1 \cdot f_2\) denotes the \emph{catenation} of the
+forests \(f_1\) and \(f_2\).
+
+\textbf{Unparsed Patterns.} Unparsed patterns are series of lexemes
+and \emph{meta\-lexemes} (which cannot be found in the programming
+language) whose purpose is to control the matching process. All
+unparsed patterns can at least contain \emph{meta\-variables} whose
+purpose is to be bound to a subtree of the parse tree, but not to a
+leaf. For example, consider again Figure~\ref{intro:concrete_pattern}:
+in case of a successful match, the lexemes \texttt{for} and
+\texttt{++} match leaves of the parse tree, while the meta\-variables
+\texttt{\%x} and \texttt{\%n} are bound to some subtree of the parse
+tree. Let \({\cal V}\) be an infinite denumerable set of variables. A
+meta\-variable is formally an element of the set \(\{\meta{x} \mid
+\textsf{meta} \not\in {\cal C}, x \in {\cal V}\}\), and no element of
+this set in included in \({\cal L}\). That means that a meta\-variable
+is a variable which is not a node of any parse tree. The concrete
+syntax of \(\meta{x}\) is the concrete variable \texttt{x} escaped by
+\texttt{\%}, i.e., \texttt{\%x}. An unparsed pattern \(\overline{p}
+\in \overline{\cal P}\) is a list of lexemes and meta\-lexemes.
+
+\textbf{Substitutions.} A \emph{substitution} \(\sigma\) is a mapping
+whose domain \(\dom{\sigma}\) is a finite subset of (meta)variables
+\({\cal V}\) and the co\hyp{}domain is a finite subset of parse trees
+\({\cal H}\). We note \(\sigma_\varnothing\) any substitution with an
+empty domain. A \emph{binding} \(x \mapsto t\) is the pair \((x, t)\),
+where \(x \in {\cal V}\) and \(t \in {\cal H}\). Conceptually, a
+substitution can be thought of as a table which maps variables to
+parse trees. The substitution \(\sigma \oplus x \mapsto t\) is the
+\emph{update} of the substitution \(\sigma\) by the binding \(x
+\mapsto t\):
+\begin{equation}
+(\sigma \oplus x \mapsto t)(y) \triangleq
+\begin{cases}
+  t         & \text{if} \; x = y\\
+  \sigma(y) & \text{otherwise}
+\end{cases}
+\label{model:oplus}
+\end{equation}
+Let us extend updates to substitutions as follows:
+\begin{equation}
+(\sigma_1 \oplus \sigma_2)(y) \triangleq
+\begin{cases}
+  \sigma_2(y) & \text{if} \; y \in \dom{\sigma_2}\\
+  \sigma_1(y) & \text{otherwise}
+\end{cases}
+\label{model:oplus:ext}
+\end{equation}
+Let us define the inclusion between substitutions as
+\begin{align}
+  \sigma_1 \subseteq \sigma_2
+&\Longleftrightarrow 
+  \forall x \in \dom{\sigma_1}.(\sigma_1(x) = \sigma_2(x))\label{model:incl}
+\end{align}
+
+\textbf{Inference Systems.} An inference system is a finite set of
+\emph{inference rules}, which are logical implications of the form
+\(P_1 \wedge P_2 \wedge \ldots \wedge P_n \Rightarrow C,\) or simply
+\[
+\inferrule
+  {P_1 \\ P_2 \\ \ldots \\ P_n}
+  {C}
+\]
+The propositions \(P_i\) are called \emph{premises} and \(C\) is the
+\emph{conclusion}. When premi\-ses are lacking, then \(C\) is called
+an \emph{axiom} and is simply written \(C\). Free variables are
+implicitly universally quantified at the outermost level. A
+\emph{proof tree}, or a \emph{derivation}, is a finite tree whose
+nodes are (instances of) conclusions of an inference system and their
+children are the premises of the same rule. The leaves of the tree are
+axioms. The conclusion of the proof, is then the root of the tree,
+which is traditionally set at the bottom of the page. What makes this
+formalism interesting is that it allows two kinds of interpretation:
+logical and computational. The logical reading has just been sketched:
+if all the premises hold, then the conclusion holds. This
+top\hyp{}down reading qualifies as \emph{deductive}. The computational
+interpretation is bottom\hyp{}up instead: in order to compute the
+conclusion, the premises must be computed first (their order is
+unspecified). This reading is said \emph{inductive}. A single
+formalism with this double interpretation is powerful because a
+relationship logically defined by means of inference rules can then be
+considered as an algorithm as well. Conversely, the logical aspect
+enables proving theorems about the algorithm.
+

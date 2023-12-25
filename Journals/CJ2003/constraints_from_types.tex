@@ -1,0 +1,592 @@
+%%-*-latex-*-
+
+In this section we define the collection of constraints from types
+(i.e. declarations of pattern {\small $<$\textsf{type reference}$>$
+\textsf{::=} $<$\textsf{non-reference type without inner
+constraints}$>$}). It is a mapping ${\cal T} \rightarrow V \rightarrow
+(\R \rightarrow V) \rightarrow {\cal K}$, where ${\cal T}$ is the set
+of types, $V$ is the set of variables (ranged over by $\alpha$,
+$\beta$, $\gamma$ etc.), $\R$ is the countable set of type reference
+names (ranged over by $x$) and ${\cal K}$ is the set of
+constraints. The notation for the mapping is
+$\TSE{\varsigma}{\T}{\alpha}{\TSEmap{}}$, where \T{} is the analysed
+type, $\alpha$ is the variable denoting the terms corresponding to the
+values of \T{} and $\TSEmap{}$ is a mapping from type reference names
+into the variables, which allows the proper handling of the recursive
+types. For the sake of clarity, we write sometimes $\TSEmap{\R}$ to
+show that the domain of $\TSEmap{}$ is $\R$.
+
+For instance: $\TSE{\varsigma}{\kwdNULL}{\alpha}{\TSEmap{}} = (\alpha
+\CEeqS \kwdNULL)$ means that the set constraint associated to the
+\kwdNULL{} type, whose set of terms is denoted by $\alpha$, is $\alpha
+\CEeqS \kwdNULL$; that is to say the terms are exactly the \kwdNULL{} set
+constant. The solution of this constraint is the substitution that
+maps the variable $\alpha$ to the set $\{\kwdNULL{}\}$. Let us consider
+the constraint collection from the \kwdCHOICE{} type:
+
+\begin{center}
+\begin{tabular}{rl}
+$\TSE{\varsigma}{\kwdCHOICE \,\,
+    \FieldEnv{\{l\}}}{\alpha}{\TSEmap{}}$ = 
+ & \hspace*{-3mm}
+   $\ocamlkwd{let} \,\, \beta \,\, \emph{be a fresh variable}$\\ 
+ & \hspace*{-3mm}
+   $\ocamlkwd{in} \,\,
+   \TSE{\varsigma}{\FieldEnv{}(l)}{\beta}{\TSEmap{}} 
+   \CEand 
+   \alpha \CEeqS l \pmb{:} \beta$
+\end{tabular}
+\end{center}
+
+This equation is for \kwdCHOICE{} types having only one component,
+labeled $l$. The expression corresponding to the component
+$\FieldEnv{}(l)$ is denoted by the variable $\beta$ which is used to
+build the constraint for the \kwdCHOICE{} type.
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+     $\TSE{\varsigma}{\kwdCHOICE \,\, \FieldEnv{\{l,m\} \disjunion
+      \Labels}}{\alpha}{\TSEmap{}}$
+   & \hspace*{-4mm} = & \\
+     \multicolumn{3}{r}{
+       \begin{tabular}{ll}   
+            $\ocamlkwd{let}$ 
+         & \hspace*{-4mm} 
+           $\beta \,\, \emph{and} \,\, \gamma \,\, \emph{be fresh
+            variables}$\\  
+           $\ocamlkwd{in}$ 
+         & \hspace*{-4mm}
+           $\TSE{\varsigma}{\kwdCHOICE \,\, \FieldEnv{\{m\} \disjunion
+            \Labels}}{\gamma}{\TSEmap{}} \CEand
+            \TSE{\varsigma}{\FieldEnv{}(l)}{\beta}{\TSEmap{}}$\\
+         & \hspace*{-4mm}
+           $\CEand \alpha \CEeqS (l \pmb{:} \beta) \, \SEcup \,
+            \gamma$
+       \end{tabular}
+     }
+\end{tabular}
+
+\medskip
+
+This equation is for \kwdCHOICE{} types having at least two
+components, $l$ and $m$. First, we compute the set constraint for the
+\kwdCHOICE{} with the same components except $l$ (the expression is
+named $\gamma$). Then there is the constraint for the component $l$
+(variable $\beta$), and finally the constraint on the whole
+\kwdCHOICE{} type, whose expression is $\alpha$ and is the 
+union of the expression of the component $l$ and $\gamma$.
+
+\medskip
+
+\noindent
+\begin{tabular}{rcl}
+    $\TSE{f}{\kwdSETOF \,\, \T_0}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{ll}
+          $\ocamlkwd{let}$
+        & \hspace*{-4mm}
+          $\beta \,\, \emph{and} \,\,
+          \gamma \,\, \emph{be fresh variables}$\\
+          $\ocamlkwd{in}$
+        & \hspace*{-4mm}
+          $\TSE{\I}{\T_0}{\beta}{\TSEmap{}} \!
+           \CEand \gamma \CEeqS \Cons \, (\beta, \gamma) \,
+           \SEcup \, \Nil
+           \CEand \alpha \PSCEeq \gamma \SEdiam \mathbb{N}^{+}$
+      \end{tabular}
+    }
+\end{tabular}
+\medskip
+
+The variable $\beta$ denotes the expression from type \T{}, defined
+by the constraint $\TSE{\I}{\T}{\beta}{\TSEmap{}}$. The constraint
+$\gamma \CEeqS \Cons \, (\beta, \gamma) \, \SEcup \, \Nil$
+defines the powerset $\gamma$ over $\beta$ sets. These sets are always
+finite because the types in \core are well-founded (see
+section~\ref{well_founded_types}). Finally, the powerset constraint
+$\alpha \PSCEeq \gamma \SEdiam \mathbb{N}^{+}$ states that the powerset
+expression we are looking for is the pair of $\gamma$ (the
+powerset itself) and $\mathbb{N}^{+}$ (the allowed cardinals of the
+elements of $\gamma$). Note that, because we are in \core, the
+\kwdSETOF{} applies to a type (\T) which is always a reference without
+subtyping constraint (see section~\ref{mapping},
+step~\ref{types_in_SETOF}).
+
+\begin{center}
+$\TSE{f}{\kwdSEQUENCEOF \,\, \T}{\alpha}{\TSEmap{}}
+ = \TSE{f}{\kwdSETOF \,\, \T}{\alpha}{\TSEmap{}}$
+\end{center}
+
+This equation defines the set of terms of the \kwdSEQUENCEOF{} type as
+being the same as the \kwdSETOF{} terms. Indeed, the difference
+between these two types is only meaningful for the encoding rules
+(hence, at the application level).
+
+\begin{center}
+\begin{tabular}{rcl} 
+    $\TSE{f}{\kwdSEQUENCE \, \{\}}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = 
+  & \hspace*{-4mm}
+    $\alpha \CEeqS \Nil$
+\end{tabular}
+\end{center}
+
+\noindent
+This equation is for empty \kwdSEQUENCE{} types.
+
+\medskip
+
+\begin{tabular}{rcl}
+    $\TSE{f}{\kwdSEQUENCE \, \CompEnv{\{l\} \disjunion
+    \Labels}}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = \\
+    \multicolumn{3}{l}{
+    \begin{tabular}{ll} 
+        $\ocamlkwd{let}$ 
+      & \hspace*{-4mm}
+        $\beta \,\, \emph{and} \,\, \gamma \,\,
+         \emph{be fresh variables}$\\
+        $\ocamlkwd{in}$
+      & \hspace*{-4mm}
+        $\TSE{f}{\kwdSEQUENCE \,
+         \CompEnv{\Labels}}{\gamma}{\TSEmap{}}$\\
+      & \hspace*{-7mm}
+        \begin{tabular}{rl}
+            $\CEand$
+          & \hspace*{-5mm}
+            $\ocamlkwd{match} \,\, \CompEnv{}(l) \,\,
+             \ocamlkwd{with}$\\
+          & \hspace*{-6mm}
+            \begin{tabular}{rl}
+                & \hspace*{-4mm}
+                  $(\T, \None \mid \Some \, (\kwdDEFAULT \,
+                   \wildcard)) \rightarrow$\\
+                & 
+                  $\TSE{\I}{\T}{\beta}{\TSEmap{}}
+                   \CEand \alpha \CEeqS \Bind \, (l, \beta,
+                   \gamma)$\\
+              $\mid$
+                & \hspace*{-4mm}
+                  $(\T, \Some \, \kwdOPTIONAL) \rightarrow$\\
+                & 
+                  $\TSE{\I}{\T}{\beta}{\TSEmap{}}
+                   \CEand 
+                   \alpha \CEeqS \Bind \, (l, \beta, \gamma) \,
+                   \SEcup \, \gamma$
+            \end{tabular}
+        \end{tabular}
+    \end{tabular}
+    }
+\end{tabular}
+
+\medskip
+
+This equation assumes that the set has at least one component, labeled
+$l$.  We need first to extract the constraint from the
+\kwdSEQUENCE{} without this component: $\TSE{f}{\kwdSEQUENCE \,
+\CompEnv{\Labels}}{\gamma}{\TSEmap{}}$. Next, a case analysis is done
+on the component, $\CompEnv{}(l)$. In all cases, the variable $\beta$
+denote the set of terms of the component type:
+$\TSE{f}{\T}{\beta}{\TSEmap{}}$. Hence we add the constraint $\alpha
+\CEeqS \Bind \, (l, \beta, \gamma)$, for it represents the set of
+terms when the component $l$ is always present. That is why, when this
+component can be omitted (see the \kwdOPTIONAL{} case) we complete the
+set with $\gamma$. Note that, because we are in \core, the (possible)
+default value is a reference (see section~\ref{mapping},
+step~\ref{default_values}), hence we do not care here about it (in
+particular, we do not constrain it to belong to the set of terms of
+the component). Indeed, this value, like all initial top-level values,
+have been introduced in a so-called \emph{single value} subtyping
+constraint (see step~\ref{types_from_values}) upon their expected
+type and which will be considered independently from the current
+case. Another detail worth mentioning is the lack, in \core, of
+\kwdCOMPONENTSOF{} clause (see section~\ref{mapping},
+steps~\ref{COMPONENTS_OF_reference}
+and~\ref{COMPONENTS_OF_unfolding}).
+
+\begin{center}
+$\TSE{f}{\kwdSET \, \CompEnv{}}{\alpha}{\TSEmap{}}$
+= $\TSE{f}{\kwdSEQUENCE \, \CompEnv{}}{\alpha}{\TSEmap{}}$
+\end{center}
+
+This equation states that the constraint for the \kwdSET{}
+type is the one for the \kwdSEQUENCE{} with the same components. This
+is in fact an approximation. Indeed, the difference between \kwdSET{}
+and \kwdSEQUENCE{} is that the values of the latter must be given in
+the same order as the components are given. Introducing explicitly the
+proper combinatorics for the \kwdSET{} values would result in
+exponential size of the term set. So we approach the \kwdSET{}
+values as if they were \kwdSEQUENCE{} values. In theory, after the
+equation solving, we would have to consider these values modulo
+permutation (except for the validation purpose, which only requires
+the existence of one term in the set).
+
+\begin{center}
+\begin{tabular}{rcl}
+$\TSE{f}{\kwdINTEGER}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqI \mathbb{N}$\\ 
+$\TSE{f}{\kwdREAL}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqF \mathbb{R}$\\ 
+$\TSE{f}{\kwdBOOLEAN}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqS \kwdTRUE \,\, \SEcup \,\, \kwdFALSE$\\
+$\TSE{f}{\kwdNULL}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqS \kwdNULL$\\
+$\TSE{f}{\String}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqR \Regexp \, \stringof{.*}$\\
+$\TSE{f}{\kwdBITSTRING}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqR \Regexp \, \texttt{"}\textsf{[}\symbol{92}\textsf{s01]*}\texttt{"}$ \\
+$\TSE{f}{\kwdOCTETSTRING}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = & \hspace*{-4mm}
+        $\alpha \CEeqR \Regexp \, \texttt{"}\textsf{[}\symbol{92}\textsf{s}\symbol{92}\textsf{da-fA-F]*}\texttt{"}$
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{rcl}
+    $\TSE{f}{\kwdENUMERATED \, [a]}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = 
+  & \hspace*{-4mm}
+    $\alpha \CEeqS \Enum \, (a)$\\
+    $\TSE{f}{\kwdENUMERATED \, (a \CONS b \CONS
+     \textnormal{I})}{\alpha}{\TSEmap{}}$
+  & \hspace*{-4mm} = 
+  & \\
+    \multicolumn{3}{r}{
+      \begin{tabular}{l}
+         $\ocamlkwd{let} \,\, \beta \,\, \emph{be a fresh variable}$\\
+         $\ocamlkwd{in} \,\, \TSE{\I}{\kwdENUMERATED \, (b \CONS
+          \textnormal{I})}{\beta}{\TSEmap{}}
+          \CEand
+          \alpha \CEeqS \Enum \, (a) \, \SEcup \, \beta$
+      \end{tabular}
+    }
+\end{tabular}
+\end{center}
+
+These equations deal with the constraints from the basic types of
+\ASN. You may notice that the terms of the types $\kwdBITSTRING$,
+$\kwdOCTETSTRING$ and $\String$ are encoded using the regular
+expressions. Also, we do not care about the enumerated and bit
+string constants. Indeed, in \core, these values, like all
+initially declared values, have been introduced in single value
+subtyping constraints (see section~\ref{mapping},
+steps~\ref{constants} and~\ref{types_from_values}) on their expected
+type, and which wil be considered independently from the current
+case. Another detail worth citing is that there is no \kwdINTEGER{}
+type defining constants in \core (see section~\ref{mapping},
+steps~\ref{constants} and~\ref{constants_unfolding}).
+
+\begin{center}
+\begin{tabular}{rcl}
+$\TSE{f}{\TRef \, (x)}{\alpha}{\TSEmap{\R}}$
+  & \hspace*{-4mm} = & \\
+\multicolumn{3}{r}{
+  \begin{tabular}{l}
+     $\ocamlkwd{if} \,\, x \in \R \,\, \ocamlkwd{then} \,\, \alpha
+      \CEeq \TSEmap{}(x)$\\
+     $\ocamlkwd{else} \,\, \ocamlkwd{match} \,\, \TypeEnv(x) \,\,
+      \ocamlkwd{with}$\\
+     \hspace*{5mm}
+     \begin{tabular}{rl}
+               & \hspace*{-5mm}
+                  $(\T_0, \None) \rightarrow \,\,
+                  \denotC{\I}{\T_0}{\alpha}{\TSEmap{}
+                  \funupdate \{x \mapsto \alpha\}}$\\
+        $\mid$ & \hspace*{-5mm}
+                 $(\T_0, \Some \, \C_0) \! \rightarrow \!
+                 \denotC{f}{\T_0, \C_0}{\alpha}{\TSEmap{} \funupdate \{x
+                 \mapsto \alpha\}}$
+     \end{tabular}
+  \end{tabular}
+}
+\end{tabular}
+\end{center}
+
+This equation defines the constraint collected from a type
+reference. Two situations can occur. First, if the reference name $x$
+is already in the domain $\R$ of the mapping $\TSEmap{}$, it means
+that we already analysed this type before. Then we just emit
+an $\alpha \CEeq \TSEmap{}(x)$ constraint that expresses that the
+terms of the reference $\alpha$ are exactly the terms of the
+referenced type $\TSEmap{}(x)$. Otherwise, we analyse the referenced
+type: it can be either a type (first pattern) or a subtype (second
+pattern).
+
+In the first case, we just analyse the referenced type, without
+forgetting to add ($\funupdate$) a binding $x \mapsto \alpha$ to
+$\TSEmap{}$, in order to avoid a loop at run-time in presence of
+recursive types\footnote{Hence there is no fixpoint-based approach in
+the collection, it lies in the solving procedure instead.}. A valid
+situation can be simply illustrated by the declaration \texttt{\small
+T ::= CHOICE} \verb+{+\texttt{a REAL,} \texttt{b T}\verb+}+.
+
+In the second case, we use the constraint collection from subtypes,
+presented in the next section. A valid situation is: 
+\texttt{\small T ::= SET} \verb+{+\texttt{a} \texttt{\small U}\verb+}+
+\ \texttt{\small U ::= REAL (0..5)}. This case is the only dependence
+between constraints from types and constraints from subtypes.
+
+Let us consider now an example of constraint collection from a
+type.\label{example_CHOICE} Let \texttt{\small T ::= CHOICE}
+\verb+{+\texttt{item} \texttt{\small INTEGER,} \texttt{and}
+\texttt{\small SET OF T,} \texttt{not} \texttt{\small T}\verb+}+. We
+want the constraint whose solution in $\alpha$ is the set of terms of
+\texttt{T}, that is to say, $\denotC{\I}{\TRef \,
+  (\textsf{"T"})}{\alpha}{\{\}} = \denotC{\I}{\kwdCHOICE \,
+  \FieldEnv{\Labels}}{\alpha}{{\cal Q}}$, where $\Labels =
+\{\textsf{"item"}, \textsf{"and"}, \textsf{"not"}\}$ and ${\cal Q} =
+\{\textsf{"T"} \mapsto \alpha\}.$
+
+Let
+$\left\{
+  \hspace*{-2mm}
+  \begin{tabular}{l}
+     $\FieldEnv{} \, (\textsf{"item"}) = \kwdINTEGER$\\
+     $\FieldEnv{} \, (\textsf{"and"}) = \kwdSETOF \, (\TRef \,
+      (\textsf{"T"}))$\\
+     $\FieldEnv{} \, (\textsf{"not"}) = \TRef \, (\textsf{"T"})$
+  \end{tabular}
+ \right.$
+
+\noindent
+Then we get: 
+
+\begin{tabular}{rcll}
+    $\denotC{\I}{\kwdCHOICE \, \FieldEnv{\Labels}}{\alpha}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & 
+  & \hspace*{-6mm}
+    $\denotC{\I}{\kwdCHOICE \, \FieldEnv{\Labels \backslash
+    \{\textsf{"item"}\}}}{\gamma}{{\cal Q}}$\\
+  & 
+  & \hspace*{-6mm}
+    $\CEand$
+  & \hspace*{-6mm}
+    $\denotC{\I}{\FieldEnv{} \,
+    (\textsf{"item"})}{\beta}{{\cal Q}}$\\
+  & 
+  & \hspace*{-6mm}
+    $\CEand$
+  & \hspace*{-6mm}
+    $\alpha \CEeqS (\textsf{"item"} \pmb{:} \beta) \,
+    \SEcup \, \gamma$\\
+%%
+    $\denotC{\I}{\kwdCHOICE \, \FieldEnv{\Labels \backslash
+     \{\textsf{"item"}\}}}{\gamma}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & 
+  & \hspace*{-6mm}
+    $\denotC{\I}{\kwdCHOICE \,
+    \FieldEnv{\{\textsf{"not"}\}}}{\delta}{{\cal Q}}$\\
+  & 
+  & \hspace*{-6mm}
+    $\CEand$   
+  & \hspace*{-6mm}
+    $\denotC{\I}{\FieldEnv{} \,
+     (\textsf{"and"})}{\varepsilon}{{\cal Q}}$\\
+  &
+  & \hspace*{-6mm}
+    $\CEand$
+  & \hspace*{-6mm}
+    $\gamma \CEeqS (\textsf{"and"} \pmb{:} \varepsilon)
+     \, \SEcup \, \delta$\\
+%%
+    $\denotC{\I}{\kwdCHOICE \,
+     \FieldEnv{\{\textsf{"not"}\}}}{\delta}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & 
+  & \hspace*{-6mm}
+    $\denotC{\I}{\FieldEnv{} \, (\textsf{"not"})}{\zeta}{{\cal Q}}$\\
+  & 
+  & \hspace*{-6mm}
+    $\CEand$
+  & \hspace*{-6mm}
+    $\delta \CEeqS \textsf{"not"} \pmb{:} \zeta$\\
+    $\denotC{\I}{\FieldEnv{} \, (\textsf{"item"})}{\beta}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\denotC{\I}{\kwdINTEGER}{\beta}{{\cal Q}}$
+    }\\
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\beta \CEeqI \mathbb{N}$
+    }\\ 
+%%
+    $\denotC{\I}{\FieldEnv{} \, (\textsf{"and"})}{\varepsilon}{{\cal
+     Q}}$
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\denotC{\I}{\kwdSETOF \, (\TRef \,
+       (\textsf{"T"}))}{\varepsilon}{{\cal Q}}$
+    }\\
+  & \hspace*{-4mm} = 
+  &
+  & \hspace*{-4mm}
+    $\denotC{}{\TRef \, (\textsf{"T"})}{\eta}{{\cal Q}}$\\
+  & 
+  & \hspace{-4mm}
+    $\CEand$
+  & \hspace*{-4mm}
+    $\varepsilon \PSCEeq \theta \SEdiam \mathbb{N}^{+}$\\
+  &  
+  & \hspace*{-4mm}
+    $\CEand$
+  & \hspace*{-4mm}
+    $\theta \CEeq \Cons \, (\eta, \theta) \, \SEcup \, \Nil$\\
+%%
+    $\denotC{\I}{\FieldEnv{} \, (\textsf{"not"})}{\zeta}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\denotC{\I}{\TRef \, (\textsf{"T"})}{\zeta}{{\cal Q}}$
+    }\\
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\zeta \CEeq \alpha$
+    }\\
+%%
+    $\denotC{\I}{\TRef \, (\textsf{"T"})}{\eta}{{\cal Q}}$
+  & \hspace*{-4mm} = 
+  & \multicolumn{2}{l}{
+      \hspace*{-4mm}
+      $\eta \CEeq \alpha$
+    }
+\end{tabular}
+
+\smallskip
+
+\noindent
+After substitution, we get:
+
+\begin{tabular}{rcl}
+    $\denotC{f}{\TRef \, (\textsf{"T"})}{\alpha}{\{\}}$
+  & \hspace*{-4mm} = &\\
+    \multicolumn{3}{r}{
+      \hspace*{2mm}
+      \begin{tabular}{ll}
+        & \hspace*{-4mm}
+          $\zeta \CEeq \alpha \,\,
+           \CEand \,\, \delta \CEeqS \textsf{"not"} \pmb{:} \zeta \,\, 
+           \CEand \,\, \eta \CEeq \alpha$\\
+          $\CEand$
+        & \hspace*{-4mm}
+          $\varepsilon \PSCEeq \theta \SEdiam \mathbb{N}^{+}
+           \,\, \CEand \,\, \theta \CEeqS \Cons \, (\eta, \theta) \,
+           \SEcup \, \Nil$\\
+          $\CEand$
+        & \hspace*{-4mm}
+          $\gamma \CEeqS (\textsf{"and"} \pmb{:} \varepsilon) \,
+           \SEcup \, \delta \,\,
+           \CEand \,\,\beta \CEeqI \mathbb{N}$\\
+          $\CEand$
+        & \hspace*{-4mm}
+          $\alpha \CEeqS (\textsf{"item"} \pmb{:} \beta)
+           \, \SEcup \, \gamma$
+      \end{tabular}
+    }
+\end{tabular}
+
+\noindent
+This constraint implies the system (we do not define formally this
+notion in this paper, because we rely on the solving algorithm of
+Aiken and Wimmers~\cite{AikenWimmers:1992}):
+
+\centerline{
+$\left\{
+  \begin{array}{l}
+    \alpha \CEeqS (\textsf{"item"} \pmb{:} \beta) \,
+    \SEcup \, (\textsf{"and"} \pmb{:} \varepsilon) \, \SEcup \,
+    (\textsf{"not"} \pmb{:} \alpha)\\
+    \beta \CEeqI \mathbb{N}\\
+    \varepsilon \PSCEeq \theta \SEdiam \mathbb{N}^{+}\\
+    \theta \CEeqS \Cons \, (\alpha, \theta) \, \SEcup \, \Nil
+  \end{array}
+\right.$}
+
+The following examples is an illegal type
+definition.\label{illegal_type} In section~\ref{validation}
+(validation) we mentionned: \texttt{\small T ::= REAL (ALL EXCEPT
+  T)}. We want the constraint whose solution in $\alpha$ is the set of
+terms of \texttt{\small T}:
+
+\smallskip
+
+$\denotC{}{\TRef \, (\textsf{"T"})}{\alpha}{\{\}} =$\\
+\hspace*{1mm} 
+$\denotC{}{\kwdREAL, \kwdALLEXCEPT \, (\kwdINCLUDES \,
+\textsf{"T"})}{\alpha}{\{\textsf{"T"} \mapsto \alpha\}}$
+
+\smallskip
+
+Let ${\cal Q} = \{\textsf{"T"} \mapsto \alpha\}$. Then we get:
+
+\smallskip
+
+\begin{tabular}{rl}
+  $\bullet$ & \hspace*{-4mm}
+    $\denotC{}{\kwdREAL}{\beta}{{\cal Q}} = \beta \CEeqF \mathbb{R}$\\
+%%
+  $\bullet$ & \hspace*{-4mm}
+    $\denotC{}{\kwdREAL, \kwdINCLUDES \, (\textsf{"T"})}{\gamma}{{\cal
+    Q}}$\\
+            & \hspace*{-4mm}
+    \begin{tabular}{rl}
+      = & \hspace*{-4mm}
+          $\denotC{}{\kwdREAL}{\delta}{{\cal Q}} \!
+           \CEand \! \denotC{}{\TRef \,
+           (\textsf{"T"})}{\varepsilon}{{\cal Q}} 
+           \CEand \! \gamma \CEeqI \delta \, \SEcap \, \varepsilon$\\
+      = & \hspace*{-4mm}
+          $\delta \CEeqF \mathbb{R} 
+           \CEand \varepsilon \CEeq \alpha 
+           \CEand \gamma \CEeqI \delta \, \SEcap \, \varepsilon$ 
+    \end{tabular}\\
+%%
+  $\bullet$ & \hspace*{-4mm}
+    $\denotC{}{\TRef \, (\textsf{"T"})}{\alpha}{\{\}}$\\
+            & \hspace*{-4mm}
+    \begin{tabular}{rll}
+        = 
+      & 
+      & \hspace*{-5mm}
+        $\denotC{}{\kwdREAL}{\beta}{{\cal Q}}
+         \CEand \alpha \CEeqI \beta \, \SEdiff \, \gamma$\\
+      & \hspace*{-5mm}
+        $\CEand$
+      & \hspace*{-5mm}
+        $\denotC{}{\kwdREAL, \kwdINCLUDES \,
+         (\textsf{"T"})}{\gamma}{{\cal Q}}$\\
+        = 
+      &
+      & \hspace*{-5mm}
+        $\beta \CEeqF \mathbb{R} \CEand \delta \CEeqF \mathbb{R}
+         \CEand \alpha \CEeqI \beta \, \SEdiff \, \gamma$\\
+      & \hspace*{-5mm}
+        $\CEand$ 
+      & \hspace*{-5mm}
+        $\varepsilon \CEeq \alpha
+         \CEand \gamma \CEeqI \delta \, \SEcap \, \varepsilon$
+    \end{tabular}
+
+\end{tabular}
+
+This constraint implies (we do not define formally this notion in this
+paper): $\alpha \CEeqI \SEneg\alpha$, which has no solutions. Thus the
+declaration of subtype \texttt{\small T} must be rejected.
+
+
+
+

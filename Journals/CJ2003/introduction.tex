@@ -1,0 +1,111 @@
+%%-*-latex-*-
+
+The wide variety of software and hardware architectures in distributed
+systems and telecommunications makes it valuable to use a common
+high-level data notation in protocol specifications. For this reason,
+the ISO organization and the International Telecommunications Union
+defined the \emph{Abstract Syntax Notation One}
+(\ASN)~\cite{X.680:2002,X.681:2002,X.682:2002,X.683:2002} series of
+standards. \ASN is a language of data types allowing the protocol
+designer to capture numerous networking concepts, such as protocol
+data units, without worrying about the possible environment and
+implementation heterogeneity of the peers. The peers must share a set
+of \ASN modules and agree upon a method for encoding values (which are
+produced at run-time by the communicating applications) into series of
+bits: the \emph{encoding rules}~\cite{X.690:2002, X.691:2002}. An \ASN
+compiler accepts a set of \ASN modules and, according to a given set
+of encoding rules and a peer-specific target programming language,
+produces a set of data type definitions in that programming language,
+together with a codec for the values to be exchanged. Then these
+pieces of source code are compiled and linked separately against the
+communicating application.
+
+\ASN has been adopted for a wide range of applications, such as
+network management, secure email, mobile telephony, air traffic
+control, video conferencing over the Internet, electronic commerce,
+digital certificates, radio paging, as well as emerging technologies
+like interactive television and financial service systems. \ASN-based
+software is used in Microsoft's Internet Explorer and Outlook. It is
+also found in wireless applications from Nokia, Ericsson and
+Motorola. \ASN is used to implement cryptographic protocols which
+secure credit card purchases over the Internet. Biometrics, databases,
+ATM transactions, plane take-offs and landings all rely on
+\mbox{ASN.1}\footnote{See \url{http://asn1.elibel.tm.fr/} to learn
+about more uses.}.
+
+There are excellent books~\cite{Dubuisson:2000,Larmouth:2000} for the
+audience of protocol designers and users, but it is still a challenge
+to write an \ASN compiler. The main reason is that, in order to
+fulfill its users' numerous needs, the language is extremely
+expressive (without including functions). As a consequence, some
+compilers may reject valid specifications or, worse, silently accept
+invalid ones. Vendors argue that this is hardly a real problem because
+such complex specifications are rarely found in
+practice. Nevertheless, we claim that this pragmatic approach can
+fruitfully be enhanced by a theoretical study which leads to an actual
+implementation. Semantics, i.e. consistent mapping from the
+syntactic constructs into some set of logical objects, leads to a
+greater understanding of \ASN and the opportunity for a better
+product. The aim of this work is to provide such a mapping for
+\mbox{X.680}~\cite{X.680:2002}, the main part of
+\mbox{ASN.1}\footnote{\mbox{X.680} does not contain information
+objects, non-subtyping constraints or parameterization.}, by means of
+an algorithm that can be implemented and integrated in the front-end
+analyser of an \ASN compiler.
+
+Since the paradigm of \ASN data types is `types as sets of
+values'~\cite{Mortazavi:1996}, the main requirement that arises, at
+least as far as telecommunication is concerned, is that \emph{types
+must contain at least one finite value}. The finiteness condition
+applies no matter what the encoding rules are, but it arises from the
+fact that the current standard encoding rules cannot handle infinite
+values, i.e. recursive values. The existence requirement is the main
+aspect of the validation of \ASN specifications, because it is
+directly related to the values that can be encoded, independently from
+the encoding rules. It is also the most difficult, because it cannot
+be dealt with by syntactic means only, i.e. it requires computations
+or, more generally, inductions on mathematical objects.
+
+In mainstream programming languages, typechecking (i.e. checking
+whether a value complies with its declared type) is enough as far as
+validation is concerned and the sets of values corresponding to types
+are not considered explicitly. In \ASN, the great deal lies in an
+involved notion of subtyping. It consists of constraints upon
+recursive types, which restrict their sets of values in a
+set-theoretic manner (e.g. by intersection) or in a structural way
+(e.g. by requiring the omission of some fields in a record-like
+construct).
+
+In this article we introduce a set-theoretic interpretation which maps
+types and subtypes into sets of values, by means of an algorithm, and
+also allows a constructive decision procedure for the `at least one
+finite value' property --- thus fully validates the \mbox{X.680}
+specifications (except tagging). The algorithm deals with the entire
+\mbox{X.680} standard. It brings new insights to obscure areas of the
+standard (like type compatibility in assignments or recursion),
+which, while not often used by the protocol designer, are unavoidable
+for the tool implementor concerned with full conformance. The
+algorithm is twofold: a collecting algorithm, which extracts some
+constraints, and a solving procedure. Some of the constraints are set
+constraints~\cite{Aiken:1994,PacholskiPodelski:1997}, so the solving
+procedure relies upon Aiken and Wimmers'
+algorithm~\cite{AikenWimmers:1992}. Set constraints are inclusions
+between expressions interpreted over the domain of sets of trees.
+
+First, in section~\ref{presentation}, we briefly introduce \ASN (the
+subtyping constraints are presented step by step in
+section~\ref{constraints_from_subtypes}). In section~\ref{core}, we
+define a strict subset of \mbox{X.680} which has fewer ambiguities and
+syntactic constructs; it also allows a much simpler presentation of
+the collection algorithm of sections~\ref{constraints_from_types}
+and~\ref{constraints_from_subtypes}. We give a procedure for rewriting
+every \mbox{X.680} specification into \core. We provide, in
+section~\ref{well_founded_types}, a formal predicate for the `at least
+one finite value' property on (unconstrained) types in \core. This
+property is a prerequisite for handling subtypes. Next, in
+section~\ref{constraints}, we introduce our constraints. The
+collecting algorithm is introduced in two steps: first, the collection
+from types is given in section~\ref{constraints_from_types}; second,
+the collection from proper subtypes appears in
+section~\ref{constraints_from_subtypes}. We finally explain the
+resolution process in section~\ref{full_collection_and_solving}.

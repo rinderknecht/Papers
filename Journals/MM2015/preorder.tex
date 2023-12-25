@@ -1,0 +1,33 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pst-tree,pst-eps,pstricks-add}
+
+\begin{document}
+
+\TeXtoEPS
+\psset{radius=2.5pt}
+\pstree[levelsep=20pt,treesep=20pt]{\TC*[name=root]}{
+  \TC*[name=node1]
+  \TC*[name=node2]
+  \pstree{\TC*[name=node3]}{
+    \pstree{\TC*[name=node31]}{\TC*[name=node311]}
+    \TC*[name=node32]
+  }
+}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{root}{node1}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node1}{root}
+\ncarc[linestyle=dotted,arcangle=-35]{->}{root}{node2}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node2}{root}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{root}{node3}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node3}{node31}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node31}{node311}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node311}{node31}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node31}{node3}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node3}{node32}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node32}{node3}
+\ncarc[ArrowInside=->,linestyle=dotted,arcangle=-35]{-}{node3}{root}
+\endTeXtoEPS
+
+\end{document}

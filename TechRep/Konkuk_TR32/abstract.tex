@@ -1,0 +1,22 @@
+%%-*-latex-*-
+
+\begin{abstract}
+\noindent It is more and more common to query \XML databases using the
+path language \XPath or the more expressive language \XQuery. A lot of
+attention has been devoted to solve efficiently the matching of
+streams of \XML elements against \XPath expressions, in particular
+when the relationship between the query nodes is either parent/child
+or ancestor/descendant. In the latter case, the semantics of \XPath
+allows two descendants to be themselves in an ancestor/descendant
+relationship. In many cases, this leads to too general queries. We
+propose a novel primitive operation as a stricter interpretation of
+the ancestor/descendant relation that restricts the matches to the
+ending nodes of paths diverging from a common node in the data. We
+propose and compare several algorithms for answering this new type of
+query.
+%The experimental results show that one of them substantially
+%improves the performance of this new type of XML query.
+\end{abstract}
+
+\noindent\textbf{Keywords:} divergent paths, XML database,
+tree\hyp{}pattern matching, \XPath

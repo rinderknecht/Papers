@@ -1,0 +1,590 @@
+%%-*-latex-*-
+
+\section{Core \ASN}
+
+\ASN syntax is involved because it aims at allowing the specification
+of as many networking concepts as possible. For instance types, values
+and subtyping constraints may depend on each other: a type may contain
+constraints (on components) and values (\emph{e.g.,} default values),
+a value has a type and constraints rely upon types (\emph{e.g.,}
+inclusion constraint) and values (\emph{e.g.,} value constraint). We
+define \core such that
+
+\medskip
+
+\begin{itemize}
+
+  \bitem the default tagging mode of the module is \texttt{\small EXPLICIT
+  TAGS};
+
+  \bitem tags obey the standard rules, like alternative types in
+  \texttt{\small CHOICE} having distinct tags etc.;
+
+  \bitem tags appear only at the top-level, i.e. just after the symbol
+  `{\small \verb+::=+}';
+
+  \bitem the built-in types are explicitly tagged \texttt{\small
+  IMPLICIT} and \texttt{\small UNIVERSAL};
+
+  \bitem tags are explicitly either \texttt{\small IMPLICIT} or
+  \texttt{EXPLICIT};
+
+  \bitem \texttt{\small IMPLICIT} tags apply only to untagged
+  types;
+
+  \bitem tag values are numeric \texttt{\small INTEGER} values (not
+  value references);
+
+  \bitem component types are references and references are component
+  types;
+
+  \bitem there are no \texttt{DEFAULT} component types;
+
+  \bitem there is no \texttt{\small COMPONENTS OF} clause;
+
+  \bitem constraints appear only at the top-level (not in component
+  types);
+
+  \bitem there are no \texttt{\small ABSENT}, \texttt{\small PRESENT}
+  or \texttt{\small OPTIONAL} component constraints;
+
+  \bitem there is no selection type, \emph{e.g.,} no {\small \verb+T ::= i < U+};
+
+  \bitem \texttt{\small SET OF} and \texttt{\small SEQUENCE OF} apply
+  to references;
+
+  \bitem the \texttt{\small BIT STRING} and \texttt{\small INTEGER}
+  type do not define constants, \emph{e.g.,} no {\small \verb+INTEGER {c(1)}+}
+  or {\small \verb+BIT STRING {a(x)}+};
+
+  \bitem the only \texttt{\small BIT STRING} values are series of
+  bits, \emph{e.g.,} \verb+'1110'B+;
+
+  \bitem \texttt{\small ENUMERATED} types define constants with
+  explicit numeric integers;
+
+  \bitem \texttt{\small REAL} values are not legal tokens for
+  \texttt{\small INTEGER} values and conversely (\emph{e.g.,} \texttt{\small
+  0} is \emph{only} of type \texttt{\small INTEGER});
+  
+  \bitem \texttt{\small REAL} values do not use the
+  \emph{(mantissa, base, exponent)} form;
+
+  \bitem there are no references in values (thus no recursive values).
+
+\end{itemize}
+
+\medskip
+
+We relax the first assumption we made in section~\ref{modeling} and
+assume now that we have one \ASN module, syntactically correct with
+respect to \mbox{X.680}. It is reduced to \core by applying the
+following series of rewritings which do not commute in general.  For
+we lack of room to give the formal rewriting rules, we only illustrate
+the process on short examples.
+
+\medskip
+
+\begin{enumerate}
+
+  \item \label{selection} We remove the selection types, taking care
+  of tags:
+
+        \begin{center}
+        {\small
+          $\left\{
+             \begin{tabular}{l}
+                \verb+A ::= [0] i < [1] B+\\
+                \verb+B ::= [2] C+\\
+                \verb+C ::= [3] CHOICE{i [4]D}+\\
+                \verb+D ::= [5] INTEGER+
+             \end{tabular}
+            \right.
+          \rightarrow
+          \left\{
+               \begin{tabular}{l}
+                  \verb+A ::= [0][4][5] INTEGER+\\
+                  \verb+B ::= [2] C+\\
+                  \verb+C ::= [3] CHOICE{i [4]D}+\\
+                  \verb+D ::= [5] INTEGER+
+               \end{tabular}
+             \right.$
+        }
+        \end{center}
+
+        Note that the selection types that do not define a unique type
+        lead to recursive type definitions whose pattern is
+        \texttt{\small X ::= X}, as in
+
+        \begin{center}
+        {\small 
+        \verb+T ::= CHOICE {a a < T}+\\
+        $\longrightarrow
+         \left\{
+            \begin{tabular}{l}
+               \verb+T ::= CHOICE {a A}+\\
+               \verb+A ::= a < T+
+            \end{tabular}
+          \right.
+         \longrightarrow
+         \left\{
+             \begin{tabular}{l}
+                \verb+T ::= CHOICE {a A}+\\
+                \verb+A ::= A+
+             \end{tabular}
+          \right.$
+        }
+        \end{center}
+
+  \item \label{type_references}
+        The top-level type references are unfolded, i.e. the type
+        references at the declaration level are replaced by the type
+        they reference, as in
+
+        \begin{center}
+        {\small
+         $\left\{
+             \begin{tabular}{l}
+                \verb+T ::= U (C)+\\
+                \verb+U ::= REAL (D)+
+             \end{tabular}
+          \right.
+          \longrightarrow
+          \left\{
+             \begin{tabular}{l}
+                \verb+T ::= REAL (D ^ C)+\\
+                \verb+U ::= REAL (D)+
+             \end{tabular}
+          \right.$}
+        \end{center}
+
+Beware of the case of constrained references
+        to \texttt{\small SET OF} types:
+
+        \begin{center}
+        {\small
+         $\left\{
+            \begin{tabular}{l}
+              \verb+A ::= SET OF C+\\
+              \verb+B ::= A (SIZE (7))+
+            \end{tabular}
+          \right.
+          \longrightarrow
+          \left\{
+            \begin{tabular}{l}
+              \verb+A ::= SET OF C+\\ 
+              \verb+B ::= SET (SIZE (7)) OF C+
+            \end{tabular}
+          \right.$}
+        \end{center}
+
+       The result {\small \verb+B ::= SET OF C (SIZE (7))+} would be
+       wrong!
+
+       This step is difficult because it removes all recursive types
+       declarations that do not lead to a uniquely defined type, like
+       \texttt{\small T ::= T} or {\small
+       \verb+T ::= CHOICE {a a < T}+} etc. (See step~\ref{selection}.)
+
+  \item The default values are expanded and the \texttt{DEFAULT}
+  annotation is replaced by \texttt{OPTIONAL}, like in the following
+  example
+
+        \begin{center}
+        {\small
+         $\left\{
+            \begin{tabular}{l}
+               \verb+v T ::= {}+\\
+               \verb+T ::= SET {a U DEFAULT w}+
+            \end{tabular}
+          \right.
+          \rightarrow
+          \left\{
+             \begin{tabular}{l}
+               \verb+v T ::= {a w}+\\
+               \verb+T ::= SET {a U OPTIONAL}+
+             \end{tabular}
+           \right.$}
+        \end{center}
+
+  \item \label{COMPONENTS_OF_unfolding} The \texttt{\small COMPONENTS
+  OF} clauses are expanded:
+
+        \begin{center}
+        {\small
+         $\left\{
+            \begin{tabular}{l}
+               \verb+T ::= SET {COMPONENTS OF [6] A}+\\
+               \verb+A ::= SET {a REAL}+
+            \end{tabular}
+          \right.
+         \rightarrow
+         \left\{
+            \begin{tabular}{l}
+              \verb+T ::= SET {a REAL}+\\
+              \verb+A ::= SET {a REAL}+
+            \end{tabular}
+          \right.$}
+         \end{center}
+
+        If the tagging mode is \texttt{\small AUTOMATIC TAGS}, we must
+        \emph{previously} compute the current component tags and then
+        insert the components referred by \texttt{\small
+        COMPONENTS OF}.
+
+        \begin{center}
+        {\small
+         $\left\{
+          \begin{tabular}{l}
+             \verb+PDU DEFINITIONS AUTOMATIC TAGS ::=+\\
+             \verb+  A ::= SET {a SET OF B, COMPONENTS OF B}+\\
+             \verb+  B ::= SET {b [2] INTEGER}+\\
+             \verb+END+
+          \end{tabular}
+          \right.$
+          $\longrightarrow
+          \left\{
+          \begin{tabular}{l}
+             \verb+PDU DEFINITIONS AUTOMATIC TAGS ::=+\\
+             \verb+  A ::= SET {a [0] SET OF B, b [1][2] INTEGER}+\\
+             \verb+  B ::= SET {b [2] INTEGER}+\\
+             \verb+END+
+          \end{tabular}
+          \right.$
+        }
+        \end{center}
+
+  \item \label{constants_unfolding}
+        \texttt{\small INTEGER} and \texttt{\small BIT STRING}
+        constants are replaced by their definition and removed from
+        their defining type:
+
+        \begin{center}
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(x)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.
+           \longrightarrow
+           \left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= x+
+              \end{tabular}
+           \right.$}
+        \end{center}
+
+        This step may reveal some recursive values, as in
+
+        \begin{center}
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(v)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.
+           \longrightarrow
+           \left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= v+
+              \end{tabular}
+            \right.$}
+        \end{center}
+
+  \item For \texttt{\small BIT STRING} values which are specified by
+  means of a series of bit names, we unfold their associated
+  references and replace the value by an equivalent string of bits:
+
+  \begin{center}
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                \verb+T ::= BIT STRING {msb(x),lsb(y)}+\\
+                \verb+v T ::= {msb,lsb}+
+              \end{tabular}
+            \right.\!\!
+            \rightarrow\!
+            \left\{
+              \begin{tabular}{l}
+                \verb+T ::= BIT STRING+\\
+                \verb+v T ::= '10000001'B+
+              \end{tabular}
+            \right.$
+        }
+  \end{center}
+
+   assuming the excerpt {\small \verb+  x INTEGER ::= 7  y INTEGER ::= 0+}
+
+   Also, values in hexadecimal form are translated into binary form:
+   \begin{center}
+     {\small \verb+x U ::= 'A'H+ $\longrightarrow$
+        \verb+x U ::= '1010'B+}
+   \end{center}
+
+  \item \label{rec_values} We unfold the value references, disallowing
+  at the same time the recursive values, like {\small
+  \verb+v T ::= {v}+}
+
+  \item We unfold the {\small \verb+ENUMERATED+} constants and add the
+  missing integers:
+
+  \begin{center}
+  {\small
+   $\left\{
+    \begin{tabular}{l}
+      \verb+T ::= ENUMERATED{a(v),b}+\\
+      \verb+v INTEGER ::= 3+
+    \end{tabular}
+    \right.
+    \!\!\rightarrow\!\!
+    \left\{
+    \begin{tabular}{l}
+      \verb+T ::= ENUMERATED{a(3),b(4)}+\\
+      \verb+v INTEGER ::= 3+
+    \end{tabular}
+    \right.$    
+  }  
+  \end{center}
+
+  \item We unfold the tag values (this always terminates because there
+  are no more recursive values since step~\ref{rec_values}), checking
+  that they are syntactically integers:
+
+  \begin{center}
+  {\small 
+   $\left\{
+    \begin{tabular}{l}
+      \verb+T ::= [APPLICATION v] IMPLICIT REAL+\\
+      \verb+v INTEGER ::= 3+
+    \end{tabular}
+    \right.$
+    $\longrightarrow
+    \left\{
+    \begin{tabular}{l}
+      \verb+T ::= [APPLICATION 3] IMPLICIT REAL+\\
+      \verb+v INTEGER ::= 3+
+    \end{tabular}
+    \right.$
+  }
+  \end{center} 
+
+
+  \item The tagging mode becomes \texttt{EXPLICIT TAGS}, like
+
+  \begin{center}
+   {\small
+    $\left\{
+     \begin{tabular}{l}
+       \verb+PDU DEFINITIONS IMPLICIT TAGS ::=+\\
+       \verb+  A ::= SET {a [0] SET OF B}+\\
+       \verb+  B ::= [1] CHOICE {b [2] REAL}+\\
+       \verb+END+
+     \end{tabular}
+     \right.$
+    $\longrightarrow
+     \left\{ 
+     \begin{tabular}{l}
+       \verb+PDU DEFINITIONS EXPLICIT TAGS ::=+\\
+       \verb+  A ::= SET {a [0] IMPLICIT SET OF B}+\\
+       \verb+  B ::= [1] EXPLICIT CHOICE {b [2] IMPLICIT REAL}+\\
+       \verb+END+
+     \end{tabular}
+     \right.$
+   }
+  \end{center}
+
+  \item We make explicit the tags of the built-in types:
+   \begin{center}
+    {\small 
+     \verb+A ::= INTEGER+ $\longrightarrow$
+     \verb+A ::= [UNIVERSAL 2] IMPLICIT INTEGER+
+    }
+   \end{center}
+
+  \item We reduce the \texttt{\small IMPLICIT} tags, as
+   \begin{center}
+    \small\tt
+    T ::= [0] IMPLICIT [1] EXPLICIT [UNIVERSAL 9] IMPLICIT REAL
+    $\longrightarrow$ T ::= [0] IMPLICIT REAL
+   \end{center}
+   
+  \item \label{structural_constraints} We apply and reduce the
+  structural subtyping constraints \texttt{\small ABSENT},
+  \texttt{\small PRESENT} and \texttt{\small OPTIONAL}, like
+  \begin{alltt}
+  \small
+T ::= CHOICE \{a REAL, b REAL\}
+             (WITH COMPONENTS \{a(PRESENT)\})
+  \(\longrightarrow\) T ::= CHOICE \{a REAL\}
+  \end{alltt}
+  (General case complex but tractable.)
+
+\end{enumerate}
+
+\medskip
+
+It is important to understand that in \core it is still possible that
+
+\begin{enumerate}
+  
+  \bitem \label{finiteness} types have only infinite values:
+  \texttt{\small T ::= SET} \verb+{+\texttt{a} \texttt{\small
+  T}\verb+}+
+
+  \bitem \label{typing} values are ill-typed: \texttt{v}
+  \texttt{\small REAL ::= ""}
+
+  \bitem values do not conform to all additional \mbox{X.680}
+  requirements, like
+  \begin{center}
+  {\small
+    $\left\{
+    \begin{tabular}{l}
+      \verb+T ::= SEQUENCE {a BOOLEAN, b INTEGER}+\\
+      \verb+t T ::= {b 7, a TRUE}   -- illegal+
+    \end{tabular}
+    \right.$
+  }
+  \end{center}
+
+  \bitem \label{constraint_consistence} subtyping constraints are
+  inconsistent: \texttt{\small T ::= REAL (SIZE(7))}
+
+  \bitem \label{subtype_non_emptiness} subtypes are empty:\\
+  {\small \verb+T ::= SET ((SIZE(1))^(SIZE(2))) OF REAL+}
+        
+  \bitem \label{solvability} subtypes have no value set:
+  \texttt{\small T ::= REAL (ALL EXCEPT T)}
+
+\end{enumerate}
+
+The reason why this is not a problem is that \core has been defined
+with the BER modeling in mind, in particular we do not aim here at a
+full validation of \ASN.
+
+\medskip
+
+\textbf{Abstract grammar.} We formally define the constructs of \core
+by means of an \emph{abstract grammar} implemented with the algebraic
+data types of the functional programming language OCaml
+\cite{ChaillouxManouryPagano:2000}, which is a full-fledged
+programming language, as well as, historically, a logic
+meta-language. The \core parser output is a pair of a type environment
+and a value environment. The former is a mapping from type names to
+types, corresponding to the type declarations in the \ASN
+specification, and the latter is a mapping from value names to values,
+corresponding to the value declarations. The types and values are
+\emph{abstract syntax trees}, complying with the abstract grammar. We
+except from the abstract grammar the \texttt{\small OBJECT IDENTIFIER}
+and \texttt{\small RELATIVE-OID} types and values for the sake of
+brevity. We also ignore the extension markers and the subtyping
+constraints beacause they play no role in the
+BER~\cite[\S{8.1.1.4}]{X.690:2002} (however we considered some
+constraints at step~\ref{structural_constraints}).
+
+\medskip
+
+\textbf{Values.} The abstract grammar for \core values is defined as
+follows. Firstly, we assume that the parser removes the ambiguity
+between enumeration constants~\cite[\S{19}]{X.680:2002} and value
+references~\cite[\S{11.4}]{X.680:2002}. For instance, in \texttt{a}
+\texttt{\small T} \verb+::=+ \texttt{b}, the token \texttt{b} can
+denote either an enumeration constant or a value reference, depending
+on the definition of type \texttt{\small T}. The ambiguity can always
+be removed just by looking at the type definition (this is easy in
+\core). The type \ocamltypename{item} is used later in the enumerated
+constants and the type \ocamltypename{label} denotes component names.
+
+\smallskip
+
+\noindent 
+\Xtype \type{item} \equal \type{string} \Xand \type{label} \equal
+\type{string}
+
+\noindent 
+\Xtype \type{core\_value} \equal \lbra\SetOf{} \Xof \type{core\_value}
+\type{list} \vbar~\SeqOf{} \Xof \type{core\_value} \type{list}
+\vbar~\Set{} \Xof \lpar\type{label} $\times$ \type{core\_value}\rpar{}
+\type{list} \vbar~\Seq{} \Xof \lpar\type{label} $\times$
+\type{core\_value}\rpar{} \type{list} \vbar~\True{} \vbar~\False{}
+\vbar~\Enum{} \Xof \type{item} \vbar~\Int{} \Xof \type{int}
+\vbar~\Real{} \Xof \type{float} \vbar~\Null{} \vbar~\MinusInfinity{}
+\vbar~\Chosen{} \Xof \type{label} $\times$ \type{core\_value}
+\vbar~\pvString{} \Xof \type{string} \vbar~\BitStr{} \Xof \type{bool
+array} \vbar~\PlusInfinity{}\rbra
+
+\smallskip
+
+\noindent
+where \SetOf{} corresponds to values of \texttt{\small SET OF} and
+\SeqOf{} to values of \texttt{\small SEQUENCE OF} types~\cite[\S{25},
+\S{27}]{X.680:2002}; \Set{} models values of the \texttt{\small SET}
+type and \Seq{} models values of \texttt{\small SEQUENCE}
+types~\cite[\S{24}, \S{26}]{X.680:2002} (the argument is a mapping
+from labels to values); \True{} and \False{} are obvious; \Enum{}
+models enumerated constants; \Int{} and \Real{} stand for
+\texttt{\small INTEGER} and \texttt{\small REAL} values (for
+simplicity, we assume they fit the built-in arithmetic of OCaml);
+\Null{} models the special \texttt{\small NULL}
+value~\cite[\S{23}]{X.680:2002}; \PlusInfinity{} and \MinusInfinity{}
+correspond to \texttt{\small PLUS-INFINITY} and \texttt{\small
+MINUS-INFI\-NI\-TY}; \Chosen{} corresponds to \texttt{\small CHOICE}
+values~\cite[\S{28}]{X.680:2002} (thus its argument is a pair of a
+label and a value); \pvString{} concentrates all kinds of character
+strings; \BitStr{} represents \texttt{\small BIT STRING}
+constants~\cite[\S{21}]{X.680:2002} and \texttt{\small OCTET STRING}
+values~\cite[\S{22}]{X.680:2002}. OCaml values of type
+\ident{core\_value} will be noted $v$. 
+%The argument of the \Set{} and \Seq{} constructors is noted $\IdEnv{}$.
+
+\smallskip
+
+\Xtype \type{tagged\_type} \equal \type{tag} \type{list} $\times$
+\type{core\_type}\\
+\Xand \type{tag} \equal \lpar\type{tag\_class} $\times$
+\type{int}\rpar{} $\times$ \type{tag\_mode}\\
+\Xand \type{tag\_class} \equal \Universal{} \vbar~\Private{}
+\vbar~\Application{} \vbar~\Context\\ 
+\Xand \type{tag\_mode} \equal \Explicit \vbar~\Implicit\\
+\Xand \type{core\_type} \equal \lbra\Choice{} \Xof
+\type{label} $\rightarrow$ \type{tagged\_type} 
+\vbar~\OctetString{}\\
+\vbar~\SET{} \Xof \type{components} 
+\vbar~\SEQUENCE{} \Xof \type{components} 
+\vbar~\BitString{}\\
+\vbar~\SETOF{} \Xof \type{tagged\_type} 
+\vbar~\SEQUENCEOF{} \Xof \type{tagged\_type}
+\vbar \Null{}\\
+\vbar~\Enumerated{} \Xof \type{item} $\rightarrow$ \type{int}
+\vbar~\Integer{} 
+\vbar~\Boolean{} 
+\vbar~\REAL{}\\
+\vbar \pvString{} 
+\vbar~\TRef{} \Xof \type{string}\rbra\\ 
+\Xand \type{components} \equal \lpar\type{label} $\times$
+\type{tagged\_type} $\times$ \lbra\Optional\rbra{}
+\type{option}\rpar{} \type{list}
+
+\smallskip
+
+The type \type{tagged\_type} models the tagged types of \core, in
+which a type (\type{core\_type}) can be preceded by a list of
+tags. Constructor names of type \type{core\_type} are almost
+self-explanatory, except \TRef{} which denotes type references. The
+type \ocamltypename{components} defines the components of
+\texttt{\small SET} and \texttt{\small SEQUENCE} \core types: it is a
+triple made of a label, a tagged type and an optional \texttt{\small
+OPTIONAL} component's attribute. OCaml values of type
+\type{core\_type} are noted \T{} and \type{tagged\_type} values
+$\overline{\T}$. The mapping of type $\type{label} \rightarrow
+\type{tagged\_type}$, which is the argument of \Choice, is noted
+$F$. Values of type \type{components} are lists noted $\Phi$ of
+components noted $\varphi$, \emph{e.g.,} $\SET \, (\varphi\!::\!\Phi)$. An
+\ASN module is modeled by a type environment which is modeled by a
+function $\Gamma$ from type names to tagged types, since there are no
+more value references in \core. Values of type \type{tag} are noted
+$\psi$ and lists of tags $\Psi$.

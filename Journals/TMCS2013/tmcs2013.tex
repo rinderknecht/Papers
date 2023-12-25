@@ -1,0 +1,60 @@
+\documentclass[11pt,a4paper]{article}
+
+% Language and fonts
+%
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}       % Required for hyphenation and \DJ
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{hyphenat}
+\usepackage{url}
+
+% Figures
+%
+\usepackage{graphicx,subfig}
+\usepackage[verbose]{wrapfig}    % Wrapping text around figures
+
+% Maths
+%
+\usepackage{amsmath,amssymb,amsthm,stmaryrd}
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+% Title
+%
+\title{A Didactic Analysis of Merge Sort}
+
+\author{Christian Rinderknecht\\
+\small Department of Programming Languages and Compilers\\
+\small E\"otv\"os Lor\'and University\\
+\small Budapest, Hungary\\
+\small \url{rinderkn@caesar.elte.hu}}
+\date{}
+
+% Main document
+%
+\begin{document}
+
+\maketitle
+
+\allowdisplaybreaks
+
+\input{commands}
+
+\input{abstract}
+\input{keywords}
+\input{introduction}
+\input{merging}
+\input{power}
+\input{topdown}
+\input{conclusion}
+
+\medskip
+
+\paragraph{Acknowledgements} The author thanks the anonymous reviewers
+for their helpful comments on the manuscript.
+
+\bibliographystyle{unsrt}
+\bibliography{tmcs2013}
+
+\end{document}

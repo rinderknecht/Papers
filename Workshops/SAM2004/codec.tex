@@ -1,0 +1,237 @@
+%%-*-latex-*-
+
+\section{Coding and decoding}
+
+\textbf{BER codes.} The structure of a BER code is based on the triple
+(\emph{tag}, \emph{length}, \emph{contents}). The \emph{tag} field
+corresponds to the tag of the value type in \ASN, the \emph{length} is
+the length of the contents field and the \emph{contents} field is
+either another code (in which case the code is said
+\emph{constructed}) or the encoding of a primitive type (in which case
+the code is said \emph{primitive}). A primitive type is an \ASN
+built-in type which is not defined in terms of other types,
+\emph{e.g.,} the \texttt{\small INTEGER} type. If the contents length
+is unknown at the encoding-time, it is possible for the coder to
+provide a special dummy length and then close the code with an
+\emph{ending octet}, in which case the code is said to be in
+\emph{indefinite form}, as opposed to \emph{definite form}. Definite
+form requires that the sender computes the whole code before sending
+it (in order to be able to compute the contents length) and it allows
+the receiver to allocate a bounded amount of memory to store the
+incoming code. The indefinite form allows the sender to encode the
+value coming from the upper application as it comes throughout a
+buffer (i.e. faster encoding within a bounded space) but it requires
+the receiver to handle carefully the incoming stack size. Indeed, the
+BER codes have a recursive structure and one of the advertised
+vulnerabilities was due to a deeply embedded code in indefinite form
+which overflowed the receiver's stack because the
+\emph{implementation} was mishandling the memory.
+
+\medskip
+
+\textbf{Abstract BER codes.} A complete formalisation of the BER first
+requires a model of the codes \emph{at the octet level}, by means of a
+context-free grammar for instance, and the proof of some relevant
+properties on it. For example, from a soundness point of view, it is
+important to prove that the grammar is not ambiguous, i.e. a given
+code cannot be described in more than one way (exactly one derivation
+tree); from the decoder's efficiency point of view, it is important to
+prove that the grammar can be recursively analysed without
+backtracking and with a small constant amount of
+look-ahead. Unfortunately, due to the limited room, we have to skip
+this interesting stage. We shall assume that we already deal with
+\emph{abstract codes}, which correspond to the abstract syntax trees
+of the compilers: an abstract code does not model the octets, but
+rather the structure of the codes. As a consequence, the length field
+is not included in an abstract code since, conceptually, an abstract
+code is a tree, not a series as the original codes. Moreover, the
+concepts of definite and indefinite form are not relevant for abstract
+codes, since they apply to octet streams only. The abstract codes are
+thus modeled with an OCaml type since these types correspond to trees
+with user-defined nodes and leaves.
+
+\vspace*{-10pt}
+
+\begin{tabbing}
+\Xtype \type{primitive\_code} \equal \= \Pint{} \vbar~\Preal{}
+\vbar~\Pminusinf{} \vbar~\Pplusinf \vbar~\Pstring{}\\ 
+\> \vbar~\Pbitstr{} \vbar~\Pbool{} \Xof \type{int}
+\vbar~\Pnull\\
+\Xtype \type{code} \equal \lpar\type{tag\_class} $\times$
+\type{int}\rpar{} $\times$ \type{contents}\\ 
+\Xand \type{contents} \equal \Primitive{} \Xof \type{primitive\_code}
+\vbar~\Constructed{} \Xof \type{code} \type{list}
+\end{tabbing}
+
+\vspace*{-10pt}
+
+The type \type{primitive\_code} captures the codes of the values from
+types \texttt{\small INTEGER}, \texttt{\small REAL}, \texttt{\small
+  BIT STRING}, \texttt{\small OCTET STRING}, \texttt{\small BOOLEAN},
+\texttt{\small NULL} and the numerous character string types. The
+abstract primitive codes carry little discriminative information for a
+given type; for example, \emph{all} the \texttt{\small INTEGER} values
+are encoded into the same abstract code \Pint, but codes of
+\texttt{\small REAL} values are still different (\Preal). This way we
+abstract away octet-level details which would otherwise bring us too
+far. We nevertheless keep the \texttt{\small BOOLEAN} standard
+encoding: value \texttt{\small FALSE} is encoded as \lpar\cst{Pbool
+  0}\rpar{} and \texttt{\small TRUE} is encoded as \lpar\cst{Pbool
+  $n$}\rpar{} for any $n>0$. \emph{This allows to maintain the
+  non\hyp{}determinism of the BER in the modeling.} A \type{code} is a
+triple made of a \type{tag\_class}, a tag number (\emph{int}) and
+\emph{contents}. The latter is either a primitive or a constructed
+code. A constructed code is a list of codes.
+
+\medskip
+
+\textbf{Inference rules.} We define the encoding with a \emph{system
+of inference rules}. These are logical implications $P_1 \wedge P_2
+\wedge \ldots \wedge P_n \Rightarrow C$ graphically represented as
+\begin{mathpar}
+\inferrule{P_1\\ P_2\\ \ldots\\ P_n}{C} 
+\end{mathpar}
+where the $P_i$ are the \emph{premises} and $C$ is the
+\emph{conclusion}. When there is no premise, $C$ is an \emph{axiom}
+and is simply noted $C$. An inference rule can be interpreted also
+from a computational point of view: in order to compute $C$, we need
+to compute the $P_i$ first (order is not specified). The rules and
+axioms can contain unquantified variables (\emph{free variables}). In
+this case they are implicitly universally quantified ($\forall$) at
+the beginning. For instance
+\inferrule{P_1(x)\\ P_2(y)}{P(x,y)}\;\TirName{\textsc{Prop}} actually
+denotes the property \textsc{Prop} which is $\forall x,y.P_1(x) \,
+\wedge \, P_2(y) \Rightarrow P(x,y)$. A system of inference rules is
+an unordered set of rules. A theorem is a judgement, i.e. a formal
+statement. A demonstration is a proof tree whose root (the conclusion)
+is the theorem, the inner nodes are the conclusions of its subtrees
+and the leaves are axioms.
+
+\medskip
+
+%% \inferrule*[right=\quad \textsc{Int}]
+%%   {}
+%%   {\coding{\Gamma}{\Int \,
+%%    (n)}{([\tau,p],\Integer)}{(\tau,\Primitive \, (\Pint))}
+%%   }
+
+\textbf{Abstract BER.} Let us note $\coding{\Gamma}{v}{(\Psi,\T)}{c}$
+the judgement ``In the environment $\Gamma$, the value $v$ is encoded
+into the code $c$, following the type \T{} with the tags $\Psi$.'' The
+environment models the module and is mandatory because recursive types
+are allowed, thus type references do exist. Given a type name $x$, the
+referred type is $\Gamma(x)$. Using a system of inference rules to
+define the encoding relation means that the successful encoding of a
+value matches a proof tree made with the following rules:
+\begin{mathpar}
+\inferrule*[right=True]
+  {n > 0}
+  {\coding{\Gamma}{\True}{([\tau,p],\Boolean)}{(\tau, \Primitive \, (\Pbool \, n))}
+  }
+\and
+\inferrule[Ref]
+  {\coding{\Gamma}{v}{\Gamma(x)}{c}}
+  {\coding{\Gamma}{v}{([\,],\TRef \, (x))}{c}}
+\and
+\inferrule
+  {\textnormal{$\pi$ is a permutation on \type{components}}\\\\
+   \coding{\Gamma}{v}{(\Psi,\SEQUENCE \; (\pi (\Phi)))}{c}}
+  {\coding{\Gamma}{v}{(\Psi,\SET \; \Phi)}{c}}\;\TirName{Set}
+
+\inferrule*[right=Tags]
+  {\coding{\Gamma}{v}{(\Psi,\T)}{c}}
+  {\coding{\Gamma}{v}{((\tau,\Explicit)\!::\!\Psi,\T)}
+          {(\tau, \Constructed \, [c])}
+  }
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[right=SeqOptOut]
+  {\varphi = (l, \overline{\T},\Some \, \Optional)\\
+   \coding{\Gamma}{\Seq \, M}{([\psi\,], \SEQUENCE \; \Phi)}{c}\\
+  }
+  {\coding{\Gamma}{\Seq \, ((l,v)\!::\!M)}
+          {([\psi\,],\SEQUENCE \, (\varphi\!::\!\Phi))}{c}
+  }
+\end{mathpar}
+\begin{mathpar}
+\inferrule*[right=SeqOptIn]
+  {\varphi = (l,\overline{\T},\Some \, \Optional)\\
+   \coding{\Gamma}{v}{\overline{\T}}{c}\\
+   \coding{\Gamma}{\Seq \, M}{([\psi], \SEQUENCE \; \Phi)}
+          {(\tau,\Constructed \, C)}\\
+   \overline{c} = (\tau, \Constructed \, (c\!::\!C))
+  }
+  {\coding{\Gamma}{\Seq \, ((l,v)\!::\!M)}
+          {([\psi],\SEQUENCE \, (\varphi\!::\!\Phi))}{\overline{c}}}
+\end{mathpar}
+
+\medskip
+
+Due to the lack of space, we only presented the more interesting
+rules, of which we shall comment the conclusions before the
+premises. Lists are noted between brackets and $a::A$ is a list whose
+head is~$a$ and sub-list is~$A$. A pair is either noted $(a,b)$ or
+$a,b$. Rule \textsc{True} illustrates a primitive encodings which is
+non\hyp{}deterministic (variable $n$ is free). Pattern $[\tau,n]$
+matches a list of a single element which is a pair whose first
+projection is named $\tau$ and the second is named $n$. Since we
+operate on \core, this tag is compulsorily the predefined
+\texttt{\small UNIVERSAL} and \texttt{\small IMPLICIT} tag of
+\texttt{\small INTEGER}. Rule \textsc{Ref} matches the encoding of a
+type reference $\TRef (x)$ with no tags: we encode the referenced type
+$\Gamma(x)$. Rule \textsc{Tags} apply when an \texttt{\small EXPLICIT}
+tag occurs first. Note that $\Psi$ cannot be empty, i.e. [\,], since
+an \texttt{\small IMPLICIT} tag only apply to a core type. Rule
+\textsc{Set} models the non\hyp{}determinism of the BER with respect
+to the \texttt{\small SET} type: any permutation of the sub-codes is
+allowed.
+
+\medskip
+
+Rules \textsc{SeqOptOut} and \textsc{SeqOptIn} model another
+non\hyp{}deterministic behaviour: a component value whose type is
+\texttt{\small OPTIONAL} may not be encoded, as a sender's
+option. Hence these \emph{two} rules have the same conclusion (it is
+the only case), contrary to rule \textsc{Set} in which
+non\hyp{}determinism is modeled by a free variable ($\pi$). We did not
+model the encoding errors: at any time, given an environment $\Gamma$,
+a tagged type $(\Psi, \T)$ and a value $v$, if no conclusion
+$\coding{\Gamma}{v}{(\Psi,\T)}{\star}$ matches then it is a run-time
+error (we can build no code $c$ in place of $\star$) and the
+implementation must handle properly this situation in an unspecified
+way. If the typing is statically done by the \ASN compiler, this
+should not happen, but since we decided not to model the typing, the
+typing is partly included in the encoding (i.e. at run-time).
+
+\medskip
+
+\textbf{Abstract decoding.} As we said in section~\ref{modeling}, the
+BER decoding process is not published, is up to the \ASN compiler
+implementors and can be modeled by a non\hyp{}injective function. We
+propose the following equational definition we expect to be
+faithful. Let us note $\decoding{\Gamma}{c}{(\Psi,\T)}$ the decoding
+of $c$ in the environment $\Gamma$ according to type \T{} tagged
+$\Psi$.
+
+\begin{gather*}
+\decoding{\Gamma}{(((\Universal,1), \Primitive (\Pbool \,
+0)))}{([\,],\Boolean)} = \False\\
+\begin{align*}
+\decoding{\Gamma}{(((\Universal,1), \Primitive (\Pbool \,
+n)))}{([\,],&\Boolean)} = \True\\
+& \ \textnormal{for all} \ n > 0
+\end{align*}\\
+\decoding{\Gamma}{c}{([\,],\TRef \, (x))} = \decoding{\Gamma}{c}{\Gamma(x)}\\
+\decoding{\Gamma}{(\tau,\Constructed \,
+  [c])}{((\tau,\Explicit)\!::\!\Psi,\T)} =
+\decoding{\Gamma}{c}{(\Psi,\T)}\\
+\begin{align*}
+\decoding{\Gamma}{(\tau,\kappa)}{([\,],\Choice \, F)} = & \ 
+\decoding{\Gamma}{(\tau,\kappa)}{F(l)}\\
+& \ \textnormal{where} \ F(l) = ((\tau,m)\!::\!\Psi,\T) 
+\end{align*}
+\end{gather*}
+
+We do not provide the full definition for we lack of space and do not
+wish to drown the reader into too much technical details anyway.

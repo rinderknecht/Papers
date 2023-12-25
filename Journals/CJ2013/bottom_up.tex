@@ -1,0 +1,483 @@
+\section{General case}
+
+The splitting strategy is a parameter of merge sort. \emph{Top-down
+  merge sort} consists in cutting a series of \(n\)~keys into two
+series of equal or almost equal lengths, that is, \(\floor{n/2}\) and
+\(\ceiling{n/2}\), where \(\floor{x}\) (\textsl{floor of~\(x\)}) is
+the greatest integer less than or equal to~\(x\), and \(\ceiling{x}\)
+(\textsl{ceiling of~\(x\)}) is the least integer greater than or equal
+to~\(x\). The number of comparisons \(\C{\top}{n}\) then satisfies the
+equations
+\begin{equation}
+\C{\top}{0} = \C{\top}{1} = 0,\quad
+\C{\top}{n} = \C{\top}{\floor{n/2}}
++ \C{\top}{\ceiling{n/2}}
++ \C{\Join}{\floor{n/2},\ceiling{n/2}}.
+\label{eq:Ctop}
+\end{equation}
+
+Instead of cutting a series of \(n\)~keys in two halves, we could
+split into \(2^{\ceiling{\lg n}-1}\) and \(n-2^{\ceiling{\lg n}-1}\)
+keys, where the first number represents the highest power of~\(2\)
+strictly smaller than~\(n\). For instance, if \(n=11=2^3+2^1+2^0\), we
+would split into \(2^3=8\) and \(2^1+2^0=3\). Of course, if \(n=2^p\),
+this strategy, called \emph{bottom-up}, coincides with that of
+top-down merge sort, which, in terms of cost, is expressed as
+\(\C{\bot}{2^p} = \C{\top}{2^p} = \C{\Join}{2^p}\), where
+\(\C{\bot}{n}\) is the cost of bottom-up merge sort on a series
+of length~\(n\). In all generality, \(\C{\bot}{0} = \C{\bot}{1} = 0\) and
+\begin{equation}
+\C{\bot}{n} = \C{\bot}{2^{\ceiling{\lg n}-1}}
+  + \C{\bot}{n - 2^{\ceiling{\lg n}-1}} + \C{\Join}{2^{\ceiling{\lg
+        n}-1},n - 2^{\ceiling{\lg n}-1}}.
+\label{eq:cost_bms}
+\end{equation}
+
+\Fig~\ref{fig:bot_up2} shows the merge tree of seven keys being sorted in that fashion. Note how the bottommost singleton \((4)\) is connected by an edge without an arrow to the node above because it is merged \emph{at the upper level} with \((2,6)\), a series twice as long. The imbalance in length is further propagated upwards. The general case is better suggested by retaining at each node only the length of the associated series, as shown in \fig~\ref{fig:msort_abs}.
+\begin{figure}
+\centering
+\subfigure[Merge tree of \((7,3,5,1,6,2,4)\)\label{fig:bot_up2}]{%
+    \includegraphics[bb=71 632 206 721]{bot_up2}} \qquad
+\subfigure[Lengths only\label{fig:msort_abs}]{%
+    \includegraphics[bb=71 632 150 721]{msort_abs}}
+\caption{Sorting seven keys}
+\end{figure}
+
+\paragraph{Minimum cost}
+
+A simple analysis of the minimum cost of bottom-up merge sort has
+been published long ago~\cite{McIlroy:1974}, but we include it here
+for the sake of completion. Let \(\B{\bot}{n}\) be the minimum cost
+for sorting \(n\)~keys, bottom-up. Let \(n=2^p+i\), with \(0 < i
+< 2^p\). Then, from equations~\eqref{eq:cost_bms}
+and~\eqref{eq:best_merge}, we deduce
+\begin{equation}
+\B{\bot}{2^p+i} = \B{\bot}{2^p} + \B{\bot}{i} + i.
+\label{eq:Bbot_2p_i}
+\end{equation}
+Equation~\eqref{eq:best_power} is \(\B{\bot}{2^p} = \frac{1}{2}p2^p\),
+so let us look for an additional linear term in the general case,
+\emph{i.e.}, the greatest real constants~\(a\) and~\(b\) such that,
+for \(n \geqslant 2\), \(\pred{L}{n} \colon \tfrac{1}{2}n\lg n + an +
+b \leqslant \B{\bot}{n}\), where \(\lg n\)~is the binary logarithm
+of~\(n\). The base case is simply \(\pred{L}{2} \colon 2a + b
+\leqslant 0\). Let us assume \(\pred{L}{n}\), for all \(1 \leqslant n
+\leqslant 2^p\), and prove \(\pred{L}{2^p+i}\), for all \(0 < i
+\leqslant 2^p\). The induction principle entails then that
+\(\pred{L}{n}\) holds for all~\(n \geqslant 2\). The inductive step
+\(\pred{L}{2^p+i}\) should give us the opportunity to maximise the
+constants~\(a\) and~\(b\). Let \(m=2^p\). Using \(\B{\bot}{2^p} =
+\tfrac{1}{2}p2^p\) and the inductive hypothesis \(\pred{L}{i}\), we
+have
+\begin{equation}
+\tfrac{1}{2}m\lg m + (\tfrac{1}{2}i\lg i + ai + b) + i \leqslant \B{\bot}{m} + \B{\bot}{i} + i = \B{\bot}{m+i}.
+\label{ineq:Btms_n_i}
+\end{equation}
+For the inductive step, we need \(\tfrac{1}{2}(m+i)\lg(m+i) + a(m+i) +
+b \leqslant \B{\bot}{m+i}\). Using~\eqref{ineq:Btms_n_i}, it is
+implied by \(\tfrac{1}{2}(m+i)\lg(m+i) + a(m+i) + b \leqslant
+\tfrac{1}{2}m\lg m + (\tfrac{1}{2}i\lg i + ai + b) + i\). At this
+point, we extend~\(i\) over the real numbers by defining \(i=x2^p\),
+where \(x\)~is a real number such that \(0 < x \leqslant 1\). Then,
+the result is implied by \(a \leqslant \Phi(x)\), where \(\Phi(x) :=
+\tfrac{1}{2}x\lg x + x - \tfrac{1}{2}(1+x)\lg(1+x)\). The
+function~\(\Phi\) can be continuously extended at~\(0\), as \(\lim_{x
+  \to 0} x\lg x = 0\), and it is differentiable on the closed interval
+\([0,1]\):
+\begin{equation}
+\frac{d\Phi}{dx} = \frac{1}{2}\lg\frac{4x}{x+1}.
+\label{eq:der_Phi}
+\end{equation}
+The root of \(d\Phi/dx = 0\) is \myfrac{1}/{3}, and the derivative is
+negative before, and positive after. Therefore, \(a_{\max} := \min_{0
+  \leqslant x \leqslant 1}\Phi(x) = \Phi(\tfrac{1}{3}) =
+-\tfrac{1}{2}\lg\tfrac{4}{3}\). The base case was \(b \leqslant -2a\),
+therefore \(b_{\max} := -2a_{\max} = \lg\tfrac{4}{3}\).
+\begin{equation}
+  \tfrac{1}{2}n\lg n - \left(\tfrac{1}{2}\lg\tfrac{4}{3}\right)n + \lg\tfrac{4}{3}
+  \leqslant \B{\bot}{n},
+  \label{ineq:lower_Btms}
+\end{equation}
+where \(\tfrac{1}{2}\lg\tfrac{4}{3} \simeq 0.2075\) and
+\(\lg\tfrac{4}{3} \simeq 0.415\). Importantly, the lower bound is
+tight if \(x=\myfrac{1}/{3}\), that is, when
+\(2^p+i=2^p+x2^p=(1+1/3)2^p=2^{p+2}\!/3\), or, in general,
+\(2^k\!/3\). The nearest integers are \(\floor{2^k\!/3}\) and
+\(\ceiling{2^k\!/3}\), so we should find out which one minimises
+\(\B{\bot}{n} - \tfrac{1}{2}n\lg(\tfrac{3}{4}n)\), because we have
+\(\tfrac{1}{2}n\lg n - \left(\tfrac{1}{2}\lg\tfrac{4}{3}\right)n =
+\tfrac{1}{2}n\lg(\tfrac{3}{4}n)\). It is tedious, but elementary, to
+prove that the lower bound is tight if \(n=2\) (from the base case)
+and is otherwise the sharpest when \(n=(1010\dots01)_2\) or
+\(n=(1010\dots1011)_2\). As a whole, these values are the
+\emph{Jacobsthal sequence}, defined as \(J_0 = 0\), \(J_1=1\) and
+\(J_{n+2} = J_{n+1} + 2J_{n}\).
+
+Let us use now the same inductive approach to find a good upper bound
+to \(\B{\bot}{n}\), that is, we want to minimise the real constants
+\(a'\)~and~\(b'\) such that, for \(n \geqslant 2\), \(\B{\bot}{n}
+\leqslant \tfrac{1}{2}n\lg n + a'n + b'\). The only difference with
+the search for the lower bound is that inequalities are reversed, so
+we want \(\Phi(x) \leqslant a'\), where \(\Phi(x) := \tfrac{1}{2}x\lg
+x + x - \tfrac{1}{2}(1+x)\lg(1+x)\). Here, we need to find the maximum
+of~\(\Phi\) on the closed interval \([0,1]\). The two positive roots
+of~\(\Phi\) are \(0\)~and~\(1\), and \(\Phi\)~is negative between them
+(see equation~\eqref{eq:der_Phi}). Therefore \(a'_{\min} := \max_{0
+  \leqslant x \leqslant 1}\Phi(x) = \Phi(0) = \Phi(1) = 0\). From the
+base case, \(b'_{\min} = -2a_{\min} = 0\). Therefore, we have the
+bounds
+\begin{equation}
+\tfrac{1}{2}n\lg n - \left(\tfrac{1}{2}\lg\tfrac{4}{3}\right)n + \lg\tfrac{4}{3}
+\leqslant \B{\bot}{n} \leqslant
+\tfrac{1}{2}n\lg n.
+\label{ineq:bounds_Btms}
+\end{equation}
+The upper bound is clearly tight when \(n=2^p\) because of
+equation~\eqref{eq:best_power}. The cost \(\B{\bot}{n}\) has been
+investigated by means of advanced real analysis~\cite{Delange:1975},
+revealing that \(\B{\bot}{n} = \tfrac{1}{2}n\lg n + F_0(\lg n) \cdot
+n\), where \(F_0\)~is a continuous, nowhere differentiable function of
+period~\(1\), and whose Fourier series shows the mean value to be
+about \(-0.145599\).
+
+\paragraph{Maximum cost}
+
+Let \(\W{\bot}{n}\) be the maximum cost for sorting \(n\)~keys,
+bottom-up. Let \(n=2^p+i\), with \(0 < i < 2^p\). Then, from
+equations~\eqref{eq:cost_bms} and~\eqref{eq:worst_merge} we deduce
+\begin{equation}
+\W{\bot}{2^p+i} = \W{\bot}{2^p} + \W{\bot}{i} + 2^p
++ i - 1.
+\label{eq:Wbms_2p_i}
+\end{equation}
+Let us search a lower bound of \(\W{\bot}{n}\) by induction based on
+that equation. Let us find the greatest real constants \(a\)~and~\(b\)
+such that, for \(n \geqslant 2\), \(n\lg n + an + b \leqslant
+\W{\bot}{n}\). The base case is \(n=2\), that is, \(b \leqslant -2a -
+1\). Let us assume the bound holds for \(n=i\) and let us recall
+equation~\eqref{eq:worst_power}, which here takes the guise of
+\(\W{\bot}{2^p} = p2^p - 2^p + 1\). Equation~\eqref{eq:Wbms_2p_i}
+yields \((p2^p - 2^p + 1) + (i\lg i + ai + b) + 2^p + i - 1 \leqslant
+\W{\bot}{2^p+i}\), which is equivalent to \(p2^p + i\lg i + i + ai + b
+\leqslant \W{\bot}{2^p+i}\). We want to prove the bound holds for
+\(n=2^p+i\), that is, \((2^p+i)\lg(2^p+i) + a(2^p+i) + b \leqslant
+\W{\bot}{2^p+i}\). This is true if the following stronger constraint
+holds: \((2^p+i)\lg(2^p+i) + a(2^p+i) + b \leqslant p2^p + i\lg i + i
++ ai + b\). It is equivalent to \(a2^p \leqslant p2^p -
+(2^p+i)\lg(2^p+i) + i\lg i + i\). Let us extend~\(i\) over the real
+numbers by defining \(i=x2^p\), where \(x\)~is a real number such that
+\(0 < x \leqslant 1\). Then, the running inequality is equivalent to
+\(a \leqslant \Phi(x)\), where \(\Phi(x) := x\lg x + x -
+(1+x)\lg(1+x)\). The function~\(\Phi\) can be continuously extended
+at~\(0\), as \(\lim_{x \to 0} x\lg x = 0\), and it is differentiable
+on the closed interval \([0,1]\):
+\begin{equation*}
+\frac{d\Phi}{dx} = \lg\frac{2x}{x+1}.
+\end{equation*}
+The root of \(d\Phi/dx = 0\) is~\(1\), the derivative is negative
+before, and positive after; so~\(\Phi\) decreases until \(x=1\):
+\(a_{\max} := \min_{0 \leqslant x \leqslant 1}\Phi(x) = \Phi(1) =
+-1\). From the base case, \(b_{\max} := -2a_{\max} - 1 = 1\). Then
+\(n\lg n - n + 1 \leqslant \W{\bot}{n}\). The bound is tight when
+\(x=1\), that is, \(i=2^p\), hence \(n=2^{p+1}\).
+
+Let us find the smallest real constants \(a'\)~and~\(b'\) such that,
+for \(n \geqslant 2\), \(\W{\bot}{n} \leqslant n\lg n + a'n + b'\).
+The difference with the lower bound is that the inequalities are
+reversed and we minimise the unknowns, instead of maximising
+them. Thus, the base case here is \(b' \geqslant -2a - 1\) and the
+condition for induction is \(a' \geqslant \Phi(x)\). We know~\(\Phi\),
+so \(a'_{\min} := \max_{0 \leqslant x \leqslant 1}\Phi(x) = \Phi(0) =
+0\), and \(b'_{\min} := -2a'_{\min} - 1 = -1\). So
+\begin{equation}
+n\lg n - n + 1 \leqslant \W{\bot}{n} < n\lg n - 1.
+\label{ineq:OWbms}
+\end{equation}
+Because \(\Phi(x)\) was extended at~\(x=0\), the upper bound is best
+approched when \(i=1\), the smallest possible integer value, that is,
+when \(n=2^p+1\) (the most unbalanced merger: series of size~\(2^p\)
+and~\(1\)). A complicated study~\cite{PannyProdinger:1995}, based on
+Fourier analysis, confirms that the linear terms of these bounds
+cannot be improved and shows the mean value of the coefficient of the
+linear term to be, approximately, \(-0.70057\).
+
+\paragraph{Average cost}
+
+Let \(\M{\bot}{n}\) be the average number of comparisons to sort
+\(n\)~keys bottom-up. All permutations of the input series being
+equally likely, equation~\eqref{eq:cost_bms} becomes \(\M{\bot}{0} =
+\M{\bot}{1} = 0\) and
+\begin{equation*}
+\M{\bot}{n} = \M{\bot}{2^{\ceiling{\lg n}-1}}
++ \M{\bot}{n - 2^{\ceiling{\lg n}-1}}
++ \M{\Join}{2^{\ceiling{\lg n}-1},n - 2^{\ceiling{\lg n}-1}},
+\end{equation*}
+which, with equation~\eqref{eq:mean_merge}, implies \(\M{\bot}{0} =
+\M{\bot}{1} = 0\) and
+\begin{align*}
+\M{\bot}{n} &= \M{\bot}{2^{\ceiling{\lg n}-1}}
++ \M{\bot}{n - 2^{\ceiling{\lg n}-1}}\\
+&\phantom{=} \,
++ n - \frac{2^{\ceiling{\lg n}-1}}{n - 2^{\ceiling{\lg n}-1} + 1}
+- \frac{n - 2^{\ceiling{\lg n}-1}}{2^{\ceiling{\lg n}-1}+1}.
+\end{align*}
+For the lower bound, let us maximise the real constants
+\(a\)~and~\(b\) in \(\pred{H}{n} \colon n\lg n + an + b \leqslant
+\M{\bot}{n}\), for \(n \geqslant 2\). The base case for induction is
+\(\pred{H}{2} \colon 2a + b + 1 \leqslant 0\). Let us assume now
+\(\pred{H}{n}\) for all \(2 \leqslant n \leqslant 2^p\), and let us
+prove \(\pred{H}{2^p+i}\), for all \(0 < i \leqslant 2^p\). The
+induction principle entails then that \(\pred{H}{n}\) holds for any
+\(n \geqslant 2\). If \(n=2^p+i\), then \(\ceiling{\lg n} - 1 = p\),
+so
+\begin{equation}
+\M{\bot}{2^p+i} = \M{\bot}{2^p} + \M{\bot}{i}
++ 2^p + i - \frac{2^p}{i+1} - \frac{i}{2^p+1}.
+\label{eq:Abms_2p_i}
+\end{equation}
+By hypothesis, \(\pred{H}{i}\) holds, that is, \(i\lg i + ai + b
+\leqslant \M{\bot}{i}\), but, instead of using
+\(\pred{H}{2^p}\), we will use the exact value in
+equation~\eqref{eq:Mjoin}, where \(\alpha :=
+\sum_{k \geqslant 0}1/(2^k+1)\). Let \(c_p := \sum_{k \geqslant 0}1/(2^{k}+2^{-p})\). From equation~\eqref{eq:Abms_2p_i},
+we derive
+\begin{equation*}
+(p-\alpha)2^p + c_p + (i\lg i + ai + b) + 2^p + i -
+\tfrac{2^p}{i+1} - \tfrac{i}{2^p+1} < \M{\bot}{2^p+i}.
+\end{equation*}
+We want \(\pred{H}{2^p+i} \colon (2^p+i)\lg(2^p+i) + a(2^p+i) + b
+\leqslant \M{\bot}{2^p+i}\), which is thus implied by
+\((2^p+i)\lg(2^p+i) + a2^p \leqslant (p - \alpha + 1)2^p -
+\tfrac{2^p}{i+1} + i\lg i + i - \tfrac{i}{2^p+1} + c_p\). Let
+\begin{align*}
+  \Psi(p,i) &:= p - \alpha + 1 - 1/(i+1) + i/(2^p+1)\\
+&\phantom{:=} \; - ((2^p+i)\lg(2^p+i) - i\lg i - c_p)/2^p.
+\end{align*}
+Then the sufficient condition above is equivalent to \(a \leqslant
+\Psi(p,i)\). To study the behaviour of \(\Psi(p,i)\), let us fix~\(p\)
+and let~\(i\) range over the real interval \(]0,2^p]\). The partial
+derivative of~\(\Psi\) with respect to~\(i\) is
+\begin{equation*}
+\frac{\partial\Psi}{\partial i}(p,i) = \frac{1}{2^p+1}
++ \frac{1}{(i+1)^2} - \frac{1}{2^p}\lg\left(\frac{2^p}{i}+1\right).
+\end{equation*}
+We determine the second derivative with respect to~\(i\):
+\begin{equation*}
+\frac{\partial^2\Psi}{\partial i^2}(p,i) = \frac{1}{(2^p+i)i\ln 2} - \frac{2}{(i+1)^3},
+\end{equation*}
+where \(\ln x\) is the natural logarithm of~\(x\). Let \(K_p(i) := i^3
++ (3 - 2\ln 2)i^2 + (3 - 2^{p+1}\ln 2)i + 1\).  Then
+\(\partial^2\Psi/\partial i^2 = 0 \Leftrightarrow K_p(i) = 0\) and the
+sign of \(\partial^2\Psi/\partial i^2\) is the sign of \(K_p(i)\). In
+general, a cubic equation has the form \(ax^3 + bx^2 + cx + d = 0\),
+with \(a \neq 0\). A classic result about the existence and nature f
+the roots is as follows. Let the \emph{discriminant} of the cubic
+equation be \(\Delta := 18abcd - 4b^3d + b^2c^2 - 4ac^3 -
+27a^2d^2\). It is well known that
+\begin{itemize}
+
+  \item if \(\Delta > 0\), the equation has three distinct real roots;
+
+  \item if \(\Delta = 0\), the equation has a multiple root and all
+    its roots are real;
+
+  \item if \(\Delta < 0\), the equation has one real root and two
+    nonreal complex conjugate roots.
+
+\end{itemize}
+Let us resume now our discussion. Let the cubic polynomial \(\Delta(x)
+:= (4\ln 2)x^3 - (9 - 2\ln 2)(3 + 2\ln 2)x^2 + 12(9 - 2\ln 29)x - 4(27
+- 8\ln 2)\). Then the discriminant of \(K_p(i) = 0\) is
+\(\Delta(2^{p+1}) \cdot \ln^2 2\). The discriminant of \(\Delta(x) = 0
+\) is negative, thus \(\Delta(x)\) has one real root~\(x_0 \simeq
+8.64872\). Because the coefficient of~\(x^3\) is positive,
+\(\Delta(x)\) is negative if \(x < x_0\) and positive if \(x >
+x_0\). Since \(p \geqslant 3\) implies \(2^{p+1} > x_0\), the
+discriminant of \(K_p(i) = 0\) is positive, which means that
+\(K_p(i)\) has three distinct real roots if \(p \geqslant 3\), and so
+does \(\partial^2\Psi/\partial i^2\). Otherwise, \(K_p(i)\) has one
+real root if \(0 \leqslant p \leqslant 2\). Before we study these two
+cases in detail, we need a small reminder about cubic polynomials. Let
+\(\rho_0\), \(\rho_1\) and~\(\rho_2\) be the roots of \(P(x) = ax^3 +
+bx^2 + cx + d\). So \(P(x) = a(x-\rho_0)(x-\rho_1)(x-\rho_2) = ax^3 -
+a(\rho_0+\rho_1+\rho_2)x^2 + a(\rho_0\rho_1 + \rho_0\rho_2 + \rho_1
+\rho_2)x - a(\rho_0\rho_1\rho_2)\), therefore \(\rho_0\rho_1\rho_2 =
+-d/a\).
+\begin{itemize}
+
+\item Let \(p \in \{0,1,2\}\). We just found that \(K_p(i)\) has one
+  real root, say~\(\rho_0\), and two nonreal conjugate roots,
+  say~\(\rho_1\) and \(\rho_2=\overline{\rho_1}\). Then
+  \(\rho_0\rho_1\rho_2 = \rho_0 \len{\rho_1}^2 = -1\), so \(\rho_0 <
+  0\). Since the coefficient of~\(x^3\) is positive, this entails that
+  \(K_p(i) > 0\) if \(i > 0\), which is true for
+  \(\partial^2\Psi/\partial i^2\) as well: \(i > 0 \) implies
+  \(\partial^2\Psi/\partial i^2 > 0\), therefore
+  \(\partial\Psi/\partial i\) increases. Because
+  \begin{gather*}
+    \frac{\partial\Psi}{\partial i}(p,i) \xrightarrow[i\to 0^{+}]{}
+    -\infty < 0,\\
+    \left.\frac{\partial\Psi}{\partial
+        i}(p,i)\right|_{i=2^p} = -\frac{1}{2^p(2^p+1)^2} < 0,
+  \end{gather*}
+  we deduce that \(\partial\Psi/\partial i < 0\) if \(i > 0\), which
+  means that \(\Psi(p,i)\) decreases when \(i \in ]0,2^p]\). Since we
+  are looking to minimise \(\Psi(p,i)\), we have \(\min_{0 < i
+    \leqslant 2^p}\Psi(p,i) = \Psi(p,2^p)\).
+
+\item If \(p \geqslant 3\), then \(K_p(i)\) has three real
+  roots. Here, the product of the roots of \(K_p(i)\) is~\(-1\), so at
+  most two of them are positive. Since we have \(K_p(0) = 1 > 0\),
+  \(K_p(1) < 0\) and \(\lim_{i\to+\infty}K_p(i) > 0\), we see that
+  \(K_p(i)\) has one root in \(]0,1[\) and one in \(]1,+\infty[\), and
+  so does \(\partial^2\Psi/\partial i^2\). Furthermore,
+  \(\left.\partial\Psi/\partial i\right|_{i=1} > 0\) and
+  \(\left.\partial\Psi/\partial i\right|_{i=2^p} < 0\), therefore,
+  from the intermediate theorem, there exists a real~\(i_p \in\;
+  ]1,2^p[\) such that \(\left.\partial\Psi/\partial i\right|_{i=i_p} =
+  0\), and we know that it is unique because \(\partial\Psi^2/\partial
+  i^2\) changes sign only once in \(]1,+\infty[\). This also means
+  that \(\Psi(p,i)\) increases if~\(i\) increases on \([1,i_p[\),
+  reaches its maximum when \(i=i_p\), and then decreases on
+  \(]i_p,2^p]\). Since \(\lim_{i \to 0^{+}}\Psi(p,i) = -\infty\) and
+  we are searching for a lower bound of \(\Psi(p,i)\), we need to know
+  which of \(i=1\) or \(i=2^p\) minimises \(\Psi(p,i)\): actually, we
+  have \(\Psi(p,1) \geqslant \Psi(p,2^p)\), so we conclude \(\min_{0 <
+    i \leqslant 2^p}\Psi(p,i) = \Psi(p,2^p)\).
+\end{itemize}
+In any case, we need to minimise \(\Psi(p,2^p)\). We have:
+\begin{equation*}
+\Psi(p,2^p) = - \frac{2}{2^p+1} - \sum_{k=0}^{p-1}\frac{1}{2^k+1}.
+\end{equation*}
+We check that \(\Psi(p,2^p) > \Psi(p+1,2^{p+1})\), so the function
+decreases for integer points and \(a_{\max} = \min_{p > 0}\Psi(p,2^p)
+= \lim_{p \to \infty}\Psi(p,2^p) = -\alpha^{+}\). From the base case,
+we draw \(b_{\max} = -2a_{\max} - 1 = 2\alpha - 1 \simeq 1.52899\). In
+total, by the principle of induction, we have established, for \(n
+\geqslant 2\),
+\begin{equation*}
+n\lg n - \alpha n + 2\alpha -1 < \M{\bot}{n}.
+\end{equation*}
+
+We need now to work out an upper bound using the same technique. In
+other words, we want to minimise the real constants \(a'\)~and~\(b'\)
+in \(\M{\bot}{n} \leqslant n\lg n + a'n + b'\), for \(n
+\geqslant 2\). The difference with the lower bound is that
+inequations are reversed: \(a'\geqslant \Psi(p,i)\) and \(b' \geqslant
+-2a' - 1\). We revisit the two cases above:
+\begin{itemize}
+
+  \item If \(0 \leqslant p \leqslant 2\), then \(\max_{0 < i
+    \leqslant 2^p}\Psi(p,i) = \Psi(p,1)\). We check
+  \(\max_{0 \leqslant p \leqslant 2}\Psi(p,1) = \Psi(0,1) = 1 -
+  \alpha\).
+
+\item If \(p \geqslant 3\), we need to express \(i_p\)~as a function
+  of~\(p\), but it is hard to solve \(\left.\partial\Psi/\partial
+    i\right|_{i=i_p} = 0\).
+
+\end{itemize}
+Before giving up, we could try to differentiate~\(\Psi\) with respect
+to~\(p\), instead of~\(i\). Indeed, \((p,i,\Psi(p,i))\) defines a
+surface in space, and by privileging \(p\)~over~\(i\), we are slicing
+the surface along planes perpendicular to the \(i\)~axis. Sometimes,
+slicing in one direction instead of another makes the analysis
+easier. The problem here is to differentiate~\(c_p\). We can work our
+way round with the bound \(c_p < 2\) from~\eqref{ineq:M_join}
+and define
+\begin{align*}
+  \Phi(p,i) &:= p - \alpha + 1 - 1/(i+1) + i/(2^p+1)\\
+&\phantom{:=} \; - ((2^p+i)\lg(2^p+i) - i\lg i - 2)/2^p.
+\end{align*}
+We have \(\Psi(p,i) < \Phi(p,i)\) and, instead of \(\Psi(p,i)
+\leqslant a'\), we can impose the stronger constraint \(\Phi(p,i)
+\leqslant a'\) and cross our fingers. In \fig~\ref{fig:phi},
+\begin{figure}
+\centering
+\begin{sideways}
+\includegraphics[bb=71 565 400 725]{phi} 
+\end{sideways}
+\caption{\(\Phi(p,1)\), \(\Phi(p,2)\) and \(\Phi(p,3)\) \label{fig:phi}}
+\end{figure}
+are outlined \(\Phi(p,1)\), \(\Phi(p,2)\) and \(\Phi(p,3)\). (The
+starting point for each curve is marked by a white disk.)
+Differentiating with respect to~\(p\) yields
+\begin{equation*}
+\frac{\partial\Phi}{\partial p}(p,i) = 
+\frac{i}{2^p}\ln\left(\frac{2^p}{i}+1\right)
+- \frac{\ln 2}{2^{p-1}} - \frac{i2^p\ln 2}{(2^p+1)^2}.
+\end{equation*}
+To study the sign of \(\partial\Phi(p,i)/\partial p\) when~\(p\)
+varies, let
+\begin{equation*}
+\varphi(x,i) := \frac{x}{i\ln 2} \cdot
+                \left.\frac{\partial\Phi}{\partial
+                    p}(p,i)\right|_{p=\lg x}.
+\end{equation*}
+Because \(x \geqslant 1\) implies \(x/i\ln 2 > 0\) and \(\lg x
+\geqslant 0\), the sign of \(\varphi(x,i)\) when~\(x \geqslant 1\)
+varies is the same as the sign of \(\partial\Phi(p,i)/\partial p\)
+when~\(p \geqslant 0\) varies, bearing in mind that \(x=2^p\). We
+have
+\begin{align*}
+\varphi(x,i) &= \lg\left(\frac{x}{i}+1\right) -
+\left(\!\frac{x}{x+1}\!\right)^2 - \frac{2}{i},\\
+\frac{\partial\varphi}{\partial x}(x,i) &=
+\frac{1}{(x+i)\ln 2} - \frac{2x}{(x+1)^3}.
+\end{align*}
+This should remind us of a familiar sight:
+\begin{equation*}
+\frac{\partial\varphi}{\partial x}(x,i) =
+  x \cdot \left.\frac{\partial^2\Psi}{\partial x^2}(p,x)\right|_{p=\lg
+  i}.
+\end{equation*}
+When \(x \geqslant 1\) varies, the sign of
+\(\partial\varphi(x,i)/\partial x\) is the same as the sign of
+\(\left.\partial^2\Psi(p,x)/\partial x^2\right|_{p=\lg i}\), so we can
+reuse the previous discussion on the roots of \(K_p(i)\), while taking
+care to replace~\(i\) by~\(x\), and~\(2^p\) by~\(i\):
+\begin{itemize}
+
+\item If \(i \in \{1,2,3,4\}\), then \(\partial\varphi(x,i)/\partial x
+  > 0\) when \(x > 0\).
+
+\item If \(i \geqslant 5\), then \(\partial\varphi(x,i)/\partial x >
+  0\) when \(x \geqslant 1\).
+
+\end{itemize}
+In both cases, \(\varphi(x,i)\) increases when \(x \geqslant 1\),
+which, with the facts that \(\lim_{x\to 0^{+}}\varphi(x,i) = -\infty <
+0\) and \(\lim_{x\to\infty}\varphi(x,i) = +\infty > 0\), entails that
+there exists a unique root~\(\rho > 0\) such that \(\varphi(x,i) < 0\)
+if \(x < \rho\), and \(\varphi(x,i) > 0\) if \(x > \rho\), and the
+same holds for \(\partial\Phi/\partial p\) (with a different
+root). Concordantly, \(\Phi(p,i)\) is decreasing down to its minimum,
+and increasing afterwards. (See again \fig~\ref{fig:phi}.)
+
+Moreover \(\overline\lim_{p \to \infty}\Phi(p,i) = i/(i+1) - \alpha <
+1 - \alpha = \Phi(0,1)\), so the curves admit asymptotes. Because we
+are searching for the maximum, we deduce \(a'_{\min} = \max_{0 < i
+  \leqslant 2^p}\Phi(p,i) = 1 - \alpha \simeq -0.2645\), and the
+constant is \(b'_{\min} = -2a'_{\min} - 1 = 2\alpha - 3 \simeq
+-0.471\). In sum, we found, for \(n \geqslant 2\),
+\begin{equation}
+n\lg n - \alpha n + (2\alpha - 1) < \M{\bot}{n} 
+< n\lg n - (\alpha - 1)n - (3 - 2\alpha).
+\label{ineq:bounds_Mbms}
+\end{equation}
+The lower bound is most accurate when \(n=2^p\). To interpret the
+values of~\(n\) for which the upper bound is most accurate, we need
+another glance at \fig~\ref{fig:phi}. We have \(i/(i+1) - \alpha \to 1
+- \alpha\), as \(p \to \infty\), but this does not tell us anything
+about~\(p\). Unfortunately, as noted earlier, for a given~\(p\), we
+cannot characterise explicitly~\(i_p\), which is the value of~\(i\)
+maximising \(\Phi(p,i)\) (in the planes perpendicular to this
+page). Anyway, the linear terms of these bounds cannot be improved
+upon. This means that the additional number of comparisons incurred by
+sorting \(n=2^p+i\) keys instead of~\(2^p\) is at most~\(n\). Much
+more advanced mathematics~\cite{PannyProdinger:1995} show that
+\(\M{\bot}{n} = n\lg n + B^*(\lg n) \cdot n\), where \(B^*\)~is a
+continuous, non-differentiable, periodic function whose average
+value is approximately \(-0.965\). Obviously, we have \(\M{\bot}{n}
+\sim n\lg n \sim \W{\bot}{n} \sim 2 \cdot \B{\bot}{n}\), where \(f(x)
+\sim g(x)\) means \(\lim_{x\to \infty}f(x)/g(x) = 1\).

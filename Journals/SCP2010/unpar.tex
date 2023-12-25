@@ -1,0 +1,76 @@
+%%-*-latex-*-
+
+\documentclass{elsart}
+
+% Language
+%
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{hyphenat}
+
+% Graphics and figures
+%
+\usepackage{subfig}
+\usepackage{graphicx}
+
+% Maths
+%
+\usepackage{amssymb,amsmath,stmaryrd}
+\usepackage{mathpartir}
+\usepackage{accents}
+
+% Miscellanea
+%
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{fancyvrb}
+
+% User-defined commands
+%
+\input{commands}
+
+% Main document
+%
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Theory and Practice of\\ Unparsed Patterns for Metacompilation}
+
+\author[ChR]{Christian Rinderknecht}
+\ead{rinderkn@konkuk.ac.kr}
+\ead[url]{\url{http://konkuk.ac.kr/~rinderkn}}
+\author{Nic Volanschi}
+\ead{nic.volanschi@free.fr}
+\ead[url]{\url{http://nic.volanschi.free.fr}}
+
+\address[ChR]{Konkuk University, 143-701 Seoul Gwangjin-gu Hwayang-dong,
+  South Korea}
+
+\thanks{The authors wish to express their gratitude to the anonymous
+  reviewers, whose upstanding and expert insights have greatly
+  improved this article.}
+
+\input{abstract}
+
+\begin{keyword}
+pattern matching \sep tree pattern \sep code checking \sep
+metacompilation \sep formal methods
+\end{keyword}
+\end{frontmatter}
+
+\allowdisplaybreaks
+
+\input{introduction}
+\input{model}
+\input{backtracking}
+\input{es1}
+\input{implementation}
+\input{related_work}
+\input{conclusion}
+
+\bibliographystyle{unsrt}
+\bibliography{unpar}
+
+\end{document}

@@ -1,0 +1,72 @@
+%%-*-latex-*-
+
+%\documentclass[a4paper,11pt,twocolumn]{article}
+\documentclass[]{cj}
+
+% Language
+%
+\usepackage[british]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{hyphenat}
+
+% Graphics and figures
+%
+\usepackage{picins}
+\usepackage{subfig}
+\usepackage{float}
+
+% Maths
+%
+\usepackage{amssymb,amsmath,stmaryrd}
+\usepackage{mathpartir}
+\usepackage{accents}
+
+% Miscellanea
+%
+\usepackage{xspace}
+\usepackage{url}
+\usepackage{fancyvrb}
+
+% User-defined commands
+%
+\input{commands}
+
+% Main document
+%
+\title[Theory and Practice of Unparsed Patterns]{Theory and Practice of Unparsed Patterns for Metacompilation}
+\author{Christian Rinderknecht}
+\affiliation{Konkuk University, 143-701 Seoul Gwangjin-gu Hwayang-dong,
+  South Korea}
+\author{Nic Volanschi}
+\affiliation{\emph{my}\textbf{gcc}, \url{http://mygcc.free.fr}}
+\email{rinderkn@konkuk.ac.kr, nic.volanschi@free.fr}
+
+\input{abstract}
+
+\keywords{pattern matching, tree pattern, code checking,
+  metacompilation, formal methods}
+\shortauthors{Christian Rinderknecht, Nic Volanschi}
+\volumeyear{2009}
+\volumenumber{VV}
+\issuenumber{II}
+
+\begin{document}
+
+\maketitle
+
+\allowdisplaybreaks
+
+\input{introduction}
+\input{model}
+\input{backtracking}
+\input{es1}
+%% \input{implementation}
+%% \input{related_work}
+%% \input{conclusion}
+\input{appendix}
+
+\bibliographystyle{unsrt}
+\bibliography{unparsed}
+
+\end{document}

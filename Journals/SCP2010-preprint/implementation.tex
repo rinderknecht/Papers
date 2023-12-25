@@ -1,0 +1,248 @@
+%%-*-latex-*-
+
+\section{Implementation}
+\label{implementation}
+
+Avoiding the parsing of patterns dramatically simplifies the
+implementation of pattern matching, as can be seen from the following
+two implementations. Indeed, we saw that extending a programming
+language grammar is difficult to implement in most existing tools. In
+contrast, unparsing an AST is trivial to implement: it consists of
+just printing the AST. In most cases, parser\hyp{}based tools already
+include functions to pretty\hyp{}print the AST, for debugging
+reasons. Moreover, AST pretty\hyp{}printers can be generated
+automatically based on the grammar of a language. It is
+straightforward to adapt an existing pretty\hyp{}printer to do
+unparsing on demand (see below for an example).
+
+Unparsed patterns were first implemented by the second author in the
+context of a lightweight checking compiler called
+\MyGCC,\footnote{\url{http://mygcc.free.fr}} which is an extensible
+version of the \GCC compiler, able to perform user\hyp{}defined checks
+on \Clang, \cpp, and \Ada code. Checks are expressed by defining
+incorrect sequences of program operations, where each program
+operation is described as an unparsed pattern or a disjunction of
+unparsed patterns. The implementation of pattern matching within
+\MyGCC accounts for only about 600 lines of new \Clang code, plus
+about 250 lines of code adapting the existing tree pretty\hyp{}printer
+of \GCC to perform unparsing on demand. The existing
+pretty\hyp{}printer dumped the unparsed representation of a whole AST
+in a debug file. We added a flag \verb|--lazy_mode| to switch between
+the standard dumping behaviour and the new on\hyp{}demand
+behaviour. When in on\hyp{}demand mode, the pretty\hyp{}printer
+returns for a given AST the list of its direct children (either trees
+or lexemes), instead of dumping the AST entirely to a file. This
+modification was straightforward.
+
+It is important to note that even though three different input
+languages can be checked, every single line of the patch is
+language\hyp{}independent. As a proof for that, the patched \GCC
+compiler restricted to the \Clang front\hyp{}end was initially tested
+only on \Clang code, as reported previously~\cite{ppdp}; subsequently,
+by just recompiling \GCC with all the front\hyp{}ends enabled it
+became possible to check \cpp{} and \Ada programs. Part of this
+extreme language independence comes from the fact that all the three
+front\hyp{}ends generate intermediate code in a language called
+\Gimple, and the dumper for different languages shared a common
+infrastructure based on \Gimple, which was modified just
+once. However, this is not required for the pattern matching
+framework. The only language\hyp{}dependent aspects used by the
+matcher were already present in \GCC: a parser for each language, a
+conversion from language\hyp{}specific ASTs to \Gimple ASTs, and a
+dumping function of \Gimple ASTs for each language, sharing some
+common infrastructure. Our patch of the dumper (briefly sketched
+above) concerned only the common (or language\hyp{}independent)
+infrastructure of the dumper. The \cpp{} and \Ada pattern matching
+became possible by this combination of the language\hyp{}independent
+matching algorithm with the language\hyp{}dependent unparsers already
+present in \GCC.  For instance, a pattern such as \texttt{\%\_ =
+operator[](\%x,\%y)} successfully matches any \cpp{} assignment of the
+form \texttt{\%\_ = \%x[\%y]} in which the indexing operator has been
+redefined, because the corresponding \Gimple ASTs are dumped using the
+\texttt{operator[]} syntax captured by the pattern.  Had the common
+infrastructure of the language\hyp{}specific dumpers not existed, each
+of the dumpers should have been modified to make them unparse level by
+level.
+
+The \textit{ES}(1) pattern matching algorithm was also implemented by
+the second author and is distributed as a freely available, standalone
+prototype called
+\Matchbox.\footnote{\url{http://mypatterns.free.fr/unparsed}} This
+very simple prototype, consisting of 500 lines of \Clang code, takes a
+parse tree represented in a \textsf{Lisp}\hyp{}like notation and an
+unparsed pattern, prints a complete trace of all the rules applied,
+and finally reports a successful match or a failure. The prototype may
+already be used to reproduce all the examples in this paper (using the
+\textit{ES}(1) algorithm). The aim of \Matchbox is to evolve into a
+standalone library for unparsed\hyp{}pattern matching, which can be
+linked from any parser\hyp{}based tool.
+
+\subsection{Examples}
+
+Here are some examples of pattern matching by \Matchbox. First, this
+is the example shown in Figure~\ref{fig:match_ex}. Note how the parse
+tree is written using parentheses and also how the concrete syntax
+lexemes are quoted.
+{\small
+\begin{verbatim}
+match "assign(var('a') '='
+       sub(sub(var('a') '-' mul(var('b')'*'var('c'))) '-' var('d')))"
+      "%x = %y - %z"
+ok, sigma={x<-var('a') y<-sub(var('a')'-'mul(var('b')'*'var('c')))
+           z<-var('d')}
+\end{verbatim}
+}
+\noindent Now the same pattern but with a simplified parse tree in
+which the constructors were omitted:
+{\small
+\begin{verbatim}
+match "(('a')'='((('a')'-'(('b')'*'('c')))'-'('d')))"
+      "%x = %y - %z"
+ok, sigma={x<-('a') y<-(('a')'-'(('b')'*'('c'))) z<-('d')}
+\end{verbatim}
+}
+Note the meta\-parentheses needed to avoid failure due to the
+incompleteness of \textit{ES}(1):
+{\small
+\begin{verbatim}
+match "(('a')'='((('a')'-'(('b')'*'('c')))'-'('d')))"
+      "%x = %(%(%y - %z%) - %t%)"
+ok, sigma = {t<-('d') x<-('a') y<-('a') z<-(('b')'*'('c'))}
+\end{verbatim}
+}
+Consider the unparsed pattern ``\texttt{\%q \%t \%x;}'' against the
+parse tree in Figure~\ref{fig:const_static}: the first meta\-variable,
+which intends to capture the qualificators, actually binds the
+qualified type as a whole, leading to a later failure:
+{\small
+\begin{verbatim}
+match "decl(qtype(quals('const' 'static') type('int')) id('x') ';')"
+      "%q %t %x;"
+failed
+\end{verbatim}
+}
+%% In order to avoid that, the unparsed pattern must be
+%% meta\-parenthesised as \texttt{\%(\%(\%q \%t\%) \%x;\%)}.
+%% {\small
+%% \begin{verbatim}
+%% match "decl(qtype(quals('const' 'static') type('int')) id('x') ';')"
+%%       "%(%(%q %t%) %x;%)"
+%% ok, sigma = {q<-quals('const' 'static') t<-type('int') x<-id('x')}
+%% \end{verbatim}
+%% }
+In order to avoid that, the variable \(q\) must be typed as
+\texttt{\%<quals>q}:
+{\small
+\begin{verbatim}
+match "decl(qtype(quals('const' 'static') type('int')) id('x') ';')" 
+      "%<quals>q %t %x;"
+ok, sigma = {q<-quals('const' 'static') t<-type( 'int' ) x<-id( 'x' )}
+\end{verbatim}
+}
+Mixing parentheses and meta\-parentheses with the parse
+tree from ``\texttt{case v in 1) exit;; esac}'':
+{\small
+\begin{verbatim}
+match "('case'('v')'in'(('1')')' ('exit')';;') 'esac')"
+      "case %x in %y) %z;; esac"
+ok, sigma = {x<-('v') y<-('1') z<-('exit')}
+\end{verbatim}
+}
+
+\subsection{Assessment}
+
+The technique of pattern matching based on unparsed patterns is
+completely language independent. Patterns are simply strings, which
+exist as a base type in any programming language. No pattern parser is
+required, which means also that the implementation of the pattern
+matcher is language independent. The only part tied to a specific
+language is the unparser, but they can be automatically generated from
+any grammar. 
+
+Unparsed patterns are an unrestricted solution to match programs,
+because they allow pattern variables to stand for any program
+sub\-construct or sub\-expression---in fact, for any subtree in the
+AST.  For instance, in the case of ASTs for the \Clang language,
+pattern variables may stand for function names, structure field names,
+or types, which are all subtrees. This makes it possible to naturally
+express patterns such as \texttt{\%x = \%f (\%y)} catching function
+names or expressions in pattern variable \texttt{f}, \texttt{static
+  \%t a} catching the type of variable \texttt{a} in pattern variable
+\texttt{t}, etc. As opposed to this unrestricted use, many
+pattern\hyp{}based tools implement parsed patterns only for a few
+common program constructs. By being an easy\hyp{}to\hyp{}implement and
+a general solution, unparsed patterns have the potential to enable
+widespread use of concrete syntax code pattern matching within many
+parser\hyp{}based tools. There are two quite different ways to use
+this enabling technology.
+
+\subsection{Usages}
+
+First, patterns can be used in the implementation of the tool itself,
+to simplify various code analyses and transformations. For instance,
+an analysis or optimisation pass could use pattern matching to look
+for statements matching a given pattern, e.g., increment assignments.
+This can simplify the implementation especially if the tool is written
+in a language that does not provide any support for pattern matching,
+like \Clang or \Java. However, as shown in the introduction, unparsed
+patterns may be useful even when the tool is written in a language
+that does provide a form of tree\hyp{}pattern matching, e.g., \ML:
+some ASTs patterns---especially verbose patterns--- are more easily
+expressed in native syntax than in tree syntax. Thus, at least,
+unparsed patterns offer an alternative for the programmer to freely
+chose the more convenient form for each pattern.
+
+The pattern matcher implemented in \MyGCC offers two programming
+interfaces for internal usage.
+
+The first interface implements unparsed patterns as used above, in
+which pattern variables are represented by the \texttt{\%} escaping
+character, followed by a variable, e.g, \texttt{\%x}, \texttt{\%y},
+etc. Pattern variables are global variables. This interface is
+available using the \Clang function:
+\begin{verbatim}
+bool tree_match(tree t, const char *format)
+\end{verbatim}
+which takes an AST \texttt{t} and a pattern format with named
+pattern variables and returns true if the matching succeeded, and
+false otherwise. 
+
+The second interface implements unparsed patterns with unnamed pattern
+variables, represented by the \texttt{\%} escaping character followed
+by the type of the variable: \texttt{t} for a subtree, \texttt{c} for
+a character, \texttt{d} for a number, e.g.,\texttt{\%t = \%t + \%t}
+(currently only tree variables are implemented). This interface is
+similar to the \Clang library functions performing I/O such as
+\texttt{scanf}, and is available through the \Clang function:
+\begin{verbatim}
+bool tree_scanf(tree t,const char *pat,...)
+\end{verbatim}
+which takes an AST \texttt{t}, a pattern \texttt{pat} with unnamed
+pattern variables, and a series of variable addresses corresponding to
+the pattern variables occurring in format, and returns true if the
+matching succeeded, and false otherwise. For example:
+\begin{verbatim}
+tree t, x, y;
+succeeded=tree_scanf(t,"%t=%t+%t",&x,&x,&y);
+\end{verbatim}
+matches \texttt{t} if it represents an increment, that is, if the
+variable on the left\hyp{}hand side is the same as the first term of
+the addition. In case of successful match, it instantiates variable
+\texttt{x} to the variable or expression being incremented, and
+\texttt{y} to the increment.
+
+Patterns can also be used to make the tool extensible by associating
+user\hyp{}defined behaviour to some patterns. For example, in \MyGCC
+users can define sequences of operations that constitute bugs. As a
+particular case, \MyGCC allows searching all the code for a given
+pattern, by using a new option \verb|--tree-check|. For instance, the
+following command will issue a warning for all the read statements
+whose result is unused, but otherwise compile the file as usual:
+\begin{verbatim}
+gcc --tree-check="read(%x, %y, %z);" foo.c   
+\end{verbatim}
+Indeed, because of the final semi\hyp{}colon, this pattern only
+matches complete statements and not simple expressions consisting of a
+call to the function \texttt{read}. Therefore, statements using the
+value of the call will not be reported (which is the intended
+behaviour).

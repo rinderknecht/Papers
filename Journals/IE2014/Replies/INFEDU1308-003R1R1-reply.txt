@@ -1,0 +1,157 @@
+First of all, thank you for your interest in my paper and for taking
+the time to read it and assess its value.
+
+> Originality    Average 
+
+This is the first ever survey on the field of teaching and learning
+recursive programming. How much more original can it get?
+ 
+> First of all, it is unclear what the purpose of the paper is. 
+
+Please read again the foreword. I tried to clarify it even more.
+
+> If it is mainly a historical survey, then it is less appropriate for
+> this journal. If it is mainly a bibliographic overview, then that
+> also would make it less appropriate.
+
+Of course, this is a fair discussion you should have with the editor,
+but, if you would allow me a pro domo argument, I would say that (1)
+publishing surveys is useful for researchers new to a field, (2)
+publishing the first ever survey on the teaching and learning of
+recursive programming is even more useful in a field where repetition
+is rife, (3) there is no mystery why ACM Computing Surveys has the
+highest Thomson Reuters score amongst all CS journals, and surveys
+like mine may improve the impact factor of Informatics in Education.
+
+> Technical quality   Below average, needs improvement 
+> [...]
+> Secondly, on the technical side, I find the paper lacking.  For
+> instance, it does not give a rigorous definition of recursion, even
+> though that is the main topic.  It claims to do so on p.3 ("we had
+> better define recursion").  But in what follows, there is no
+> rigorous definition of recursion.  It should be noted that this is
+> not a simple thing to do.  And, therefore, it is all the more
+> important to address this issue.
+
+Again, the foreword informs you that my intention is not to present a
+paper about my own (contentual) research on the topic, but to survey
+others for the first time, in order to serve as a reference for future
+studies. Therefore, while your criticism is technically valid, it
+applies to one short, off-topic paragraph in a 43-page long
+paper. Nevertheless, I felt challenged by your constructive criticism
+below and I expanded that paragraph into several pages so you can now
+criticise in detail my personal understanding on the matter, even if
+it is just as irrelevant as ever.
+
+> Furthermore, educators will not learn from this paper how to teach
+> this subject, or even what trade-offs there are and how to decide on
+> an approach taking into account the context variables (prior
+> knowledge of students, etc.).
+
+You are right. But, again, you miss the point because my target
+audience is *researchers* who would like to work on the teaching and
+learning of recursive programming. If you want others' research to
+inform and improve your teaching of the subject at hand, please refer
+to the original papers in the bibliography.
+
+> If the authors do not wish to take a position in this matter, then
+> they basically leave it to the reader. If they do, then this should
+> be clearly expressed in the paper. Now, I find this lacking.
+
+My approach and purpose is "clearly expressed" in the foreword.
+
+> Altogether, it is essential that these concerns are addressed.
+
+I agree and this is why I wrote the foreword: so I don't get
+criticised for a paper that I did not write, did not intend to write,
+and may never write.
+
+> References       Sufficient (or even too much) 
+> [...] 
+> I also find the paper too long to be effective. 
+
+As a survey, this paper is meant to become a reference for presenting
+the research in the field in the most exhaustive manner. Collating the
+bibliography has not been a matter of copy and paste, but a very long
+detective work, as bibliographies are often incomplete and even wrong.
+
+> It provides a lot of information, but it does not serve as a good
+> teaching guide; 
+
+That is correct on both counts. Purposefully.
+
+> in fact, it creates more confusion.
+
+If you expected teaching tips, I can understand your confusion: the
+field is actually really wide and it is quite contentious at times.
+
+> p.3, "recursion is not often clearly understood": do you mean "often
+> not"?  Otherwise, it makes little sense.
+
+You are right, of course. Fixed.
+
+> p.3, "A function call is tail recursive if it is recursive and ...":
+> this begs the question.  When is a call recursive?
+
+This paragraph has been entirely rewritten, but it is not a logical
+fallacy because it assumes that there is a definition of recursion for
+functions (not really there, I grant you) and proceeds to define the
+concept of tail recursion, which is the conjunction of recursion and a
+syntactic property (tail position).
+
+> In this fragment of Java code, is the call to f on line 4 recursive?
+>
+> 1 public class T {
+> 2     public void f(T t) {
+> 3         ...
+> 4         t.f(t);
+> 5         ...
+> 6     }
+> 7 }
+> Note that the actual argument of f could be an object from a
+> subclass of T, where f is overridden.  So, it is not recursive in a
+> purely static syntactic sense.
+
+That is a good example and I included it. Thank you.
+
+> Note also that T as a type is not recursive in the usual sense,
+> because it has no attributes declared in terms of T.
+
+I would argue on the contrary that T *is* (iso-)recursive, because the
+signature of the methods is part of the class. (Think of an
+interface.)
+
+> Thus, recursion is a tricky business. It's presence is undecidable.
+
+In the new, expanded explanation of my understanding of recursion, I
+distinguish between a syntactic definition and a dynamic definition,
+and I argue that both are necessary to address the issue. I hope you
+will find it, if not illuminating, at least not lacking anymore.
+
+> p.4, "factorial fonction": "function"
+> p.4, "instanciations of itself": "instantiations"
+
+Good catch!
+
+> Missing reference:
+>
+> David Gries, Paul Gries
+> Multimedia Introduction to Programming Using Java
+> Springer, 2005
+> Especially Chapter 15 (Recursion)
+
+I read it, following your suggestion, but I am afraid that I have to
+decline your proposal on two grounds. First, as I explain in the
+foreword and the section about textbooks, I choose to cite only
+companion books (to textbooks), which specialise on recursion (I make
+two exceptions to this rule). Recursion in the book by the Gries is
+introduced only after 400 pages, which hardly shows an interest on the
+matter at hand here. Second, while I find really interesting the
+program transformation from tail recursion to loops, I suspect that it
+may yield the student to associate "tail" with "recursion", when tail
+calls are actually a concept totally independent of
+recursion. Moreover, none of the examples deal with structural
+recursion, and recursion on arrays or numerical values is neither
+original nor likely to leave an impression, because loops are just as
+easy to write in these cases (no passing a pair of indices at each
+recursive call to denote a sub-array, no implicit stack frames etc.).

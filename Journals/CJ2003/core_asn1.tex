@@ -1,0 +1,867 @@
+%%-*-latex-*-
+
+It is difficult to separate the different concepts throughout the
+syntax. The \emph{types}, \emph{values} and \emph{subtyping
+  constraints} may depend on each other: a type may contain
+constraints (on components) and values (\emph{e.g.,} default values),
+a value has a declared type, and constraints rely upon types
+(\emph{e.g.,} inclusion constraint) and values (\emph{e.g.,} value
+constraint). Another related difficulty is the large number of
+syntactic constructs.
+
+In order to allow a clearer presentation of the constraint collection
+(sections~\ref{constraints_from_types},
+\ref{constraints_from_subtypes}
+and~\ref{full_collection_and_solving}), we define a strict subset of
+\mbox{X.680}, which we call from now on \core (versus \emph{full}
+\ASN), that will be used in the rest of this paper. In \core,
+  \begin{itemize}
+
+    \item there are no \texttt{\small COMPONENTS OF} or selection
+      types;
+
+    \item the \texttt{\small INTEGER} type does not allow defining
+          constants;
+
+    \item component types are references;
+
+    \item \texttt{\small SET OF} and \texttt{\small SEQUENCE OF} apply
+          to references;
+
+    \item default values are references;
+
+    \item enumerated and bit string constants are references;
+
+    \item types of declared values are references;
+
+    \item default, enumerated, integer and bit string values appear in
+          a constraint upon their expected type;
+ 
+    \item types in inclusion constraints are references;
+
+    \item there is no type reference just after the symbol
+      `\texttt{\small ::=}' and constraints appear only at top-level,
+      \emph{i.e.,} the extended Backus-Naur Form for type declarations
+      is: {\small $<$\textsf{type reference}$>$ \textsf{::=}
+        $<$\textsf{non-reference type without inner constraints}$>$
+        \textsf{[}"("$<$\textsf{subtyping constraint}$>$")"\textsf{]}
+      }
+    \item there are no infinite values, \emph{i.e.,} recursive values.
+
+  \end{itemize}
+Since we have not yet introduced the collection, it is awkward to
+explain here the rationale behind \core. As a consequence, this
+information will be given later and the reader may skip the
+next section when reading this for the first time.
+
+
+\subsection{Mapping full \ASN into \core}
+\label{mapping}
+
+Full \ASN is mapped into \core by applying a series of rewritings.  It
+is important to note that each step strictly preserves the
+expressiveness of full \ASN. In other words: \core can express all
+that can be expressed in full \ASN and nothing more.
+
+Another useful property is that each simplification output can be
+given in (the syntax of) full \ASN, making presentation easier. As
+software tools use a specific internal data representation, the
+practical bonus is that pretty-printing is then possible at each stage
+with the \emph{same} initial pretty-printer (\emph{i.e.,} for full
+\ASN).
+
+It is assumed that the following transformations and checkings apply
+to an \ASN module whose syntax complies with
+\mbox{X.680}~\cite{X.680:2002}. (The attentive reader will note that
+not all the rewritings commute, \emph{i.e.,} the following enumeration
+cannot be arbitrarily shuffled.)
+\begin{enumerate}
+
+  \item \label{default_values} We extract the default constant values
+    from the \texttt{\small SEQUENCE} and \texttt{\small SET} types,
+    following the example
+
+        {\small
+         \verb+T ::= SET {a REAL DEFAULT 0.0}+\\
+         $\longrightarrow
+         \left\{
+                \begin{tabular}{l}
+                  \verb+T ::= SET {a A DEFAULT v}+\\
+                  \verb+A ::= REAL+\\
+                  \verb+v A ::= 0.0+
+                \end{tabular}
+              \right.$
+        }
+
+        where \texttt{A} is a fresh type reference and \texttt{v} is
+        a fresh value reference.
+
+  \item \label{constants}
+        We lift the enumeration constants (enumerated, integer and bit
+        string constants) to the top-level, as shown by
+        (\texttt{v} is a fresh value reference):
+
+        {\small
+           \verb+T ::= ENUMERATED {a(x), b}+\\
+            $\longrightarrow$
+            $\left\{
+                \begin{tabular}{l}
+                  \verb+T ::= ENUMERATED {a(v), b}+\\
+                  \verb+v INTEGER ::= x+
+                \end{tabular}
+              \right.$
+
+           \verb+T ::= INTEGER {a(x)}+\\
+            $\longrightarrow$
+            $\left\{
+                \begin{tabular}{l}
+                   \verb+T ::= INTEGER {a(v)}+\\
+                   \verb+v INTEGER ::= x+
+                \end{tabular}
+              \right.$
+
+          \verb+T ::= BIT STRING {a(x)}+\\
+           $\longrightarrow$
+           $\left\{
+                \begin{tabular}{l} 
+                   \verb+T ::= BIT STRING {a(v)}+\\
+                   \verb+v INTEGER (0..MAX) ::= x+
+                \end{tabular}
+              \right.$
+        }
+
+  \item \label{types_from_values}
+        For each value declaration, we extract the given type and
+        create a corresponding type declaration for it. We also create
+        another type declaration where the previous type is required 
+        to contain the originally declared value. For instance,
+        consider\\
+        {\small
+         \begin{tabular}{l}
+           \verb+y REAL(0..9) ::= 1+
+           $\,\, \longrightarrow \,\,$
+           \hspace*{-3.9pt}
+           $\left\{
+                \begin{tabular}{l} 
+                   \verb+y A ::= 1+\\
+                   \verb+A ::= REAL(0..9)+\\
+                   \verb+B ::= A (y)+
+                \end{tabular}
+              \right.$
+         \end{tabular}
+        }\\
+        where \verb+A+ and \verb+B+ are fresh type references. This
+        way the declared type in a value definition is bound in a
+        type definition (\texttt{\small A}). Also, the
+        typechecking of a value (\texttt{y}) can be done with our
+        algorithm (through \texttt{\small B}), since it deals with
+        subtyping constraints.
+
+  \item \label{COMPONENTS_OF_reference}
+        The types which appear in
+        \texttt{\small COM\-PO\-NENTS OF} constructions are
+        replaced by fresh type references (in the following,
+        \texttt{A} is a fresh type reference)
+        {\small
+         \verb+ T ::= SET {COMPONENTS OF SET {a REAL}}+\\
+         $\longrightarrow$
+         $\left\{
+            \begin{tabular}{l}
+               \verb+T ::= SET {COMPONENTS OF A}+\\
+               \verb+A ::= SET {a REAL}+
+            \end{tabular}
+          \right.$}
+
+  \item \label{contained_reference}
+        We want to relax the dependence between
+        subtyping constraints and types. Hence, for each inclusion
+        constraint, we replace the included type by 
+        a fresh reference and add a corresponding new type
+        declaration, like (\texttt{\small A} is a fresh type
+        reference):\\
+        {\small
+         \begin{tabular}{l}
+           \verb+T ::= U(SET{a REAL})+
+           $\rightarrow
+           \left\{\hspace*{-2pt}
+                \begin{tabular}{l}
+                   \verb+T ::= U (A)+ \\
+                   \verb+A ::= SET {a REAL}+
+                \end{tabular}
+              \right.$
+         \end{tabular}}
+
+  \item \label{component_types}
+        We replace each component type by a reference:\\
+        {\small
+         \verb+T ::= SET {a REAL, b SET {d INTEGER}, c U (V)}+\\
+         $\rightarrow
+          \left\{\hspace*{-5pt}
+            \begin{tabular}{l}
+               \verb+T ::= SET {a A, b B, c C}+\\
+               \verb+A ::= REAL  B ::= SET{d D}  C ::= U(V)+\\
+               \verb+D ::= INTEGER+
+            \end{tabular}
+          \right.$}\\
+        where \texttt{\small A}, \texttt{\small B}, \texttt{\small C}
+        and \texttt{\small D} are fresh type references.
+
+  \item \label{types_in_SETOF}
+        At this step, we replace each type to which a \texttt{\small
+        SET OF} or a \texttt{\small SEQUENCE OF} applies, by a
+        reference:\\
+        {\small
+            \verb+T ::= SET OF REAL (C)+
+            $\longrightarrow$
+            $\left\{\hspace*{-5pt}
+               \begin{tabular}{l}    
+                  \verb+T ::= SET OF A+\\
+                  \verb+A ::= REAL (C)+
+               \end{tabular}
+             \right.$}\\
+        where \texttt{\small A} is a fresh type reference.
+
+  \item We remove the selection types (at top-level)\\
+        {\small
+        \begin{tabular}{l} 
+          $\left\{\hspace*{-5pt}
+             \begin{tabular}{l}
+                \verb+A ::= i < B+\\
+                \verb+B ::= C+\\
+                \verb+C ::= CHOICE{i D}+\\
+                \verb+D ::= INTEGER+
+             \end{tabular}
+            \right.
+          \longrightarrow
+          \left\{\hspace*{-5pt}
+               \begin{tabular}{l}
+                  \verb+A ::= INTEGER+\\
+                  \verb+B ::= C+\\
+                  \verb+C ::= CHOICE{i D}+\\
+                  \verb+D ::= INTEGER+
+               \end{tabular}
+             \right.$
+        \end{tabular}}\\
+       You must also be aware of the possibly misleading case:\\
+       {\small
+       \begin{tabular}{@{}r@{\;}c@{\;}l@{}}
+         $\left\{
+            \begin{tabular}{@{}l@{}}
+              \verb+A ::= SET OF S+\\
+              \verb+B ::= A (SIZE (7))+
+            \end{tabular}
+          \right.$
+         & $\longrightarrow$
+         & $\left\{
+            \begin{tabular}{@{}l@{}}
+              \verb+A ::= SET OF S+\\ 
+              \verb+B ::= SET (SIZE (7)) OF S+
+            \end{tabular}
+            \right.$
+       \end{tabular}
+       }
+   
+       The result \verb+B ::= SET OF S (SIZE (7))+ would be wrong!
+
+       This step is difficult because it removes all recursive types
+       declarations that do not lead to a uniquely defined type, like
+       \texttt{T ::= T} or \texttt{T ::= CHOICE \{a a < T\}}
+       etc. 
+
+        Note that the selection types that do not define a unique type
+        lead to recursive type definitions whose pattern is
+        \texttt{\small X ::= X}, as \verb+T ::= CHOICE{a a < T}+
+        $\longrightarrow$\\
+        {\small
+         $\left\{\hspace*{-4pt}
+            \begin{tabular}{l}
+               \verb+T ::= CHOICE {a A}+\\
+               \verb+A ::= a < T+
+            \end{tabular}
+          \right.
+         \longrightarrow
+         \left\{\hspace*{-4pt}
+             \begin{tabular}{l}
+                \verb+T ::= CHOICE {a A}+\\
+                \verb+A ::= A+
+             \end{tabular}
+          \right.$
+        }
+
+        From now on we know exactly what a referenced
+        type is, and thus what is the type of a value.
+
+  \item \label{type_references} The top-level type references are
+    unfolded, \emph{i.e.,} the type references at the declaration
+    level are replaced by the type they reference\\
+        {\small
+         $\left\{
+             \begin{tabular}{l}
+                \verb+T ::= U (C)+\\
+                \verb+U ::= REAL (D)+
+             \end{tabular}
+          \right.$
+          $\longrightarrow$
+          $\left\{
+             \begin{tabular}{l}
+                \verb+T ::= REAL (D ^ C)+\\
+                \verb+U ::= REAL (D)+
+             \end{tabular}
+          \right.$}\\
+        During this step, ill-formed recursive definitions, like
+        \texttt{\small X ::= X}, are rejected.
+
+  \item The default values are expanded, like\\
+        {\small
+         $\left\{
+            \begin{tabular}{ll}
+                 \verb+v T ::= {}+ 
+               & \verb+T ::= SET {a U DEFAULT w}+
+            \end{tabular}
+          \right.$\\
+          $\longrightarrow$
+            \verb+ v T ::= {a w}   T ::= SET {a U DEFAULT w}+
+        }
+
+  \item \label{COMPONENTS_OF_unfolding}
+        The type references in the \texttt{\small COMPONENTS OF}
+        clauses are replaced by their corresponding components\\
+        {\small
+         $\left\{
+            \begin{tabular}{l}
+               \verb+T ::= SET {COMPONENTS OF A}+\\
+               \verb+A ::= SET {a REAL}+
+            \end{tabular}
+          \right.$\\
+         $\longrightarrow$
+         $\left\{
+            \begin{tabular}{l}
+              \verb+T ::= SET {a REAL}+\\
+              \verb+A ::= SET {a REAL}+
+            \end{tabular}
+          \right.$}
+
+  \item \label{constants_unfolding}
+        Integer and bit string constants are unfolded\\
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(x)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.
+           \longrightarrow
+           \left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= x+
+              \end{tabular}
+           \right.$
+        }\\
+        In the case of bit string values which are specified by
+        means of a series of bit names, we unfold their associated
+        references and replace the value by an equivalent one
+        without those names\\
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                \verb+T ::= BIT STRING {msb(x),lsb(y)}+\\
+                \verb+v T ::= {msb,lsb}+
+              \end{tabular}
+            \right.$\\
+            $\longrightarrow
+            \left\{
+              \begin{tabular}{l}
+                \verb+T ::= BIT STRING+\\
+                \verb+v T ::= '10000001'B+
+              \end{tabular}
+            \right.$
+        }\\
+        where 
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                \verb+x INTEGER (0..MAX) ::= 7+\\
+                \verb+y INTEGER (0..MAX) ::= 0+
+              \end{tabular}
+           \right.$
+        }
+        (see step~\ref{constants}).
+
+        This step may reveal some recursive values\\
+        {\small
+           $\left\{
+              \begin{tabular}{l}
+                 \verb+T ::= INTEGER {c(v)}+\\
+                 \verb+v T ::= c+
+              \end{tabular}
+            \right.
+           \longrightarrow
+           \left\{
+              \begin{tabular}{l}
+                \verb+T ::= INTEGER+\\
+                \verb+v T ::= v+
+              \end{tabular}
+            \right.$
+        }
+
+  \item We disallow the recursive values, like {\small
+  \verb+v T ::= {v}+} or\\
+        {\small
+         $\left\{
+            \begin{tabular}{ll}
+                \verb+v T ::= {v}+
+              & \verb+T ::= SET OF T+\\
+                \textnormal{or}
+              & \\
+                \verb+v T ::= {}+
+              & \verb+T ::= SET {a T DEFAULT v}+
+            \end{tabular}
+          \right.$
+        }
+
+\end{enumerate}
+
+
+
+\subsection{Validation issues}\label{validation}
+
+In \core, it is possible that
+
+\begin{enumerate}
+  
+  \item \label{finiteness} types have only infinite values:
+        \texttt{\small T ::= SET} \verb+{+\texttt{a} \texttt{\small
+        T}\verb+}+
+
+  \item \label{type_conformance} values are ill-typed:
+        \texttt{v} \texttt{\small T ::= ""} \hspace*{6mm}
+        \texttt{\small T ::= REAL}
+
+  \item \label{type_compatibility} in particular, value references
+        may be ill-typed:\\
+        {\small 
+        $\left\{
+           \begin{tabular}{l}
+              \verb+a A ::= b     A ::= INTEGER+\\
+              \verb+b B ::= 1.5   B ::= REAL+
+           \end{tabular}
+        \right.$
+        }
+
+  \item \label{constraint_consistence} constraints are
+        inconsistent: \texttt{\small T ::= REAL (SIZE(7))}
+
+  \item \label{subtype_non_emptiness} subtypes are empty:\\
+     \texttt{\small T ::= SET ((SIZE(1)) INTERSECTION (SIZE(2)))
+        OF REAL};
+        
+  \item \label{solvability} subtypes have no value set:
+        \texttt{\small T ::= A(ALL EXCEPT T)}
+
+\end{enumerate}
+These cases can be classified into the different problems: the
+\emph{finiteness} problem (case~\ref{finiteness}), the
+\emph{typechecking} problem (case~\ref{type_conformance}), the
+\emph{type compatibility} problem (case~\ref{type_compatibility}), the
+\emph{constraint consistence} problem
+(case~\ref{constraint_consistence}), the \emph{non-emptiness} problem
+(case~\ref{subtype_non_emptiness}) and the \emph{solvability} problem
+(case~\ref{solvability}). The type compatibility problem is a sub-case
+of the typechecking problem, and constraint consistence together with
+non-emptiness are sub-cases of the solvability problem, because we
+will explicitly construct the values of each (sub)type when the system
+is solved. Moreover, since we added a new type declaration for each
+value declaration at rewriting step~\ref{types_from_values}, the
+solvability of the subtyping constraints will cope with the
+typechecking problem. So, finiteness and solvability are enough to get
+a full validation of \mbox{X.680} specifications and we need, as a
+starting point, to express formally those concepts.
+
+\subsection{Algorithmic meta-language}
+
+We shall use as \emph{meta language} for the description of our
+algorithm a version of the functional language ML:
+OCaml\footnote{{\small\url{http://www.ocaml.org/}}}~\cite{CousineauMauny:1998},
+which is a full-fledged programming language, as well as,
+historically, a logic meta-language. Therefore our algorithm is close
+to an actual implementation and is also a formal (operational)
+model. Readers familiar with ML may skip this section, which gives a
+crash overview of its syntax and semantics. (This presentation is
+based on Pidgin ML~\cite{Huet:2002}.)
+
+The core language has types and values. Thus, $1$ is a value of
+predefined type \ocamltypename{int}, whereas \textsf{"CL"} is a
+\ocamltypename{string}. Pairs of values inhabit the corresponding
+product type. Therefore, $(1,\textsf{"CL"})$ has type
+$(\ocamltypename{int} \times \ocamltypename{string})$. Recursive type
+declarations create new types, whose values are inductively built from
+the associated constructors. Thus a type modeling a binary tree of
+integers could be declared as a sum by: $\ocamlkwd{type} \,\,
+\ocamltypename{ib\_tree} = \ocamlconstr{Node} \, \ocamlkwd{of} \,
+\ocamltypename{ib\_tree} \times \ocamltypename{int} \times
+\ocamltypename{ib\_tree} \, \mid \ocamlconstr{Leaf}$. Parametric types
+give rise to polymorphism: if \ocamlvaluename{x} is of type
+\ocamltypename{t} and \ocamlvaluename{l} is of type (\ocamltypename{t}
+\ocamlconstr{list}), we construct the list adding \ocamlvaluename{x}
+to \ocamlvaluename{l} as $\ocamlvaluename{x} \CONS
+\ocamlvaluename{l}$. The empty list is \emptyL, of (polymorphic) type
+$('\ocamltypename{a} \,\, \ocamlconstr{list})$. Although the language
+is strongly typed, explicit type specifications are rarely needed from
+the programmer, since principal types may be inferred mechanically.
+
+The language is functional in the sense that functions are first class 
+objects. Therefore the integer doubling function may be written as 
+$\ocamlkwd{fun} \,\, \ocamlvaluename{x} \rightarrow
+\ocamlvaluename{x}+\ocamlvaluename{x}$, and it has type
+$\ocamltypename{int} \rightarrow \ocamltypename{int}$. It may be
+associated to the name \ocamlvaluename{double} by declaring:
+$\ocamlkwd{let} \,\, \ocamlvaluename{double} = \ocamlkwd{fun} \,
+\ocamlvaluename{x} \rightarrow
+\ocamlvaluename{x}+\ocamlvaluename{x}$. Equivalently we could write:
+$\ocamlkwd{let} \,\, \ocamlvaluename{double} \, \ocamlvaluename{x} =
+\ocamlvaluename{x}+\ocamlvaluename{x}$. Its application to value
+\ocamlvaluename{n} is written as $(\ocamlvaluename{double} \,
+\ocamlvaluename{n})$ or even $\ocamlvaluename{double} \,
+\ocamlvaluename{n}$ when there is no ambiguity. Application associates
+to the left, and thus $\ocamlvaluename{f} \, \ocamlvaluename{x} \,
+\ocamlvaluename{y}$ stands for $((\ocamlvaluename{f} \,
+\ocamlvaluename{x}) \, \ocamlvaluename{y})$.
+Recursive functional values are declared with the keyword
+\ocamlkwd{rec}. Thus we may define the factorial function as:
+$\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \ocamlvaluename{fact} \,
+\ocamlvaluename{n} = \ocamlkwd{if} \, \ocamlvaluename{n} \leqslant 0 \,
+\ocamlkwd{then} \, 1 \, \ocamlkwd{else} \, \ocamlvaluename{n} \times
+(\ocamlvaluename{fact} (\ocamlvaluename{n}-1))$.
+Functions may be defined by pattern matching. Thus the first
+projection of pairs could be defined by:
+$\ocamlkwd{let} \,\, \ocamlvaluename{fst} = \ocamlkwd{fun} \,
+(\ocamlvaluename{x},\ocamlvaluename{y}) \rightarrow
+\ocamlvaluename{x}$ or equivalently (since there is only one pattern
+in this case) by: $\ocamlkwd{let} \,\, \ocamlvaluename{fst} \,
+(\ocamlvaluename{x}, \ocamlvaluename{y}) = \ocamlvaluename{x}$.
+Pattern-matching is also usable in \ocamlkwd{match} expressions which
+generalise case analysis, such as:
+$\ocamlkwd{match} \,\, \ocamlvaluename{l} \,\, \ocamlkwd{with} \,\,
+\emptyL \rightarrow \ocamlkwd{true} \mid \wildcard \rightarrow
+\ocamlkwd{false}$, which tests if list \ocamlvaluename{l} is
+empty, using underscore as catch-all pattern.
+
+Evaluation is strict, which means that \ocamlvaluename{x} is evaluated
+before invoking \ocamlvaluename{f} in the evaluation of
+$(\ocamlvaluename{f} \, \ocamlvaluename{x})$. The \ocamlkwd{let}
+expressions allow the sequentialization of computations, and the
+sharing of sub-computations. Thus $\ocamlkwd{let} \,\,
+\ocamlvaluename{x} = \ocamlvaluename{fact} \, 10 \,\, \ocamlkwd{in}
+\,\, \ocamlvaluename{x}+\ocamlvaluename{x}$ will compute
+$\ocamlvaluename{fact} \, 10$ first, and only once.
+
+Exceptions are declared with the type of their parameters, like in:
+$\ocamlkwd{exception} \,\, \ocamlconstr{Failure} \, \ocamlkwd{of} \,
+\ocamltypename{string}$. An exceptional value may be raised, like in: 
+$\ocamlvaluename{raise}$ $(\ocamlconstr{Failure}$ $\textsf{"div
+0"})$ and handled by a \ocamlkwd{try} switching on exception patterns,
+like: $\ocamlkwd{try} \, \ocamlvaluename{expression} \,
+\ocamlkwd{with} \, \ocamlconstr{Failure} \, \ocamlvaluename{s}
+\rightarrow \ldots$ Other imperative constructs may be used, such as 
+references, mutable arrays, while loops and I/O commands, 
+but we shall seldom need them. Sequences of instructions are 
+evaluated in left to right regime in bloc expressions such as:
+$\ocamlkwd{begin} \,\, {\ocamlvaluename{e}_1; ...;
+\ocamlvaluename{e}_n} \,\, \ocamlkwd{end}$. 
+
+ML is a \emph{modular} language, in the sense that sequences of type,
+value and exception declarations may be packed in a structural unit
+called a \emph{module}, amenable to separate treatment. 
+Modules have types themselves, called \emph{signatures}. Parametric 
+modules are called \emph{functors}. The algorithms presented in this
+paper will only use this modularity structure to access some library
+functions --- the syntax ought to be self-evident.
+
+Despite the focus in this paper is algorithmic, the readers
+uninterested in computational details may think of ML
+definitions as recursive equations over inductively defined
+algebras.
+
+
+\subsection{Abstract grammar}\label{abstract_grammar}
+
+Let us use OCaml's algebraic type declarations to define the
+\emph{abstract grammar} of \core. This grammar captures the
+syntactically correct constructs of \core, except those which involve
+\emph{tags}~\cite[\S{3.6.69}, \S{8}]{X.680:2002} (since they are
+related to the encoding rules) and the \kwdOBJECTIDENTIFIER{} and
+\kwdRELATIVEOID{} types and values (for the sake of brevity). The
+parser's output is a pair of a type environment and a value
+environment. The former is a mapping from type names to subtypes,
+corresponding to the type declarations in the \ASN specification, and
+the latter is a mapping from value names to values, corresponding to
+the value declarations. The subtypes and values are \emph{abstract
+syntax trees}, complying with the abstract grammar. We do not follow
+the syntactic conventions of OCaml exactly, as detailed below.
+\begin{itemize}
+
+  \item in mutual recursive polymorphic variant definitions, we shall
+    allow type names instead of a variant, like $\ocamlkwd{type} \,
+    \ocamltypename{t} = \textsf{[}\ocamlpvar{K}\textsf{]} \,
+    \ocamlkwd{and} \, \ocamltypename{u} = \textsf{[}\ocamlpvar{L} \mid
+      \ocamltypename{t}\textsf{]}$ (this limitation can be
+    circumvented by an implementation trick out of scope here);
+
+   \item We allow \ASN symbols or keywords as data constructors, like
+         `$\pmb{<}$', `$\pmb{..}$', \kwdMINUSINFINITY{} or
+         \kwdOCTETSTRING; we then use underscores to 
+         denote the location of their arguments, as in 
+         `$\wildcard \pmb{<} \wildcard$';
+
+   \item We sometimes write $\kwdCOMPONENTSOF \,\, \T \, \sigma$
+     instead of the correct (non-currified) $\kwdCOMPONENTSOF \, (\T,
+     \sigma)$, and similarly for other data constructors.
+
+\end{itemize}
+The abstract grammar for \core values is defined as follows.  Firstly,
+we assume that the parser removes the ambiguity between
+enumeration constants~\cite[\S{19}]{X.680:2002} and value
+references~\cite[\S{11.4}]{X.680:2002}. For instance, in `\texttt{a}
+\texttt{\small T} ::= \texttt{b}', the token \texttt{b} can denote
+either an enumeration constant or a value reference, depending on the
+definition of the type \texttt{\small T}. The ambiguity can always be
+removed just by looking at the type definition (this is easy in
+\core). We start by defining the OCaml type \ocamltypename{v\_ref} for
+value references, the type \ocamltypename{item}, which is used
+later in the definition of enumerated constants, and the type
+\ocamltypename{label}, which denotes component names
+
+\smallskip
+
+\noindent
+\ocamlkwd{type} \ocamltypename{v\_ref} = \textsf{[}\VRef{}
+\ocamlkwd{of} \ocamltypename{string}\textsf{]}
+
+\noindent 
+\ocamlkwd{type} \ocamltypename{item} = \ocamltypename{string} 
+\ocamlkwd{and} \ocamltypename{label} = \ocamltypename{string}
+
+\smallskip
+
+\noindent
+The values of \VRef's argument are noted $y$. Values of type
+\ocamltypename{item} are noted $a$, $b$, $c$, and lists of such
+values are noted I. Values of type \ocamltypename{label} are noted
+$l$, and sets of labels are noted $\Labels$. Let us now define the
+numeric types straightforwardly:
+
+\smallskip
+
+\noindent 
+\ocamlkwd{type} \ocamltypename{integer} = 
+       \textsf{[}\PosInt{} \ocamlkwd{of} \ocamltypename{int}
+$\mid$ \NegInt{} \ocamlkwd{of} \ocamltypename{int}\textsf{]}
+
+\noindent \ocamlkwd{type} \ocamltypename{real} = 
+       \textsf{[}\PosReal{} \ocamlkwd{of} \ocamltypename{float} 
+$\mid$ \NegReal{} \ocamlkwd{of} \ocamltypename{float}\textsf{]}
+
+\smallskip
+
+\noindent
+where \PosInt{} means `Positive or null integer'. Next, the OCaml
+type for \ASN values is named $\V$:
+
+\smallskip
+
+\noindent 
+\ocamlkwd{type} $\V$ = 
+\textsf{[}\List{} \ocamlkwd{of} $\V$ \ocamlconstr{list}
+$\mid$ \Map{} \ocamlkwd{of} \ocamltypename{label} $\rightarrow$
+       $\V$\\
+\hspace*{-2mm}
+\begin{tabular}{rl}
+  $\mid$ & \hspace*{-4mm} 
+           \Nil{}
+  $\mid$   \kwdTRUE{} 
+  $\mid$   \kwdFALSE{}
+  $\mid$   \pvString{} \ocamlkwd{of} \ocamltypename{string}
+  $\mid$   \ocamltypename{integer}\\
+  $\mid$ & \hspace*{-4mm} 
+           \wildcard $\pmb{:}$ \wildcardof \ocamltypename{label}
+           $\times$ $\V$
+  $\mid$   \Enum{} \ocamlkwd{of} \ocamltypename{item}\\
+  $\mid$ & \hspace*{-4mm} 
+           \HexStr{} \ocamlkwd{of} \ocamltypename{string}
+  $\mid$   \BinStr{} \ocamlkwd{of} \ocamltypename{string}
+  $\mid$   \kwdNULL{}
+  $\mid$   \ocamltypename{real}\\
+  $\mid$ & \hspace*{-4mm} \kwdPLUSINFINITY{}
+  $\mid$   \hspace*{-5pt}
+           \kwdMINUSINFINITY{}
+  $\mid$   \ocamltypename{v\_ref}\textsf{]}\\
+\end{tabular}
+
+\smallskip
+
+\noindent
+where \List{} corresponds to values of \kwdSETOF{} and
+\kwdSEQUENCEOF{} types~\cite[\S{25}, \S{27}]{X.680:2002}; \Map{}
+models values of the \kwdSET{} and \kwdSEQUENCE{} types~\cite[\S{24},
+\S{26}]{X.680:2002} (the argument is a mapping from labels to values);
+\Nil{} captures the ambiguous value \verb+{}+, which can be of type
+\kwdSETOF, \kwdSEQUENCEOF, \kwdSET{}, \kwdSEQUENCE{} or \kwdBITSTRING;
+\kwdTRUE{} and \kwdFALSE{} are the values of the \kwdBOOLEAN{} type;
+\pvString{} stands for all kinds of character strings;
+$\wildcard~\pmb{:}~\wildcard$ corresponds to \kwdCHOICE{}
+values~\cite[\S{28}]{X.680:2002} (thus its argument is a pair of a
+label and a value); \Enum{} models enumerated constants; \HexStr{}
+corresponds to \kwdOCTETSTRING{} values~\cite[\S{22}]{X.680:2002};
+\BinStr{} represents \kwdBITSTRING{}
+constants~\cite[\S{21}]{X.680:2002}; \kwdNULL{} captures the special
+\kwdNULL{} value~\cite[\S{23}]{X.680:2002}; \kwdPLUSINFINITY{} and
+\kwdMINUSINFINITY{} are special values of type \kwdREAL{}.
+
+OCaml values of type $\V$ will be noted $v$, and lists of values
+L. The value environments are noted $\ValueEnv$, and have type
+$\ocamltypename{string} \rightarrow \V$. The argument of the \Map{}
+data constructor is noted $\IdEnv{}$ or $\IdEnv{\Labels}$ when the set
+of labels (the domain of the mapping) is $\Labels$ (the empty mapping
+is simply noted $\{\}$). The OCaml recursive type ${\cal T}$
+represents the \core types:
+
+\smallskip
+
+\noindent 
+\ocamlkwd{type} ${\cal T}$ = 
+           \textsf{[}\kwdCHOICE{} \ocamlkwd{of} \ocamltypename{label}
+           $\rightarrow$ \ocamltypename{t\_ref}
+  $\mid$   \kwdOCTETSTRING{}\\
+\hspace*{-2mm}
+\begin{tabular}{rl}
+  $\mid$ & \hspace*{-4mm}
+           \kwdSET{} \ocamlkwd{of} \ocamltypename{components}
+  $\mid$   \kwdINTEGER{}
+  $\mid$   \pvString{}
+  $\mid$   \kwdNULL{}\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdSEQUENCEOF{} \ocamlkwd{of} \ocamltypename{t\_ref}
+  $\mid$   \kwdREAL{}
+  $\mid$   \kwdBITSTRING{}\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdSETOF{} \ocamlkwd{of} \ocamltypename{t\_ref}
+  $\mid$   \kwdSEQUENCE{} \ocamlkwd{of}
+           \ocamltypename{components}\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdENUMERATED{} \ocamlkwd{of}
+           \ocamltypename{item} \ocamlconstr{list}
+  $\mid$   \kwdBOOLEAN{}
+  $\mid$   \ocamltypename{t\_ref}\textsf{]}
+\end{tabular}
+
+\noindent
+\ocamlkwd{and} \ocamltypename{t\_ref} = \textsf{[}\TRef{}
+\ocamlkwd{of} ${\cal R}$\textsf{]} 
+\ocamlkwd{and} ${\cal R}$ = \ocamltypename{string}
+
+\noindent 
+\ocamlkwd{and} \ocamltypename{components} =\\
+\hspace*{2mm} 
+\ocamltypename{label} $\!\rightarrow\!$ \ocamltypename{t\_ref}
+$\!\times\!$ 
+\textsf{[}\kwdOPTIONAL{} $\!\mid\!$ \kwdDEFAULT{} \ocamlkwd{of}
+\ocamltypename{v\_ref}\textsf{]} \ocamlconstr{option}
+
+\smallskip
+
+\noindent
+The type \ocamltypename{t\_ref} denotes type references. The type
+${\cal R}$ is the countable set of type reference names.  The type
+\ocamltypename{components} defines the components of \kwdSET{} and
+\kwdSEQUENCE{} \core types: it is a function from labels to pairs
+whose first projection is the type reference (in \core, component
+types are references) and whose second projection models the
+component's optional annotation, which tells whether the component is
+mandatory, optional or has a default value.
+
+OCaml values of type ${\cal T}$ are noted \T. Values of type ${\cal
+R}$ are noted $x$. The mapping of type $\ocamltypename{label}
+\rightarrow \ocamltypename{t\_ref}$, which is the argument of
+\kwdCHOICE, is noted $\FieldEnv{}$, or $\FieldEnv{\Labels}$ when the
+labels range over $\Labels$ (in general, the domain of a mapping can
+be put in subscript), \emph{e.g.,} $\kwdCHOICE \, \FieldEnv{\Labels}$. Values
+of type \ocamltypename{components} are mappings noted $\Phi$,
+\emph{e.g.,} $\kwdSET \, \Phi$.
+
+\ASN subtyping constraints~\cite[\S{45}]{X.680:2002} are modelled
+by the following type ${\cal C}$, whose values are noted C:
+
+\smallskip
+
+\noindent \ocamlkwd{type} ${\cal C}$ = 
+\textsf{[}\wildcard \kwdUNION{} \wildcardof 
+   ${\cal C}$ $\times$ ${\cal C}$
+$\mid$   \ocamltypename{interval}\\
+\begin{tabular}{rl}
+  $\mid$ & \hspace*{-4mm}
+           \wildcard \kwdINTERSECTION{} \wildcardof 
+           ${\cal C}$ $\times$ ${\cal C}$
+  $\mid$   $\V$\\
+  $\mid$ & \hspace*{-4mm}
+           \wildcard \kwdEXCEPT{} \wildcardof
+           ${\cal C}$ $\times$ ${\cal C}$
+  $\mid$   \kwdALLEXCEPT{} \ocamlkwd{of} ${\cal C}$\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdFROM{} \ocamlkwd{of} ${\cal C}$ 
+  $\mid$   \kwdSIZE{} \ocamlkwd{of} ${\cal C}$
+  $\mid$   \kwdINCLUDES{} \ocamlkwd{of} \ocamltypename{t\_ref}\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdWITHCOMPONENTS{} \ocamlkwd{of}\\
+         & \ocamltypename{kind}
+           $\times$ (\ocamltypename{label} $\rightarrow$ ${\cal C}$
+           \ocamlconstr{option}
+           $\times$ \ocamltypename{status} \ocamlconstr{option})\\
+  $\mid$ & \hspace*{-4mm}
+           \kwdWITHCOMPONENT{} \ocamlkwd{of} ${\cal C}$ 
+  $\mid$   \kwdPATTERN{} \ocamlkwd{of}
+           \ocamltypename{string}\textsf{]} 
+\end{tabular}
+
+\noindent \ocamlkwd{and} \ocamltypename{kind} = 
+\Partial{} $\mid$ \Full
+
+\noindent \ocamlkwd{and} \ocamltypename{status} = 
+       \textsf{[}\kwdPRESENT{}
+$\mid$ \kwdABSENT{}
+$\mid$ \kwdOPTIONAL\textsf{]}
+
+\noindent \ocamlkwd{and} \ocamltypename{interval} =
+\wildcard \wildcard $\pmb{..}$ \wildcard \wildcardof\\
+\hspace*{2mm}
+\ocamltypename{bound} $\times$
+\ocamltypename{in\_out} $\times$ \ocamltypename{in\_out}
+$\times$  \ocamltypename{bound}
+
+\noindent \ocamlkwd{and} \ocamltypename{bound} = 
+         \textsf{[}\kwdMIN{}
+$\mid$   \kwdMAX{}
+$\mid$   \pvString{} \ocamlkwd{of} \ocamltypename{string}
+$\mid$   \ocamltypename{real}\\
+\begin{tabular}{rl}
+$\mid$ & \hspace*{-4mm}
+         \HexStr{} \ocamlkwd{of} \ocamltypename{string}
+$\mid$   \BinStr{} \ocamlkwd{of} \ocamltypename{string}
+$\mid$   \ocamltypename{integer}\textsf{]}
+\end{tabular}
+
+\noindent \ocamlkwd{and} \ocamltypename{in\_out} = 
+$\pmb{<}$ $\mid$ $\pmb{\leqslant}$
+
+\smallskip
+
+The OCaml type \ocamltypename{subtype} models \ASN subtypes. An \ASN
+subtype is a pair of a type and an optional subtyping constraint.
+OCaml values of type ${\cal C}$ \ocamlconstr{option} are noted
+$\sigma$. The type environments are noted $\TypeEnv$, and have type
+$\ocamltypename{string} \rightarrow \ocamltypename{subtype}$.
+
+\smallskip
+
+\noindent \ocamlkwd{type} \ocamltypename{subtype} = 
+  ${\cal T}$ $\times$ (${\cal C}$ \ocamlconstr{option})

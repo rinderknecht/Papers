@@ -1,0 +1,33 @@
+Knuth~\cite{Knuth:1996} reports that the first computer program,
+designed in~\oldstylenums{1945} by the mathematician John von~Neumann,
+was a sorting algorithm, nowadays called \emph{merge sort}. It is
+amongst the most widely taught sorting algorithms because it
+epitomises the important solving strategy known as \emph{divide and
+conquer}: the input is split, each non\hyp{}trivial part is
+recursively processed and the partial solutions are finally combined
+to form the complete solution. Whilst merge sort is not difficult to
+program, determining its efficiency, by means of a \emph{cost}
+function, requires advanced mathematical knowledge. Therefore, most
+textbooks \cite{GrahamKnuthPatashnik:1994,CLRS:2009} only show how to
+find the order of growth of an upper bound of the cost from
+recurrences it satisfies when \(n\)~is a power of~\(2\), but the
+general case is often not presented in the main chapters, or not at
+all, and precise analytic solutions are extremely difficult, making
+use of complex analysis~\cite{FlajoletGolin:1994, Hwang:1998,
+ChenHwangChen:1999}. Amongst the several variants of merge
+sort~\cite{Knuth:1998, GolinSedgewick:1993}, we will be dealing here
+with the most popular variant, called \emph{top-down merge sort}.
+
+We derive lower bounds $\alpha n\log_2 n + \beta n + \gamma$ and upper
+bounds $\alpha n\log_2 n + \beta' n + \gamma'$ for the extremum and
+mean costs, relying only on basic discrete mathematics, intuitive
+figures, elementary real analysis and mathematical induction. This is
+much more precise than using Bachmann's notation and state \(O(n\log
+n)\) in all cases. Worse, this notation is often misconstrued by
+students, and occasionally by professionals, when it is used on the
+main term of the asymptotic expansion, as noted by Knuth already
+in~\oldstylenums{1976}: ``Unfortunately, people have occasionally been
+using the \(O\)-notation for lower bounds, for example when they
+reject a particular sorting method `because its running time is
+\(O(n^2)\).' I have seen instances of this in print quite often
+[...]''~\cite{Knuth:2000a}.

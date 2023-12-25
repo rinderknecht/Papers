@@ -1,0 +1,44 @@
+\section{Bottom-up merge sort}
+
+Let \(\C{\bot}{m,n}\) be the cost of merging two series of lengths
+\(m\)~and~\(n\). Let \(\C{\bot}{n}\) be the cost of sorting,
+bottom-up, a series of \(n\)~keys. We have
+\begin{equation}
+\C{\bot}{0} = \C{\bot}{1} = 0,\quad
+\C{\bot}{n} = \C{\bot}{2^{\ceiling{\lg n}-1}}
+  + \C{\bot}{n - 2^{\ceiling{\lg n}-1}} + \C{\Join}{2^{\ceiling{\lg
+        n}-1},n - 2^{\ceiling{\lg n}-1}}.
+\label{eq:cost_bms}
+\end{equation}
+
+\paragraph{Minimum cost}
+
+Let \(\B{\bot}{n}\) be the minimum cost for sorting \(n\)~keys,
+bottom-up. Let \(n=2^p+i\), with \(0 < i < 2^p\).
+Equations~\eqref{eq:cost_bms} and~\eqref{eq:best_merge} imply
+\begin{equation}
+\B{\bot}{2^p+i} = \B{\bot}{2^p} + \B{\bot}{i} + i.
+\label{eq:Bbot_2p_i}
+\end{equation}
+
+\paragraph{Maximum cost}
+
+Let \(\W{\bot}{n}\) be the maximum cost for sorting \(n\)~keys,
+bottom-up. Let \(n=2^p+i\), with \(0 < i < 2^p\).
+Equations~\eqref{eq:cost_bms} and~\eqref{eq:worst_merge} imply
+\begin{equation}
+\W{\bot}{2^p+i} = \W{\bot}{2^p} + \W{\bot}{i} + 2^p
++ i - 1.
+\label{eq:Wbms_2p_i}
+\end{equation}
+
+\paragraph{Average cost}
+
+Let \(\M{\bot}{n}\) be the average number of comparisons to sort
+\(n\)~keys bottom-up. Let \(n=2^p+i\), with \(0 < i < 2^p\).
+Equations~\eqref{eq:cost_bms} and~\eqref{eq:mean_merge} imply
+\begin{equation}
+\M{\bot}{2^p+i} = \M{\bot}{2^p} + \M{\bot}{i}
++ 2^p + i - \frac{2^p}{i+1} - \frac{i}{2^p+1}.
+\label{eq:Abms_2p_i}
+\end{equation}

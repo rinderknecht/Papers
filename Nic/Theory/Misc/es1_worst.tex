@@ -1,0 +1,69 @@
+%%-*-latex-*-
+
+\textbf{TEMPORARY: THIS SECTION IS OUT-DATED.........}
+
+\medskip
+
+Let us build a configuration such that the proof tree for the pattern
+matching contains the highest possible number of judgements: since
+each judgement corresponds to the application of an inference rule,
+i.e., one step of the matching algorithm, their total number
+corresponds to the total number of steps\,---\,which we choose here to
+be the cost (complexity) measure.
+
+An inductive examination of every rule, i.e., read from conclusion to
+premises, reveals that the pattern's length always strictly decreases
+by one or two lexemes, except for the rule \textsf{UNPAR}\(_1\), which
+keeps it invariant. So, if we want to have a proof tree strictly
+longer than the pattern, we must repeat the application of this
+rule. The longer the repetition, the longer the tree.
+
+First, let us consider a forest made of a single tree and a pattern
+made of a single element \(m\). Since the proof tree is actually a
+list (there is only one pattern\hyp{}matching premise at most for each
+inference rule), its length is exactly the cost. Therefore let us
+enumerate all the cases for \(m\) and find out which tree in the
+forest maximises the proof length.
+\begin{enumerate}
+
+  \item \(m = \mlp\).\\ Only rule \textsf{UNPAR}\(_2\) can be applied,
+    but it should be followed by \textsf{END}, since the pattern is
+    shortened by one (and we have only one element in it). So this
+    case is not the worst.
+
+  \item \label{worst:mrp} \(m = \mrp\).\\ Only rule \textsf{ELIM} can
+    be applied, but it should be followed by \textsf{END}, since the
+    pattern is shortened by one (and we have only one element in
+    it). So this case is not the worst.
+
+  \item \(m = \meta{x}\).\\ Only rules \textsf{BIND}\(_3\) and
+    \textsf{UNPAR}\(_1\) can be applied. The former is an axiom, so it
+    does not lead to the worst case (just one step). The latter cannot
+    be used because our system is ordered in such a way that binding
+    rules have priority over unparsing rules. So, this case is not the
+    worst.
+
+  \item \label{worst:l} \(m \in {\cal L}\).\\ Only rules \textsf{ELIM}
+    and \textsf{UNPAR}\(_1\) can be applied. The former leads to the
+    case \ref{worst:mrp}. The latter is worth trying. Each application
+    of \textsf{UNPAR}\(_1\) cuts the root of the first tree in the
+    forest, so, since we want to maximise the repetition of
+    \textsf{UNPAR}\(_1\), we should choose a tree which is actually a
+    list. In the end, the unique leaf (i.e., a lexeme) is eliminated
+    by \textsf{ELIM} if it is the element in the pattern. If the tree
+    is a list of \(n\) nodes (including the leaf), we need \(n-1\)
+    applications of \textsf{UNPAR}\(_1\) and \(1\) of \textsf{ELIM}.
+
+\end{enumerate}
+If we consider now having more elements in the pattern, the case
+\ref{worst:l} shows that the worst case happens when there are only
+lexemes in the pattern, and these lexemes are the leaves of the
+tree. The cost then is, again, exactly the number of nodes in the
+tree.
+\begin{theorem}[Worst case]
+For a tree of \(n\) nodes, the maximum number of steps of the matching
+algorithm ES(1) is \(n\) (and the pattern is its fringe).
+\end{theorem}
+\noindent In other words, the ES(\(1\)) matching algorithm requires at
+most exactly one complete traversal of the initial abstract syntax
+tree.

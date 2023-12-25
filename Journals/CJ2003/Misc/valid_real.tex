@@ -1,0 +1,71 @@
+%%-*-latex-*-
+
+%% This a preliminary version!!! Updating is mandatory!
+%% It should correspond to [norm_real_interval] in constraints.tex
+
+        $\ocamlkwd{and} \,\, \ocamlvaluename{valid\_real} \, ((v_0,
+        b_0), (b_1, v_1)) =$\\
+        \hspace*{3mm}
+        $\ocamlkwd{match} \,\, ((v_0, b_0), (b_1, v_1)) \,\, \ocamlkwd{with}$ \\ 
+        \hspace*{6mm}
+        \begin{tabular}{rl}
+             & $((\kwdMIN, \wild), ub) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \, ((\MinInfReal, b_0), ub)$\\
+           $\mid$
+             & $(lb, (\wild, \kwdMAX)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \, (ub, (b_1, \PlusInfReal))$\\
+           $\mid$
+             & $((\MinInfReal, \wild), (\wild, \PlusInfReal \mid \NegReal \, \wild \mid
+                \PosReal \, \wild))$\\
+           $\mid$ 
+             & $((\NegReal \, \wild, \wild), (\wild, \PlusInfReal \mid
+                \PosReal \, \wild))$\\
+           $\mid$
+             & $((\PosReal \, \wild, \wild), (\wild, \PlusInfReal)) \PAarrow
+                \,\, \mu(v_0) \, b_0 \,
+                \asnkwdconstr{..} \, b_1 \, \mu(v_1)$\\ 
+           $\mid$
+             & $((\NegReal \, n, b_0), (b_1, \NegReal \, m)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{make\_closed\_int} \, ((\PosReal \, m,
+                b_1),(b_0, \PosReal \, n))$\\
+           $\mid$ 
+             & $((\PosReal \, n, \pmb{\leqslant}), (\pmb{\leqslant},
+                \PosReal \, m)) \,\, \ocamlkwd{when} \,\, n \leqslant
+                m \PAarrow$\\
+             & \hspace*{3mm}
+               $\mu(v_0) \, b_0 \, \asnkwdconstr{..} \, b_1 \,
+                \mu(v_1)$\\ 
+           $\mid$
+             & $((\PosReal \, n, \wild), (\wild, \PosReal \, m))
+               \,\, \ocamlkwd{when} \,\, n < m \PAarrow$\\
+             & \hspace*{3mm}
+               $\mu(v_0) \, b_0 \, \asnkwdconstr{..} \, b_1 \,
+               \mu(v_1)$\\ 
+           $\mid$
+             & $((\NegInt \, n, b_0), \ocamlvaluename{ub}) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \, ((\NegReal \,
+               (\ocamlvaluename{float\_of\_int} \, (n)), b_0),
+               \ocamlvaluename{ub})$\\
+           $\mid$
+             & $((\PosInt \, n, b_0), ub) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \, ((\PosReal \,
+               (\ocamlvaluename{float\_of\_int} \, (n)), b_0),
+               \ocamlvaluename{ub})$\\
+           $\mid$
+             & $(\ocamlvaluename{lb}, (b_1, \NegInt \, m)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \,
+               (\ocamlvaluename{lb}, (b_1, \NegReal \,
+               (\ocamlvaluename{float\_of\_int} \, (m))))$\\
+           $\mid$
+             & $(\ocamlvaluename{lb}, (b_1, \PosInt \, m)) \PAarrow$\\
+             & \hspace*{3mm}
+               $\ocamlvaluename{valid\_real} \,
+               (\ocamlvaluename{lb}, (b_1, \PosReal \,
+               (\ocamlvaluename{float\_of\_int} \, (m))))$
+        \end{tabular} \\

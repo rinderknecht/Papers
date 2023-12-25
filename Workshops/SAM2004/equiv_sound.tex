@@ -1,0 +1,139 @@
+%%-*-latex-*-
+
+\section{Equivalences and soundness}
+
+\textbf{Value equivalence.} It is possible to present a complete
+definition of the value equivalence because we shaped \core with this
+goal in mind. We note $A@B$ the catenation of lists~$A$
+and~$B$. We have
+\begin{mathpar}
+\inferrule
+  {}
+  {v \approx v}\quad\TirName{Reflexivity}
+\and
+\inferrule
+  {v_1 \approx v_2\\
+   \Seq \, M_1 \approx \Seq \, M_2}
+  {\Seq \, ((l,v_1)\!::\!M_1) \approx \Seq \,
+  ((l,v_2)\!::\!M_2)}\;\TirName{Seq}
+\and
+\inferrule[Transitivity]
+  {v_1 \approx v_2\\
+   v_2 \approx v_3}
+  {v_1 \approx v_3}%\;\TirName{Trans}
+\and
+\inferrule
+  {\exists l,v_2,M'_2,M_2.M=M'_2 @\, (l,v_2)\!::\!M_2\\\\
+    v_1 \approx v_2\\
+   \Set \, M_1 \approx \Set \, M_2}
+  {\Set ((l,v_1)\!::\!M_1) \approx \Set \, M}\;\TirName{Set}
+\and
+\inferrule
+  {v_1 \approx v_2}
+  {v_2 \approx v_1}\;\TirName{Symmetry}
+\and
+\inferrule
+  {v_1 \approx v_2}
+  {\Chosen \, (l,v_1) \approx \Chosen \, (l,v_2)}\;\TirName{Choice}
+\and
+\inferrule*[right=SeqOf]
+  {v_1 \approx v_2\\ \SeqOf \, V_1 \approx \SeqOf \, V_2}
+  {\SeqOf \, (v_1\!::\!V_1) \approx \SeqOf \, (v_2\!::\!V_2)}
+\and
+\inferrule*[right=SetOf]
+  {\exists v_2,V_2,V'_2.V=V'_2 @\, v_2\!::\!V_2\\
+   v_1 \approx v_2\\
+   \SetOf \, V_1 \approx \SetOf \, (V'_2 @\, V_2)} 
+  {\SetOf \, (v_1\!::\!V_1) \approx \SetOf \, V}
+\end{mathpar}
+Our value equivalence amounts to a structural equality modulo
+permutations on sub-values of \texttt{\small SET} and \texttt{\small
+SET OF} types.
+
+\medskip
+
+\textbf{Code equivalence.} The BER embed a lot of the type information
+into the codes through the use of tags and a structure isomorphic to
+types. This makes possible to define an equivalence relationship
+between codes that relies on two codes only --- no further context is
+needed.
+\begin{mathpar}
+\inferrule[Reflexivity]
+  {}
+  {c \sim c}
+\and
+\inferrule[Symmetry]
+  {c_1 \sim c_2}
+  {c_2 \sim c_1}
+\and
+\inferrule[Transitivity]
+  {c_1 \sim c_2\\ c_2 \sim c_3}
+  {c_1 \sim c_3}
+\and
+\inferrule*[right=True]
+  {m > 0\\ n > 0}
+  {(\tau, \Primitive \, (\Pbool \, m)) \sim (\tau, \Primitive \,
+  (\Pbool \, n))}
+\end{mathpar}
+
+\begin{mathpar}
+\inferrule*[right=Seq/SeqOf]
+  {\tau = (\Universal, 16)\\
+   c_1 \sim c_2\\\\
+   (\tau, \Constructed \, C_1) \sim (\tau, \Constructed \, C_2)}
+  {(\tau, \Constructed \, (c_1\!::\!C_1)) 
+   \sim (\tau, \Constructed \, (c_2\!::\!C_2))}
+\and
+\inferrule*[right=SeqOptOut]
+  {\tau = (\Universal, 16)\\
+   (\tau, \Constructed \, C_1) \sim (\tau, \Constructed \, C_2)}
+  {(\tau, \Constructed \, (c_1\!::\!C_1)) \sim (\tau, \Constructed \, C_2)}
+\end{mathpar}
+Contrary to value equivalence, there are too many cases and hence we
+cannot present them all. Rule \textsc{True} defines the equivalence of
+two possibly different encodings of the value \texttt{\small
+TRUE}. Rule \textsc{Seq/SetOf} specifies when (and how, in fact) codes
+from values of types \texttt{\small SEQUENCE} and \texttt{\small
+SEQUENCE OF} are equivalent. By the way, note that the tags of these
+two types are identical, hence, in theory, this rule makes equivalent
+the encodings of, say, values of types \texttt{\small SEQUENCE \{a
+INTEGER\}} and \texttt{\small SEQUENCE OF INTEGER}, as soon as the
+integer value is the same. Rule \textsc{SeqOptOut} is dual to the
+homonym rule of the abstract BER where an optional value component is
+not encoded. Here, it is allowed to skip a sub-code when
+decoding. \emph{We do not specify when a sub-code has to be skipped or
+in which code.} We leave this to a more refined specification and/or
+algorithm.
+
+\medskip
+
+\textbf{Equivalence properties.} The properties we expect to hold in
+our BER model can now be restated in a formal way. First of all,
+proposition~\ref{all_BER_codes}, which states that all the BER
+encodings of a given value, according to a given type, are equivalent,
+becomes through the use of formal notations:
+\begin{proposition}
+If $\coding{\Gamma}{v}{\overline{\T}}{c_1}$ and
+$\coding{\Gamma}{v}{\overline{\T}}{c_2}$ then $c_1 \sim c_2$.
+\end{proposition}
+Next, proposition~\ref{entailment} which states that the decoding of
+two equivalent codes lead to two equivalent values is now restated in
+the following way:
+\begin{proposition}[Equivalence entailment]
+$c_1 \sim c_2 \Longrightarrow \decoding{\Gamma}{c_1}{\overline{\T}}
+  \approx \decoding{\Gamma}{c_2}{\overline{\T}}$
+\end{proposition}
+Finally, the soundness theorem~\ref{soundness}, which says that the
+encoding and decoding of a \core value $v$, following a \core tagged
+type $\overline{\T}$, leads to a value which is equivalent to $v$, is
+now formally rephrased:
+\begin{theorem}[Soundness]
+If $\coding{\Gamma}{v}{\overline{\T}}{c}$ then $v \approx
+\decoding{\Gamma}{c}{\overline{\T}}$.
+\end{theorem}
+We have no room to show the proofs of these properties because they
+contain a great number of cases. One tricky aspect is the correct
+handling of sub-code permutations when dealing with \texttt{\small SET
+OF} and \texttt{\small SET} values: for a given unknown permutation on
+the sender's side, we must explicitly construct the reverse
+permutation on the receiver's side.

@@ -1,0 +1,33 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\newcommand\pcdata[1]{\Tr{\psframebox{\rule{0pt}{7pt}\texttt{#1}}}}
+\newcommand\element[1]{\Tr{#1}}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[treemode=D,levelsep=8mm,nodesep=2pt,treesep=8pt,framearc=.4]{\element{decl}}{
+  \pstree{\element{qtype}}{
+    \pstree{\element{quals}}{
+      \psset{nodesepB=0pt}
+      \pcdata{const}
+      \pcdata{static}
+    }
+    \pstree{\element{type}}{
+      \psset{nodesepB=0pt}
+      \pcdata{int}
+    }
+  }
+  \pstree{\element{id}}{
+    \psset{nodesepB=0pt}
+    \pcdata{x}
+  }
+  \pcdata{;}
+}
+\endTeXtoEPS
+
+\end{document}

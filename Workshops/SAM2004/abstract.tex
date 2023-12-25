@@ -1,0 +1,19 @@
+%%-*-latex-*-
+
+\abstract{The Abstract Syntax Notation One (\ASN) can be used to model
+types of values carried by signals in SDL or MSC but is also directly
+used by network protocol implementors. In the last few years, the
+press has reported several alleged vulnerabilities of \ASN and the
+Basic Encoding Rules (BER) related to network protocols like SNMP and,
+more recently, OpenSSL. In reality it has been shown that the security
+issues (theoritically denial of service attacks) were due to
+low-quality and poorly-tested compiler implementations. We use some
+formal methods to go further. We review formally the design of the BER
+themselves and prove that, under some assumptions, it is flawless
+whatever the network protocol is and whatever the values to be
+transmitted are. More precisely, we start with a formal modeling of
+the BER which abstracts away low-level details but captures the design
+principles. Then we define a soundness property stating that the
+composition of encoding and decoding yields a value which is
+equivalent to the original. Finally we prove that this property holds
+for all values specified with \ASN.}

@@ -1,0 +1,120 @@
+\section{Sorting $2^n$ keys}
+
+Merging can be used to sort \emph{one} series of keys as follows. The
+initial series of keys is split in two, then the two pieces are split
+again etc. until singletons remain. These are then merged pairwise
+etc. until only one series remains, which is inductively sorted, since
+a singleton is a sorted series on its own and the merger of two series
+is sorted if they are both sorted. The previous scheme leaves open the
+choice of a splitting strategy and, perhaps, the most intuitive way is
+to cut in two halves, which works well in the case of \(2^p\)~keys. We
+will see in the next section how to deal with the general case.
+
+Here, let us consider in \fig~\ref{fig:bot_up1}
+\begin{figure}
+\centering
+\includegraphics{bot_up1}
+\caption{Sorting \((7,3,5,1,6,8,4,2)\)
+\label{fig:bot_up1}}
+\end{figure}
+all the mergers and their relative order to sort the series
+\((7,3,5,1,6,8,4,2)\). We name this structure a \emph{merge tree},
+because the nodes of the tree are sorted series, either singletons or
+resulting from the merging of its two children. The root logically
+holds the result. The merge tree is best understood from a
+bottom\hyp{}up, level by level examination. Let us note \(\C{}{2^p}\)
+the number of comparisons to sort \(2^p\)~keys and consider a merge
+tree with \(2^{p+1}\)~leaves. It is made of two immediate subtrees
+with \(2^p\)~leaves and the root holds \(2^{p+1}\)~keys. Therefore
+\begin{equation*}
+\C{}{1} = 0,
+\quad
+\C{}{2^{p+1}} = 2 \cdot \C{}{2^p} + \C{\Join}{2^p,2^p}.
+\end{equation*}
+Unrolling the recursion, we arrive at
+\begin{equation}
+\C{}{2^{p+1}} = 2^p\sum_{k=0}^p{\frac{1}{2^k}\C{\Join}{2^k,2^k}}.
+\label{eq:cost_power_2}
+\end{equation}
+
+\paragraph{Minimum cost}
+
+When the given series is already sorted, either in increasing or
+decreasing order, the number of comparisons is minimum. In fact, given
+a minimum\hyp{}comparison merge tree, any exchange of two subtrees
+whose roots are merged leaves the number of comparisons
+invariant. This happens because the merge tree is built bottom\hyp{}up
+and the number of comparisons is a symmetric function. Let us note
+\(\B{}{2^p}\) the minimum number of comparisons to sort
+\(2^p\)~keys. From equations \eqref{eq:best_merge} and
+\eqref{eq:cost_power_2}, we draw
+\begin{equation}
+%\abovedisplayskip=0pt
+\belowdisplayskip=0pt
+\B{}{2^p}
+  = 2^{p-1}\!\sum_{k=0}^{p-1}{\frac{1}{2^k}\B{\Join}{2^k,2^k}}
+  = p2^{p-1}.\label{eq:best_power}
+\end{equation}
+
+\paragraph{Maximum cost}
+
+Just as with the best case, constructing a maximum\hyp{}comparison
+merge sort is achieved by making worst cases for all the subtrees, for
+example, \((7,3,5,1,4,8,6,2)\). Let~\(\W{}{2^p}\) be the maximum
+number of comparisons for sorting \(2^p\)~keys. From equations
+\eqref{eq:worst_merge} and \eqref{eq:cost_power_2}, we deduce
+\begin{equation}
+%\abovedisplayskip=2pt
+\belowdisplayskip=0pt
+\W{}{2^p}
+  = 2^{p-1}\!\sum_{k=0}^{p-1}{\frac{1}{2^k}\W{\Join}{2^k,2^k}}
+  = (p-1)2^p + 1.
+\label{eq:worst_power}
+\end{equation}
+
+\paragraph{Average cost}
+
+For a given series, all permutations of which are equally likely, the
+average cost of sorting it by merging is obtained by considering the
+average costs of all the subtrees of the merge tree: all the
+permutations of the keys are considered for a given length. Therefore,
+equation~\eqref{eq:cost_power_2} is satisfied by the average cost
+\(\M{}{2^p}\), that is, the average number of comparisons for sorting
+\(2^p\)~keys. Besides, equation~\eqref{eq:mean_merge} yields
+\begin{equation*}
+%\abovedisplayskip=2pt
+%\belowdisplayskip=2pt
+\M{\Join}{n,n} = 2n - 2 + \frac{2}{n+1}.
+\end{equation*}
+Together with equation \eqref{eq:cost_power_2}, we further draw, for
+\(p > 0\),
+\begin{align*}
+\abovedisplayskip=0pt
+\belowdisplayskip=0pt
+\M{}{2^p}
+  &= 2^{p-1}\sum_{k=0}^{p-1}{\frac{1}{2^k}\M{\Join}{2^k,2^k}}
+  = 2^p\sum_{k=0}^{p-1}{\frac{1}{2^k}\left(2^k - 1 + \frac{1}{2^k +
+      1}\right)}\notag\\
+  &= 2^{p}\left(p - \sum_{k=0}^{p-1}{\frac{1}{2^k}}
+     + \sum_{k=0}^{p-1}{\frac{1}{2^k(2^k+1)}}\right),\notag\\
+\M{}{2^p}
+  &= 2^{p}\left(p - \sum_{k=0}^{p-1}{\frac{1}{2^k}}
+     + \sum_{k=0}^{p-1}\left(\frac{1}{2^k}
+     - \frac{1}{2^k+1}\right)\!\!\right)
+   = p2^p - 2^p \sum_{k=0}^{p-1}\frac{1}{2^k+1}\notag\\
+  &= p2^p - 2^p \sum_{k \geqslant 0}\frac{1}{2^k+1}
+     + 2^p \sum_{k \geqslant p}\frac{1}{2^k+1}
+   = p2^p - \alpha 2^p + \sum_{k \geqslant 0}\frac{1}{2^{k}+2^{-p}},
+\end{align*}
+where \(\alpha := \sum_{k \geqslant 0}\frac{1}{2^k+1} \simeq
+1.264500\) is irrational~\cite{Borwein:1992}. Since \(0 < 2^{-p} <
+1\), we have \(1/(2^k + 1) < 1/(2^k+2^{-p}) < 1/2^k\) and we conclude
+\begin{equation}
+(p - \alpha)2^p + \alpha < \M{}{2^p} < (p-\alpha)2^p + 2.
+\label{ineq:M_join}
+\end{equation}
+The uniform convergence of the series \(\sum_{k \geqslant
+  0}\frac{1}{2^{k}+2^{-p}}\) allows us to interchange the limits
+on~\(k\) and~\(p\) and deduce that \(\M{}{2^p} - (p-\alpha)2^p - 2 \to
+0^{-}\), as \(p \to \infty\). In other words, \(\M{}{2^p}\) is best
+approximated by its upper bound, for large values of~\(p\).

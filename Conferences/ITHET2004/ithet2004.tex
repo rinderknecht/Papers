@@ -1,0 +1,340 @@
+%\documentclass[10pt,twocolumn]{IEEEtran}
+% to specify a filename, can use:
+\documentclass[10pt,twocolumn]{IEEEtran}
+%\usepackage{epsfig}
+\usepackage{graphicx}
+
+% I didn't like list-s
+\hyphenation{lists}
+\pagestyle{empty}
+
+% We need to obtain a command to tell us if a command has
+% been previously defined so that we can determine which
+% IEEEtran.cls is running. The \makeatletter stuff provides
+% a way to "get at" the internal command \@ifundefined
+% since it contains the @ character
+\makeatletter
+\def\ifundefined{\@ifundefined}
+\makeatother
+
+% V1.1 change: The font change commands have to be located
+% in the preamble before the title or author is declared.
+% If you uncomment these, you may also want to uncomment
+% the redefinition of \PARstart around line 258 so that
+% the big first letter is in the same font as the rest of
+% the text.
+% Here is how you can go back to the Computer Modern fonts
+% if you wish:
+%\renewcommand{\sfdefault}{cmss}
+%\renewcommand{\rmdefault}{cmr}
+%\renewcommand{\ttdefault}{cmtt}
+
+%\usepackage{hrefpdf}
+
+\begin{document}
+
+
+\title{\LARGE \bf LeVinQam: A Question Answering Mining platform}
+
+\author{
+\large Patrick Duval, Agathe Merceron, Christian Rinderknecht, Michel Scholl \\ 
+\normalsize ESILV - G\'enie Informatique\\ 
+\normalsize P\^ole Universitaire L\'eonard de Vinci\\ 
+\normalsize F-92916 Paris La D\'efense - Cedex \\
+\normalsize FRANCE \\ 
+\normalsize {\it \{patrick.duval, agathe.merceron, christian.rinderknecht, michel.scholl\}@devinci.fr}
+}
+
+% The major version number of the class file will not
+% be defined with the old IEEEtran.cls. So, we can use this fact
+% to determine if we are running the old or the new class.
+\ifundefined{IEEEtransversionmajor}{%
+   % This block will be executed only if we are using the old
+   % class. All we do is to make sure the V1.3 lengths and commands
+   % actually exist so the code won't choke when it
+   % doesn't find them.
+
+   % This file doesn't need most of these definitions.
+   % However, we'll provide them all in case somebody
+   % wants to see what should be executed when compiling
+   % a V1.3 or later IEEEtran.cls .tex file with a pre V1.3
+   % IEEEtran.cls class file. In such a case, all you have to
+   % do is copy this block to the start of your code.
+   % However, it won't fix any bugs in the old IEEEtran.cls!
+   %
+   % **** BACKWARD COMPATIBILITY CODE BLOCK START ****
+   \newlength{\IEEEilabelindent} \newlength{\IEEEilabelindentA}
+   \newlength{\IEEEilabelindentB} \newlength{\IEEEelabelindent}
+   \newlength{\IEEEdlabelindent} \newlength{\labelindent}
+   \newlength{\IEEEiednormlabelsep} \newlength{\IEEEiedmathlabelsep}
+   \newlength{\IEEEiedtopsep}
+
+   \providecommand{\IEEElabelindentfactori}{1.0}
+   \providecommand{\IEEElabelindentfactorii}{0.75}
+   \providecommand{\IEEElabelindentfactoriii}{0.0}
+   \providecommand{\IEEElabelindentfactoriv}{0.0}
+   \providecommand{\IEEElabelindentfactorv}{0.0}
+   \providecommand{\IEEElabelindentfactorvi}{0.0}
+   \providecommand{\labelindentfactor}{1.0}
+
+   \providecommand{\iedlistdecl}{\relax}
+   \providecommand{\calcleftmargin}[1]{ \setlength{\leftmargin}{#1}
+   \addtolength{\leftmargin}{\labelwidth}
+   \addtolength{\leftmargin}{\labelsep}}
+   \providecommand{\setlabelwidth}[1]{ \settowidth{\labelwidth}{#1}}
+   \providecommand{\usemathlabelsep}{\relax}
+   \providecommand{\iedlabeljustifyl}{\relax}
+   \providecommand{\iedlabeljustifyc}{\relax}
+   \providecommand{\iedlabeljustifyr}{\relax}
+
+   \newif\ifnocalcleftmargin \nocalcleftmarginfalse
+
+   \newif\ifnolabelindentfactor \nolabelindentfactorfalse
+
+   % in V1.4 of IEEEtran.cls 
+   \newif\ifcenterfigcaptions
+   \centerfigcaptionsfalse
+
+   % we need to provide the old IED environments 
+   % with a bogus optional argument 
+   \let\OLDitemize\itemize
+   \let\OLDenumerate\enumerate \let\OLDdescription\description
+
+   \renewcommand{\itemize}[1][\relax]{\OLDitemize}
+   \renewcommand{\enumerate}[1][\relax]{\OLDenumerate}
+   \renewcommand{\description}[1][\relax]{\OLDdescription}
+
+   \providecommand{\pubid}[1]{\relax}
+   \providecommand{\pubidadjcol}{\relax}
+   \providecommand{\specialpapernotice}[1]{\relax}
+   \providecommand{\overrideIEEEmargins}{\relax}
+
+   % V1.1 change: use \let instead of \providecommand % This prevents
+   %LaTeX from hanging if the user ever % tried to redefine \PARstart
+   %in terms of \CMPARstart 
+   \let\CMPARstart\PARstart
+
+   \let\OLDappendix\appendix
+   \renewcommand{\appendix}[1][\relax]{\OLDappendix}
+
+   \newif\ifuseRomanappendices 
+   \useRomanappendicestrue
+
+   % V1.2 change: handle the optional biography environment argument %
+   %(the photo specifier) provided by IEEEtran V1.5 and later.  % This
+   %is tricky because, under the new biography, the SECOND % argument
+  % is the non-optional one (the biography text).
+   \let\OLDbiography\biography 
+   \let\OLDendbiography\endbiography
+   \renewcommand{\biography}[2][\relax]{\OLDbiography{#2}}
+   \renewcommand{\endbiography}{\OLDendbiography} 
+   % **** BACKWARD COMPATIBILITY CODE BLOCK END ****
+
+    % alter the header to show we are using the older class
+   %\markboth{A Test for IEEEtran.cls--- {\tiny \bfseries
+   %[Running Older Class]}}{Shell: A Test for IEEEtran.cls}}{
+   % END IF OLDER CLASS
+
+   % This block will be executed only if we are running
+   % the enhanced class
+   % alter the header to show we are using the enhanced class
+   \markboth{A Test for IEEEtran.cls--- {\tiny \bfseries [Running
+   Enhanced Class V\IEEEtransversionmajor.\IEEEtransversionminor]}}%
+   {Shell: A Test for IEEEtran.cls}}
+% end of conditional
+
+
+% Uncomment this line to render the big first letter in
+% Computer Modern font.
+%\renewcommand{\PARstart}[2]{\CMPARstart{#1}{#2}}
+% V1.1 change: This would hang if using the older IEEEtran.cls
+% in IEEEtest V1.0, it is OK now.
+%
+%
+% Here's how you would do invited papers:
+%\specialpapernotice{(Invited Paper)}
+% If you are binding copies of work generated with IEEEtran.cls,
+% you may want to try:
+%\overrideIEEEmargins
+% These commands work OK here even though they are not in the preamble.
+%(I wanted to put them after the backward compatibility code)
+
+
+\maketitle
+\thispagestyle{empty}
+% here's how you get a publisher's ID mark with the new
+% IEEEtran.cls.  If you want to use it, don't forget to
+% also uncomment the \pubidadjcol command (which must be
+% executed in the second text column) around line 434 below
+%\pubid{0000--0000/00\$00.00~\copyright~2001 IEEE}
+
+
+%\begin{abstract}
+ 
+\input{abstractSub.tex}
+
+% no need for this single page document
+% you may have to move \pubidadjcol (if used) if
+% these are enabled
+%\listoffigures
+%\listoftables
+%\tableofcontents
+
+\section{Introduction} %MS
+\label{intro}
+\input{introduction.tex}
+
+
+\section{e-Learning Information Model} %MS
+\label{model}
+\input{model}
+
+
+\section{Platform design} %PD and CR
+\label{architecture}
+\input{architecture}
+
+
+\section{Visualisation and Mining} %AM 
+\label{visualisation}
+\input{visualisation}
+
+%\section{Case studies} %AM 
+%\label{caseS}
+%\input{caseS.tex}
+
+%\section{Conclusion} % 
+%\label{concl}
+%\input{conclusion.tex}
+
+\begin{thebibliography}{12}
+% Note the sample label "11" in thebibliography
+% This is like the new IEEEtran class'
+% \begin{enumerate}[\setlabelwidth{11}]
+
+
+%\end{thebibliography}
+\bibitem{logicT1}
+D.~Abraham, L.~Crawford, L.~Lesta, A.~Merceron  and K.~Yacef,
+``The Logic Tutor: A Multimedia Presentation'', {\em Interactive 
+Multimedia Electronic Journal of Computer-Enhanced learning}, Vol.~3, 
+Nb.~2, Nov. 2001.
+
+
+
+\bibitem{amv03} B. Aguado, A. Merceron and A. Voisard, ``Extracting
+Information from Structured Exercises'',  Proceedings of  the 4th
+International Conference on Information Technology Based Higher
+Education and Training ITHET03, Marrakech, Morocco, (2003).
+
+\bibitem{akwww04}
+Benchaffai M., Debord G., Merceron A., and Yacef K., {\it TADA-Ed, a tool to visualize and mine students' work}. Submitted paper. 2004
+
+%\bibitem{duboulay01} B.~du Boulay, R.~Luckin, ``Modeling Human
+%Teaching Tactics and Strategies for Tutoring Systems,'' {\em
+%International Journal of Artificial Intelligence in Education,}
+%Vol.~12, pp. 235-256, 2001
+
+\bibitem{Brusilovsky} P.~Brusilovsky, ``Adaptive and Intelligent
+Technologies for Web-based Education'' {\em K\"unstliche Intelligenz,
+Special Issue on Intelligent Systems and Teleteaching,  4, 19-25, 1999
+
+%\bibitem{Laos}
+%A.I.~Cristea and A.~de~Mooij,
+%``LAOS: Layered WWW AHS Authoring Model and their corresponding 
+Algebraic Operators'',
+%{\em Proceedings of the track Education, 12th International World Wide 
+Web Conference WWW2003}, www2003.org, Budapest, Hungary, pp.185-194, May 
+2003
+
+%\bibitem{druger00}
+%M.~Druger, ``A Perspective on Exams and Grading'', {\em Journal
+%of College Science and Teaching''}, Vol.~30, Issue~3, pp. 210-211,
+%2000.
+
+%\bibitem{ellard02}
+%C.~Ellard, M.~Feinberg, J.~S. Siekpe, ``Classifying student errors
+%in the introduction to microeconomics course,'' {\em Business Quest,
+%Journal of Applied Topics in Business and Economics}, 2002.
+
+\bibitem{wargon01}
+Laurent Wargon, ``Une plateforme d'apprentissage de SQL en ligne'', {\em Rapport interne},
+ESILV/GI, January 2004.
+
+\bibitem{ganesha}
+http://www.anemalab.org/ganesha/,
+Ganesha, a Learning Management System
+
+\bibitem{grandbastien03}
+M.~Grandbastien, L.~Oubahssi, G.~Claes, ``A process oriented approach 
+for modelling on line Learning Environments'', {\em Supplementary 
+Proceedings of Artificial Intelligence in Eudcation AIED2003}, 
+University of Sydney, Australia, pp.~140-152, July 2003.
+
+
+\bibitem{han}
+Han J.,  and Kamber M.,
+{\it Data Mining: Concepts and Techniques},
+Morgan Kaufmann Publishers, 2001
+
+
+\bibitem{Petri}
+K. Jensen ``An Introduction to the Theoretical Aspects of Coloured Petri Nets.'' {\em A Decade of Concurrency}, J.W. de Bakker, W.-P. de Roever, G. Rozenberg (eds.), Lecture Notes in Computer
+Science vol. 803, Springer-Verlag, 230-272, 1994
+
+%\bibitem{jean00}
+%S.~Jean, {\em Ppite: un syst\`eme d'assistance au diagnostic de
+%comp\'etences}.
+%\newblock Ph.D.\ thesis, University of Le Mans, France, 2000.
+
+%\bibitem{langley84}
+%P.~Langley, S.~Ohlsson, ``Automated Cognitive Modeling,''
+%{\em Proceedings of the Second National Conference on Artificial
+%Intelligence}, 1984.
+
+
+
+%\bibitem{leroux96}
+%O.~Leroux, M.~Vivet, P.~Brezillon, ``Cooperation between a Pedagogical
+%Assistant, a Group of Learners and a Teacher,''
+%{\em Proceedings of European Conference on AI in Education},
+%Lisbon, Portugal, pp.~379-385, 1996
+
+
+
+\bibitem{AK-AIeD}
+A.~Merceron  and K.~Yacef, ``
+A Web-Based Tutoring Tool with Mining
+Facilities to Improve Learning and Teaching'',
+{\em Proceedings of the 11th International Conference
+on Artificial Intelligence in Education}, Sydney, Australia, pp.201-208, 2003
+
+%\bibitem{SmartSpace}
+%B.~Simon, Z.~Miklos, W.~Neidl, M.~Sintek and J.~Salvachua,
+%``Smart Space ofr Learning: A Mediation Infrastructure for Learning 
+%Services'',
+%{\em Proceedings of the track Education, 12th International World Wide 
+%Web Conference WWW2003},  www2003.org, Budapest, Hungary, pp. 97-101, 
+%May 2003
+
+
+\end{thebibliography}
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+% END of IEEEtest.tex ************
+
+
+
+-----------------------------7d34613d68--

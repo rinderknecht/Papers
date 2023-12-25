@@ -1,0 +1,44 @@
+Let \(\Expected{E_n}\)~be the \emph{average external path length} of a
+Catalan tree with~\(n\) edges, that is, the average level of a
+leaf. We have
+\begin{align*}
+\Expected{E_n} \cdot C_n
+  &:= \sum_{l=0}^{n} l \cdot \mathcal{N}_n(l,0)
+   = \sum_{l=0}^{n}l\left[\binom{2n-1}{n+l-1} -
+     \binom{2n-1}{n+l}\right]\\
+  &= \sum_{l=0}^{n-1}(l+1)\binom{2n-1}{n+l} -
+     \sum_{l=0}^{n-1}l \binom{2n-1}{n+l}
+   = \sum_{l=0}^{n-1}\binom{2n-1}{n+l},\\
+\Expected{E_n} \cdot C_n
+  &= \sum_{i=n}^{2n-1}\binom{2n-1}{i}
+   = \frac{1}{2}\sum_{j=0}^{2n-1}\binom{2n-1}{j} = 4^{n-1},
+\end{align*}
+where the penultimate step follows from the fact that an odd row in
+Pascal's triangle contains an even number of coefficients and the two
+halves have equal sums. We conclude:
+\begin{equation}
+\Expected{E_n} = (n+1) 4^{n-1}\binom{2n}{n}^{-1} \sim
+\frac{1}{4}n\sqrt{\pi n}.
+\label{eq:EEn}
+\end{equation}
+
+\subsection*{Leaves}
+
+If we look back at the Dyck paths in \fig~\ref{fig:dyck} and
+\fig~\ref{fig:dyck_deg}, we recall that they are in bijection, the
+latter expressing the former with the degrees of the nodes. We also
+know that Dyck paths are in bijection with Catalan trees. The key is
+that the leaves in the tree equivalent to the path in
+\fig~\ref{fig:dyck} correspond to the corners, whereas the inner nodes
+of the tree equivalent to the path in \fig~\ref{fig:dyck_deg}
+correspond to the corners. This simple observation entails that there
+are as many leaves as there are inner nodes in the set of all Catalan
+trees of a given size. If that size is \(n\)~edges, then the number
+leaves plus the number of inner nodes is~\(n+1\), hence the average
+number of leaves \(\Expected{L_n}\) is \((n+1)/2\). Moreover,
+\(\Expected{E_n}/\Expected{L_n}\) is the average level of a
+leaf. Using equation~\eqref{eq:EEn}, we draw:
+\begin{equation*}
+\frac{\Expected{E_n}}{\Expected{L_n}} =
+\frac{1}{2}4^n\binom{2n}{n}^{-1} \sim \frac{1}{2}\sqrt{\pi n}.
+\end{equation*}

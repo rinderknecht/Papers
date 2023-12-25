@@ -1,0 +1,1271 @@
+%% Rewrite Systems
+
+Let us consider the ordered system
+\begin{align*}
+n     &\rightarrow (n,1)\\
+(0,m) &\rightarrow m\\
+(n,m) &\rightarrow (n-1,n \times m)
+\end{align*}
+where \(n\) and \(m\) are positive integers and arithmetic operators
+\((-)\) and \((\times)\) are defined out of the system. It can be
+proved that all the compositions of rewrite steps starting with a
+positive integer \(n\) end with an integer which is the the factorial
+of \(n\). That is to say
+\[
+n \rightarrow (n,1) \rightarrow \dots \rightarrow (0,n!) \rightarrow n!
+\]
+The composition of a binary relation \((\rightarrow)\) at least once
+is called the \emph{transitive closure} and noted
+\((\xrightarrow{+})\). So, in the present case, the factorial function
+over the integers belongs to the transitive closure of
+\((\rightarrow)\), i.e., \(n \xrightarrow{+} n!\). 
+When the rewrite relation is actually a function, it is convenient to
+use a function name by means of a constructor. 
+
+Thus we have \(\textsf{fact}(n) \xrightarrow{+} n!\). 
+
+
+The reason to prefer rewrite rules over recursive equations is that
+the former force the order in which the computing steps have to be
+taken (following the arrow), whilst equations can be used both
+ways.
+
+Let us note \((\xrightarrow{n})\) the composition of \((\rightarrow)\)
+\(n\) times:
+\begin{align*}
+  (\xrightarrow{1}) &\triangleq (\rightarrow)\\
+  (\xrightarrow{n+1}) &\triangleq (\rightarrow) \circ (\xrightarrow{n})
+& \text{with} \,\; n > 0
+\intertext{and by \((\xrightarrow{+})\) the transitive closure of
+  \((\rightarrow)\), i.e.,}
+(\xrightarrow{+}) &\triangleq \bigcup_{i > 0}{(\xrightarrow{i})} 
+& \text{with} \,\; i \in \mathbb{N}
+\intertext{and by \((\xrightarrow{*})\) the reflexive\hyp{}transitive
+  closure of \((\rightarrow)\), i.e.,}
+(\xrightarrow{*}) &\triangleq (=) \cup (\xrightarrow{+})
+\end{align*}
+In other words, \((\xrightarrow{*})\) is the composition of
+  \((\rightarrow)\) any number of times, including zero. For example,
+\begin{align*}
+ \textsf{append}(\textsf{push}(x, \textsf{nil}()), &\textsf{nil}())\\
+&\rightarrow \textsf{push}(x, \textsf{append}(\textsf{nil}(),
+ \textsf{nil}()))\\
+&\rightarrow \textsf{push}(x, \textsf{nil}())
+\end{align*}
+which means that
+\[
+\textsf{append}(\textsf{push}(x, \textsf{nil}()), \textsf{nil}())
+\xrightarrow{2} \textsf{push}(x, \textsf{nil}())
+\]
+or, more generally,
+\[
+\textsf{append}(\textsf{push}(x, \textsf{nil}()), \textsf{nil}())
+\xrightarrow{*} \textsf{push}(x, \textsf{nil}())
+\]
+
+
+
+For instance, consider the toggle
+\begin{align*}
+  0 &\rightarrow 1 & 1 &\rightarrow 0
+\end{align*}
+The previous relation \((\rightarrow)\) is actually a \emph{partial
+  function} over the integers, since each integer can be rewritten
+into exactly one integer or none (e.g., \(2\)). It can be composed:
+\begin{align*}
+0 &\rightarrow 1 \rightarrow 0 \rightarrow 1 \rightarrow \dots\\
+1 &\rightarrow 0 \rightarrow 1 \rightarrow 0 \rightarrow \dots
+\end{align*}
+Note that all the rewrites can be composed as long as wished (in
+functional terms, this is because the domain and the codomain of the
+function \((\rightarrow)\) are equal). Some systems only allow one
+rewrite step at most, as
+\begin{align*}
+(0,0) &\rightarrow 0 & (0,1) &\rightarrow 1 &
+(1,0) &\rightarrow 1 & (1,1) &\rightarrow 0
+\end{align*}
+Rewrite systems can contain variables to merge several rules into one
+or allowing an infinite number of possible cases if the variables
+denote terms of an infinite kind. For instance, the above system can
+be equivalently rewritten as
+\begin{align*}
+ (1,1) &\rightarrow 0 & (x,0) &\rightarrow x & (0,x) &\rightarrow x
+\end{align*}
+assuming that \(x\) is either \(0\) or \(1\). (Note that this
+constraint is not expressed now by means of rewrite rules: it is
+defined out of the system.) Usually, rewrite rules are not ordered,
+but they can be, in order to simplify the specification. In this case,
+rules have to be considered in the order they are written (left to
+right, top to bottom). For example, the previous system can be
+simplied as
+
+For example
+\begin{align*}
+(x,x) &\rightarrow 0 & (x,y) &\rightarrow 1
+\end{align*}
+where the rules are ordered and \(x\) and \(y\) are supposed to be
+either \(0\) or \(1\). Note that a variable may occur several times in
+a left\hyp{}hand side (like \(x\) in \((x, x)\)): this implies that
+the terms denoted must be syntactically identical. 
+
+
+We can use the
+transitive closure of a rewrite relation to define the process by
+which a function call is evaluated. If \(\textsf{fact}(n)
+\xrightarrow{+} v\) and \(v\) cannot be rewritten, then \(v\) is the
+\emph{value} of \(\textsf{fact}(n)\). With this point of view, the
+first system we presented, the toggle, loops for ever on every
+input. 
+
+, instead of a symbol, and to use it as in
+mathematics, e.g., \(f(n)\). The solution consists using a constructor
+(see \emph{Constructors}) as the function name, for example \(f\) with
+the expected arity, and define rewrite rules of the shape `\(f(\dots)
+\rightarrow \dots\)' 
+
+
+We also have
+\[
+\textsf{append}(\textsf{nil}(), \textsf{push}(x, \textsf{nil}()))
+\xrightarrow{*} \textsf{push}(x, \textsf{nil}())
+\]
+Two terms which rewrite to the same identical term are said to be
+\emph{congruent}, or \emph{equal} when there is no confusion with
+identity. This is formally written as
+\begin{center}
+\emph{If}   \(x \xrightarrow{*} r\) 
+\emph{and}  \(y \xrightarrow{*} r\)
+\emph{then} \(x = y\).
+\end{center}
+For instance, this is how we prove that
+\begin{align*}
+\textsf{append}(&\textsf{push}(x, \textsf{nil}()), \textsf{nil}())\\
+&= \textsf{append}(\textsf{nil}(), \textsf{push}(x, \textsf{nil}()))
+\end{align*}
+In other words: \([x] \cdot \el = \el \cdot [x]\).
+
+
+%% Inference systems
+
+For example, the axiom
+\(A(x)\) actually means \(\forall x.A(x)\), and the rule
+\[
+\inferrule
+  {P_1(x) \\ P_2(y)}
+  {P(x,y)}
+\]
+signifies \(\forall x,y.(P_1(x) \, \wedge \, P_2(y) \Rightarrow P(x,
+y))\). Given an inference system involving in the conclusions one or
+more relations, it must be constrained so that these relations are the
+\emph{smallest relations} satisfying the rules. To understand why,
+
+Here, the relations involved are the unary relations (i.e., with only
+one argument) \textsf{even} and \textsf{odd}. The axiom states that
+\(0\) is even (by definition). For all \(n\), if \(n\) is odd, then
+\(n+1\) is even and if \(n\) is even, then \(n+1\) is odd. The problem
+is that many predicates (i.e., unary relations) satisfy these
+conditions. Take for example \(\textsf{even}(n)\) and
+\(\textsf{odd}(n)\) being always true for all \(n\) (thus
+independently of \(n\)): true implies true, but nothing interesting is
+defined here (the predicates are mere tautologies). But the smallest
+predicates, in other words, the ones which are true `the less often,'
+satisfying the rules are \(\textsf{even}(n) \triangleq (n \mod{2} =
+0)\) and \(\textsf{odd}(n) \triangleq (n \mod{2} = 1)\). Let us make
+use now of the notation with an horizontal line and show that it is
+intuitive when composing several rules.
+
+ For
+instance, the value of \(\textsf{odd}(3)\) is `true' because the
+indirectly\hyp{}recursive call \(\textsf{even}(2)\) returns `true.'
+
+
+%% Trees
+
+, e.g., by means of a
+breadth\hyp{}first traversal (layer by layer, from root to
+leaves)
+
+Constructors allow to interpret a tuple as a finite \emph{tree}.
+
+     \emph{Trees} are graphical interpretations of terms
+     hierarchical layouts of information made of \emph{nodes},
+     associated with data, which must be connected to other nodes by
+     means of segments. The hierarchy imposes that there are
+     horizontal layers of nodes. The upper layer always contains a
+     single node, called the \emph{root}, and it is depicted at the
+     top of the figure. Every node in a layer (1)~may connect to
+     several nodes in the next lower layer, (2)~must be connected to
+     exactly one node of the immediate upper layer, if
+     any. Connections inside a layer or between non\hyp{}consecutive
+     layers are not allowed. The nodes which are not connected to a
+     lower layer are called the \emph{leaves}.
+
+Note that the tuples of the constructors are not represented in the
+tree, since they encode the structure of the subtrees, which is
+already visible. 
+
+
+\section{Algorithm \emph{A(0)}}
+
+\noindent\textbf{Pattern matching.} Pattern matching is defined here
+by the following rewrite rules:
+\begin{align*}
+\match{[]}{[]}{\sigma} 
+\rightarrow & \, \sigma
+& \!\!\!\textsf{END}\\
+\match{\cons{l}{f}}{\cons{l}{p}}{\sigma} 
+\rightarrow & \, \match{f}{p}{\sigma}
+& \!\!\!\textsf{ELIM}\\
+\match{\cons{c(l,t_2,\dots,t_{A(c)})}{\!f}}{\cons{l}{p}}{\sigma}
+\rightarrow & \,
+\match{\cons{t_2,\dots,t_{A(c)}}{\!f}}{p}{\sigma}
+& \!\!\!\textsf{UNPAR}_1\\
+\match{\cons{c(t_1,\dots,t_{A(c)})}{\!f}}{\cons{\cstr{lpar}{}}{p}}{\sigma}
+\rightarrow & \,
+\match{\cons{t_1,\dots,t_{A(c)},\cstr{rpar}{}}{\!f}}{p}{\sigma}
+& \!\!\!\textsf{UNPAR}_2\\
+& \; \text{if} \, t_1 \in {\cal T}\\
+\match{\cons{t}{f}}{\cons{\meta{x}}{p}}{\sigma}
+\rightarrow & \,
+\match{f}{p}{\sigma \oplus x \mapsto t}
+& \!\!\!\textsf{BIND}
+\end{align*}
+if \(t \in {\cal T}\) and (\(x \not\in \dom{\sigma}\) or \(\sigma(x) =
+t\)).
+
+\section{Algorithme \emph{N(1)}}
+
+\noindent\textbf{Filtrage.} Ici la relation de filtrage est différente
+de celles précédentes car elle ne relie que des configurations. Pour
+tout \(l \in {\cal L}\) on définit
+\begin{mathpar}
+\inferrule{}{\match{\cons{l}{f}}{\cons{l}{p}}{\sigma} 
+\rightarrow \match{f}{p}{\sigma}}
+\quad\TirName{\text{\sf ELIM}}
+
+\inferrule
+{}
+{\match{\cons{c(t_1, \dots, t_{A(c)})\!}{\!f}}{\cons{l\!}{\!p}}{\sigma} 
+\rightarrow 
+\match{\cons{t_1, \dots, t_{A(c)}\!}{\!f}}{\cons{l\!}{\!p}}{\sigma}}
+\quad\TirName{\text{\sf UNPAR}}
+
+\inferrule
+{t \in {\cal T}\\
+\match{f}{p}{\sigma} \rightarrow \match{f'}{p'}{\sigma'}\\
+(x \not\in \dom{\sigma'} \vee \sigma'(x) = t)}
+{\match{\cons{t}{f}}{\cons{\meta{x}}{p}}{\sigma} 
+\rightarrow \match{f'}{p'}{\sigma'\oplus x \mapsto t}}
+\quad\TirName{\text{\sf BIND}}
+\end{mathpar}
+Ce système est dirigé par la syntaxe: pour chaque configuration soit
+aucune réécriture ne s'applique ou une seule.
+
+
+\subsection{Environment inclusion}
+ 
+\begin{lemma}[Inclusion]\hfill
+\label{incl}
+\begin{center}
+If \(x \not\in \dom{\sigma}\) or \(\sigma(x) = t\) then \(\sigma \subseteq
+\sigma \oplus x \mapsto t\).
+\end{center}
+\end{lemma}
+\begin{enumerate}
+
+  \item Case \(x \not\in \dom{\sigma}\).\\ By definition of
+    \(\oplus\), we have 
+    \[\forall y \in \dom{\sigma}.((\sigma \oplus x
+      \mapsto t)(y) = \sigma(y))
+    \]
+    because \(y \neq x\). Futhermore, the definition of \(\subseteq\)
+    implies that \(\sigma \subseteq \sigma \oplus x \mapsto t\).
+
+  \item Case \(\sigma(x) = t\).\\ Let \(y \in \dom{\sigma}\). There are
+    two possibilities:
+    \begin{enumerate}
+
+      \item Case \(x = y\).\\ \((\sigma \oplus x \mapsto t)(y)
+        \triangleq t = \sigma(x) = \sigma(y)\).
+
+      \item Case \(x \neq y\).\\ \((\sigma \oplus x \mapsto t)(y)
+        \triangleq \sigma(y)\).
+
+    \end{enumerate}
+    In both cases, \(\forall y \in \dom{\sigma}.(\sigma(y) = (\sigma \oplus
+    x \mapsto t)(y))\), which, by definition of the inclusion, is
+    simply \(\sigma \subseteq \sigma \oplus x \mapsto t\).
+
+\end{enumerate}
+In all cases, we established that \(\sigma \subseteq \sigma \oplus x
+\mapsto t\).\hfill\(\Box\)
+
+
+\subsection{Right neuter forest}
+
+\begin{lemma}[Right neuter forest]
+\label{neuter}
+\[
+f \cdot \el = f
+\]
+\end{lemma}
+
+\noindent\textbf{Proof.} Let \(\ind{B}(f)\) be the proposition ``\(f
+\cdot \el = f\).'' We shall prove \(\forall f.\ind{B}(f)\) by means of
+induction on the structure of \(f\), i.e., we shall prove
+\[
+\ind{B}([]) \wedge \forall f.(\ind{B}(f) \Rightarrow \forall
+t.(\ind{B}(\cons{t}{f})))
+\]
+The induction principle implies then \(\forall f.\ind{B}(f)\).
+\begin{enumerate}
+
+  \item Case \(f = \el\).\\ In this case, we must prove
+    \(\ind{B}(\el)\) directly:
+    \begin{align*}
+      \el \cdot \el &= \el & \text{by} \,\; \eqref{model:conc:1}
+    \end{align*}
+    This is simply \(\ind{B}(\el)\).
+    
+  \item Let us assume the induction hypothesis \(\ind{B}(f)\). We have
+    \begin{align*}
+      \cons{t}{f} \cdot \el &= \cons{t}{f \cdot \el}
+      & \text{by} \,\; \eqref{model:conc:2}\\
+      &= \cons{t}{f}
+      & \text{by} \,\; \ind{B}(f)
+    \end{align*}
+    This is equivalent to \(\ind{B}(\cons{t}{f})\).
+ 
+\end{enumerate}
+The induction principle implies then that \(\forall
+f.\ind{B}(f)\).\hfill \(\Box\)
+
+
+%% ES(1) unparsed patterns
+%
+\begin{itemize}
+
+  \item \(\el \in \overline{\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(\overline{p} \in \overline{\cal
+    P}\) then \(\cons{l}{\overline{p}} \in \overline{P}\);
+
+  \item if \(x \in {\cal V}\) and \(\overline{p} \in \overline{\cal
+    P}\) then \(\cons{\meta{x}}{\overline{p}} \in
+    \overline{\cal P}\);
+
+  \item if \(\overline{p} \in \overline{\cal P}\) then
+    \(\{\cons{\mlp}{\overline{p}}, \cons{\mrp}{\overline{p}}\}
+    \subseteq \overline{\cal P}\).
+
+\end{itemize}
+
+A node in a pattern tree is created
+every time a pair of opening and closing parentheses are found. Each
+subtree corresponds to the elements of the (recursively)
+meta\hyp{}parsed pattern between the meta\hyp{}parentheses. Just as
+for abstract syntax trees, we prefer, for technical reasons, to encode
+these \emph{pattern trees} with a list of subtrees (see
+section~\ref{model}). 
+
+
+%% ES(1) pattern matching
+
+\begin{figure}
+\begin{mathpar}
+\inferrule*{}{\mj{\el}{\el}{\sigma}{\sigma}}
+\quad\TirName{\text{\sf END}}
+
+\inferrule
+  {m \in {\cal L} \cup \{\mrp\}\\
+    \mj{f}{p}{\sigma}{\sigma'}}
+  {\mj{\cons{m}{f}}{\cons{m}{p}}{\sigma}{\sigma'}}
+\,\TirName{\text{\sf ELIM}}
+
+\inferrule*[right=\text{\sf BIND}\(_1\)]
+  {t \in {\cal T} \and
+   m \in {\cal L} \cup \{\mrp\}\\
+    \mj{f}{p}{\sigma}{\sigma'} \and
+   \sigma' \subseteq \sigma' \oplus x \mapsto t}
+  {\mj{\cons{t, m}{f}}%
+      {\cons{\meta{x}, m}{p}}%
+      {\sigma}{\sigma' \oplus x \mapsto t}}
+
+\inferrule*[right=\text{\sf BIND}\(_2\)]
+  {t_1 \in {\cal T} \and
+    t_2 \in {\cal T}\\
+    \mj{\cons{t_2}{f}}{p}{\sigma}{\sigma'} \and
+    \sigma'\subseteq \sigma' \oplus x \mapsto t_1}
+  {\mj{\cons{t_1, t_2}{f}}%
+      {\cons{\meta{x}}{p}}%
+      {\sigma}{\sigma' \oplus x \mapsto t_1}}
+
+\inferrule*[right=\text{\sf BIND}\(_3\)]
+  {t \in {\cal T} \and
+    \sigma \subseteq \sigma \oplus x \mapsto t}
+  {\mj{[t]}{[\meta{x}]}{\sigma}{\sigma \oplus x \mapsto t}}
+
+\inferrule*[right=\text{\sf UNPAR}\(_1\)]
+{m \in {\cal L} \cup \{\meta{x} \mid x \in {\cal V}\}\\\\
+ \mj{\subterms{c} \cdot f}{\cons{m\!}{\!p}}{\sigma}{\sigma'}}
+{\mj{\cons{c(\subterms{c})\!}{\!f}}{\cons{m\!}{\!p}}{\sigma}{\sigma'}}
+
+\inferrule*[right=\text{\sf UNPAR}\(_2\)]
+{\mj{\subterms{c} \cdot \cons{\mrp\!}{\!f}}%
+    {p}%
+    {\sigma}{\sigma'}}
+{\mj{\cons{c(\subterms{c})\!}{\!f}}%
+    {\cons{\mlp\!}{\!p}}%
+    {\sigma}{\sigma'}
+}
+\end{mathpar}
+where we impose that the rules \textsf{BIND}\(_1\),
+\textsf{BIND}\(_2\) and \textsf{BIND}\(_3\) have priority over the
+rule \textsf{UNPAR}\(_1\).
+\caption{Pattern matching \textit{ES}(1).\label{es1_match_def}}
+\end{figure}
+
+
+
+\subsection{Fringe catenation}
+
+\paragraph{Fringe.}
+
+Let \(\phi\) be the function defined as
+\begin{align*}
+\fringe{\el} &\eqn{1} \el\\
+\fringe{\cons{t}{f}} &\eqn{2} \fringe{t} \cdot \fringe{f}
+\end{align*}
+
+\begin{lemma}[Fringe Catenation]
+\label{catenation}
+\[\fringe{f_1 \cdot f_2} = \fringe{f_1} \cdot \fringe{f_2}\]
+\end{lemma}
+\noindent In other words, the fringe of the catenation is the
+catenation of the fringes.
+
+\paragraph{Proof.} 
+
+Let \(\ind{Q}(f_1, f_2)\) be the proposition ``\(\fringe{f_1 \cdot
+  f_2} = \fringe{f_1} \cdot \fringe{f_2}\).'' We shall prove \(\forall
+f_1, f_2.\ind{Q}(f_1, f_2)\) by means of induction on the structure of
+\(f_1\), i.e., we shall prove
+\[
+\forall f_2.(\ind{Q}(\el, f_2) \wedge \forall f_1.(\ind{Q}(f_1, f_2)
+\Rightarrow \forall t.\ind{Q}(\cons{t}{f_1}, f_2)))
+\]
+The induction principle implies then \(\forall f_1, f_2.\ind{Q}(f_1,
+f_2)\).
+\begin{enumerate}
+
+  \item Case \(f_1 = \el\)\\ In this case, we must prove
+    \(\ind{Q}(\el, f_2)\) directly:
+    \begin{align*}
+      \fringe{\el \cdot f_2} 
+      &= \fringe{f_2} & \text{by} \,\; \eqref{model:conc:1}\\
+      &= \el \cdot \fringe{f_2} & \text{by} \,\;
+      \eqref{model:conc:1}\\
+      &\eqn{1} \fringe{\el} \cdot \fringe{f_2}
+    \end{align*}
+    This means that \(\ind{Q}(\el, f_2)\) holds.
+
+  \item Let us assume the induction hypothesis \(\ind{Q}(f_1,
+    f_2)\). We have, for all \(t\),
+    \begin{align*}
+      \fringe{\cons{t}{f_1} \cdot f_2}
+     &\eqn{2} \fringe{t} \cdot \fringe{f_1 \cdot f_2}\\
+     &= \fringe{t} \cdot (\fringe{f_1} \cdot \fringe{f_2})
+     & \text{by} \,\; \ind{Q}(f_1, f_2)\\
+     &= (\fringe{t} \cdot \fringe{f_1}) \cdot \fringe{f_2}
+     & \text{by} \,\; \text{\ref{assoc}}\\
+     &\eqn{2} \fringe{\cons{t}{f_1}} \cdot \fringe{f_2}
+    \end{align*}
+    which is equivalent to \(\ind{Q}(\cons{t}{f_1}, f_2)\). 
+\end{enumerate}
+The induction principle implies \(\forall f_1, f_2.\ind{Q}(f_1,
+f_2)\). \hfill \(\Box\)
+
+
+\subsection{Catenation associativity}
+
+\begin{lemma}[Catenation associativity]
+\label{assoc}
+\[
+f_1 \cdot (f_2 \cdot f_3) = (f_1 \cdot f_2) \cdot f_3
+\]
+\end{lemma}
+
+\paragraph{Proof.}
+
+Let \(\ind{A}(f_1, f_2, f_3)\) denote the proposition ``\(f_1 \cdot
+(f_2 \cdot f_3) = (f_1 \cdot f_2) \cdot f_3\).'' We shall prove
+\(\forall f_1, f_2, f_3.\ind{a}(f_1, f_2, f_3)\) by means of induction
+on the structure of \(f_1\), i.e., we shall prove, for all \(f_2\),
+\(f_3\),
+\[
+\ind{A}(\el, f_2, f_3) \wedge \forall f_1.(\ind{A}(f_1, f_2, f_3)
+\Rightarrow \forall t.(\ind{A}(\cons{t}{f_1}, f_2, f_3)))
+\]
+The induction principle implies then 
+\[
+\forall f_1, f_2, f_3.\ind{A}(f_1, f_2, f_3)
+\]
+\begin{enumerate}
+
+  \item Case \(f_1 = \el\).\\ In this case, we must prove
+    \(\ind{A}(\el, f_2, f_3)\) directly:
+    \begin{align*}
+      \el \cdot (f_2 \cdot f_3)
+      &= f_2 \cdot f_3
+      & \text{by} \,\; \eqref{model:conc:1}\\
+      &= (\el \cdot f_2) \cdot f_3
+      & \text{by} \,\; \eqref{model:conc:1}
+    \end{align*}
+    This is none other than \(\ind{A}(\el, f_2, f_3)\).
+
+  \item Let us now assume the induction hypothesis \(\ind{A}(f_1, f_2,
+    f_3)\). We have
+    \begin{align*}
+      \cons{t}{f_1} \cdot (f_2 \cdot f_3)
+      &= \cons{t}{f_1 \cdot (f_2 \cdot f_3)}
+      & \text{by} \,\; \eqref{model:conc:2}\\
+      &= \cons{t}{(f_1 \cdot f_2) \cdot f_3}
+      & \text{by} \,\; \ind{A}(f_1, f_2, f_3)\\
+      &= \cons{t}{f_1 \cdot f_2} \cdot f_3
+      & \text{by} \,\; \eqref{model:conc:2}\\
+      &= (\cons{t}{f_1} \cdot f_2) \cdot f_3
+      & \text{by} \,\; \eqref{model:conc:2}
+    \end{align*}
+    This is none other than \(\ind{A}(f_1, f_2, f_3)\).
+\end{enumerate}
+The induction principle implies \(\forall f_1, f_2, f_3.\ind{A}(f_1,
+f_2, f_3)\). \hfill \(\Box\)
+
+
+%% F(0)
+%
+\paragraph{Meta\hyp{}parsed patterns.}
+
+Given a pattern \(\overline{p}\), the first task is to check whether
+\(\overline{p} \in \overline{\cal P}\). It is achieved by the
+meta\hyp{}parsing function \textsf{parse}, which either fails due to
+mismatched meta\hyp{}parentheses or returns the initial pattern where
+all patterns enclosed in meta\hyp{}parentheses (included) have been
+replaced by a tree of patterns. These trees are not abstract syntax
+trees because they contain patterns, not code (thus the new patterns
+are still unparsed with respect to the programming language
+syntax). Let \(\unary{pat}\) be their unique constructor. Thus we have
+\(\unary{pat} \not\in {\cal C}\). Let us define the set of
+\emph{meta\hyp{}parsed patterns} as the smallest set \({\cal P}\) such
+that
+\begin{itemize}
+
+  \item \(\el \in {\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(p \in {\cal P}\) then
+    \(\cons{l}{p} \in {\cal P}\);
+
+  \item if \(x \in {\cal V}\) and \(p \in {\cal P}\) then
+    \(\cons{\meta{x}}{p} \in {\cal P}\);
+
+  \item if \(p_1, p_2 \in {\cal P}\) and \(p_1 \neq \el\) then
+    \(\cons{\pat{p_1}}{p_2} \in {\cal P}\).
+
+\end{itemize}
+\piccaption{\label{f0_pattern_tree}}
+\parpic[l]{\includegraphics[bb=71 671 128 721]{pattern_tree}} The
+meta\hyp{}parsing function \textsf{parse} is formally defined by means
+of an ordered rewrite system defining jointly two other functions,
+\textsf{shift} and \textsf{reduce}. See
+figure~\ref{f0_metaparsing}. Rule \((\xrightarrow{a})\) handles the
+empty pattern. Rule \((\xrightarrow{c})\) says that lexemes and
+meta\hyp{}variables are directly copied to the result in the same
+order as in the input. Rule \((\xrightarrow{b})\) handles an opening
+meta\hyp{}parenthesis: it is pushed into an auxiliary analysis stack
+passed as second argument to the call of function \textsf{shift}. The
+purpose of this function is to parse the input with the additional
+knowledge that an opening meta\hyp{}parenthesis was found when it was
+first called ---~in other words, the analysis is performed inside
+meta\hyp{}parentheses. Thus the goal is reached when this
+supplementary stack contains only one pattern tree, since it must
+correspond to a pair of meta\hyp{}parentheses at the top\hyp{}level in
+the input pattern. In this case, i.e., rule \((\xrightarrow{d})\), the
+pattern tree is copied to the output and the meta\hyp{}parsing is
+resumed at the top\hyp{}level with \textsf{parse}. Rule
+\((\xrightarrow{f})\) copies anything from the input pattern to the
+auxiliary stack, except closing meta\hyp{}parentheses because this
+case triggers a reduction in rule \((\xrightarrow{e})\). Indeed,
+finding \mrp means that the shortest prefix in the auxiliary stack
+ending with an opening meta\hyp{}parenthesis must be replaced by the
+corresponding pattern tree and then shifting is resumed (i.e.,
+meta\hyp{}parsing not at top\hyp{}level). Rule \((\xrightarrow{h})\)
+pops any item, except \mlp, from the auxiliary stack and pushes it to
+a temporary stack which contains the first\hyp{}level subtrees of the
+pattern tree under construction. If an opening meta\hyp{}parenthesis
+is reached, in rule \((\xrightarrow{g})\), it means that the shortest
+prefix to be reduced has been found, therefore a pattern tree of root
+\textsf{pat} is produced on top of the remaining auxiliary stack. Note
+that rule \((\xrightarrow{g})\) do not build a pattern tree without
+subtrees: the sequence \verb|%(%)| is a meta\hyp{}syntax error. As
+usual with rewrite systems, errors are not specified: a
+meta\hyp{}parsing error occurs if a term is reached and it cannot be
+rewritten further. The reader can check that the unparsed pattern
+\[
+[l_1, \mlp, l_2, l_3, \mlp, \meta{x}, l_4, \mrp, \mrp]
+\]
+is meta\hyp{}parsed into the pattern
+\[
+[l_1, \pat{[l_2, l_3, \pat{[\meta{x}, l_4]}]}]
+\]
+which contains the pattern tree shown in
+figure~\ref{f0_pattern_tree}.
+\begin{figure}
+\begin{align*}
+  \cstr{parse}{\el, \el}
+&\xrightarrow{a} \el\\
+  \cstr{parse}{\cons{\lpar}{\overline{p}}, \cons{c(f_1)}{f_2}}
+&\xrightarrow{b} \cstr{shift}{\overline{p}, [\rpar], f_1 \cdot
+    \cons{\lpar}{f_2}}\\
+  \cstr{parse}{\cons{e}{\overline{p}}}
+&\xrightarrow{c} \cons{e}{\cstr{parse}{\overline{p}}}\\
+  \cstr{shift}{\overline{p}, [\pat{p}]}
+&\xrightarrow{d} \cons{\pat{p}}{\cstr{parse}{\overline{p}}}\\
+  \cstr{shift}{\cons{\mrp}{\overline{p}}, p}
+&\xrightarrow{e} \cstr{shift}{\overline{p}, \cstr{reduce}{p, \el}}\\
+  \cstr{shift}{\cons{e}{\overline{p}}, p}
+&\xrightarrow{f} \cstr{shift}{\overline{p}, \cons{e}{p}}\\
+  \cstr{reduce}{\cons{\mlp}{p_1}, \cons{e}{p_2}}
+&\xrightarrow{g} \cons{\pat{\cons{e}{p_2}}}{p_1}\\
+  \cstr{reduce}{\cons{e}{p_1}, p_2}
+&\xrightarrow{h} \cstr{reduce}{p_1, \cons{e}{p_2}}
+\end{align*}
+\caption{Meta\hyp{}parsing of patterns in
+  \textit{F}(0).\label{f0_metaparsing}}
+\end{figure}
+
+
+Let us prove \(\ind{W}\) by lexicographic induction on the
+pair made of the forest and the pattern. Let us first define the order
+on \((p,f)\) as follows. The \emph{size} of a tree is the number of
+nodes it contains, and the size of a forest is the number of nodes all
+its trees contain:
+\begin{align*}\label{size_def}
+N(\el) &= 0\\
+N(\cons{t}{f}) &= N(t) + N(f)
+  && \text{if} \;\, t \in {\cal T}\\
+N(c(s)) &= 1 + N(s)
+ && \text{if} \;\, c \in {\cal C}\\
+N(l) &= 0 
+ && \text{if} \;\, l \in {\cal L}
+\end{align*}
+The \emph{length} \(\len{p}\) of a pattern \(p\) is defined simply as
+\begin{align*}
+   \len{\el} &= 0\\
+   \len{\cons{e}{p}} &= 1 + \len{p}
+\end{align*}
+These functions allow us to partially order our pairs with
+\((\prec)\). By definition, \((p_1, f_1) \prec (p_2, f_2)\) if and
+only if \(N(f_1) < N(f_2)\) or \(N(f_1) = N(f_2)\) and \(\len{p_1} <
+\len{p_2}\). This order is actually noetherian, i.e., for any pair
+\((p, f)\), there are no infinite descending chains. Informally:
+\[
+\neg\exists p, f.(\dots \prec \dots \prec \dots \prec (p, f)).
+\]
+We even have a stronger property: there exists a minimum element for
+the partial order, which is \((\el, \el)\). So \(\langle{\cal F}
+\times {\cal P}, \prec\rangle\) is a meet\hyp{}semilattice, that is,
+all the descending chains are finite and can be extended to reach the
+same minimal element. Informally:
+\[
+\forall p, f.((\el, \el) \prec \dots \prec \dots \prec (p, f)).
+\]
+Our strategy is then to prove that, for all \(\pi\), \(\sigma\),
+\(\sigma'\),
+\begin{gather*}
+(\forall \pi'.(\pi' \prec \pi \Rightarrow \ind{W}(\pi', \sigma,
+  \sigma'))) \Rightarrow \ind{W}(\pi, \sigma, \sigma')
+\end{gather*}
+In other words, let us prove directly that \(\ind{W}\) holds for the
+minimum forest, i.e., \(\ind{W}((\el, \el), \sigma, \sigma')\) is
+true, then, assuming that \(\ind{W}(\pi', \sigma, \sigma')\) holds for
+any \(\pi'\) such that \(\pi' \prec \pi\) (the \emph{induction
+  hypothesis}), we shall establish that \(\ind{W}(\pi, \sigma,
+\sigma')\) holds too. The induction principle implies then that
+\(\forall \pi, \sigma, \sigma'.\ind{W}(\pi, \sigma, \sigma')\) holds.
+\begin{enumerate}
+
+  \item \(\pi = (\el, \el)\).\\ We have
+    \begin{align}
+      \subst{\el}{\sigma}
+      &\eqn{1} \el\notag\\
+      &\sqsubseteq \el
+      &\text{by} \,\; \textsf{EMP}\notag\\
+      &= f \label{x:compl:0}
+    \end{align}
+    Let us prove that there exists a substitution \(\sigma'\) such
+    that \(\smj{\el}{\el}{\sigma'}\) and \(\sigma' \subseteq
+    \sigma\). An examination of the inference rules shows that the
+    only rule whose conclusion matches the previous configuration is
+    \textsf{END}. Therefore
+    \begin{equation}
+      \smj{\el}{\el}{\sigma_\varnothing} \label{x:compl:1}
+    \end{equation}
+    that is to say, \(\sigma' = \sigma_\varnothing\). The definition
+    \eqref{model:incl} of the inclusion of substitutions implies that,
+    for all \(\sigma\),
+    \begin{equation}
+      \sigma_\varnothing \subseteq \sigma \quad \text{since}\,\;
+      \dom{\sigma_\varnothing} = \varnothing \label{x:compl:2}
+    \end{equation}
+    As a conclusion, \eqref{x:compl:0}, \eqref{x:compl:1} and
+    \eqref{x:compl:2} imply \(\ind{W}((\el, \el), \sigma, \sigma')\).
+
+  \item \(\pi \neq (\el, \el)\).\\ The induction hypothesis being
+    \begin{equation}
+      \forall \pi'.(\pi' \prec \pi \Rightarrow \ind{W}(\pi', \sigma,
+      \sigma')) \label{x:compl:ind}
+    \end{equation}
+    we must prove that \(\ind{Q}(\pi, \sigma, \sigma')\) holds. A
+    quick examination of the configurations in the inference rules
+    defining \((\twoheadrightarrow)\) shows that both the forest and
+    the pattern must be non-empty --- otherwise, \(\ind{Q}(\pi,
+    \sigma, \sigma')\) cannot hold. Let us assume now that the
+    following relation holds:
+    \begin{equation}
+      \subst{p}{\sigma} \sqsubseteq f \label{x:compl:hypo}
+    \end{equation}
+    (otherwise the theorem is trivially true) and prove
+    \begin{gather*}
+    \smj{f}{p}{\sigma'} \;\, \text{and} \;\, \sigma' \subseteq \sigma.
+    \end{gather*}
+    Since \(f\) is not empty, it is of the form
+    \begin{gather}
+      f = \cons{t}{f'} \label{x:compl:8}
+    \end{gather}
+    We proceed case by case on the kinds of \(p\) and \(t\).
+    \begin{enumerate}
+
+      %\(t = l_1 \in {\cal L}\)
+      \item \label{x:compl:case:1} \(p = \cons{l}{p'}\) where \(l \in
+        {\cal L}\).\\ Since \(N(f) = N(t) + N(f') < N(f')\), we have
+        \((p', f') \prec (p, f)\), therefore the induction hypothesis
+        \eqref{x:compl:ind} applies to \((p', f')\) and implies that
+        \(\ind{Q}((p', f'), \sigma, \sigma')\) holds, i.e.,
+        \begin{gather}
+          \smj{f'}{p'}{\sigma'} \label{x:compl:4}\\
+          \sigma' \subseteq \sigma \label{x:compl:5}
+        \end{gather}
+        Furthermore,
+        \begin{align}
+              \fringe{f} 
+           &= \fringe{l_1} \cdot \fringe{f'}\notag\\ 
+           &\eqn{3} [l_1] \cdot \fringe{f'}\notag\\
+           &= \cons{l_1}{\el \cdot \fringe{f'}}
+           & \text{by} \,\; \eqref{model:conc:2}\notag\\
+           &= \cons{l_1}{\fringe{f'}}
+           & \text{by} \,\; \eqref{model:conc:1}\notag
+           \intertext{Furthermore,}
+             \subst{p}{\sigma}
+           &= \subst{\cons{l_2}{p'}}{\sigma}\notag\\
+           &\eqn{7} \cons{l_2}{\subst{p'}{\sigma}}\notag
+           \intertext{So, equality \eqref{x:compl:hypo} implies then}
+           l_1 &= l_2 = l \label{x:compl:6}\\
+             \fringe{f'}
+           &= \subst{p'}{\sigma} \label{x:compl:3}
+        \end{align}
+        Then, \eqref{x:compl:6}, \eqref{x:compl:4} and inference
+        rule \textsf{ELIM} imply
+        \begin{gather}
+          \mj{\cons{l}{f'}}{\cons{l}{p'}}{\sigma_0}{\sigma'}\notag
+          \intertext{which is equivalent to}
+          \mj{f}{p}{\sigma_0}{\sigma'} \label{x:compl:7}
+        \end{gather}
+        Finally, \eqref{x:compl:hypo}, \eqref{x:compl:7} and
+        \eqref{x:compl:5} imply that \(\ind{Q}((f, p), \sigma,
+        \sigma_0, \sigma')\) holds.
+
+      \item \(t = l \in {\cal L}\) and \(p =
+        \cons{\meta{x}}{p'}\).\\ Following the same deductions
+        as in case \ref{x:compl:case:1}, we draw
+        \begin{align*}
+          \fringe{f} &= \cons{l}{\fringe{f'}}
+          \intertext{Furthermore,}
+          \subst{p}{\sigma} &= \subst{\cons{\meta{x}}{p'}}{\sigma}\\
+            &\eqn{6} \fringe{\sigma(x)} \cdot \subst{p'}{\sigma}
+        \end{align*}
+
+
+      \item \(t = c(\subterms{})\).
+
+    \end{enumerate}
+
+\end{enumerate}
+
+Let us prove this proposition by general
+induction on the size of the forest \(f\). The \emph{size} of a tree
+is the number of nodes it contains, and the size of a forest is the
+number of nodes all its trees contain:
+\begin{align*}\label{size_def}
+N(\el) &= 0\\
+N(\cons{t}{f}) &= N(t) + N(f)
+  && \text{if} \;\, t \in {\cal T}\\
+N(c(s)) &= 1 + N(s)
+ && \text{if} \;\, c \in {\cal C}\\
+N(l) &= 0 
+ && \text{if} \;\, l \in {\cal L}
+\end{align*}
+The size allows us to partially order forests with `\(\prec\)':
+\[
+f_1 \prec f_2 \Longleftrightarrow N(f_1) < N(f_2)
+\]
+This order is actually noetherian, i.e., for all forest \(f\), there
+are no infinite descending chains
+\[
+\dots \prec \dots \prec \dots \prec f
+\]
+We even have a stronger property: there exists a minimum element for
+the partial order: the empty forest. So \(\langle{\cal F},
+\prec\rangle\) is a meet-semilattice (that is, all the descending
+chains are finite and can be extended to reach the same minimal
+element). Our strategy is then to prove that, for all \(f\), \(p\),
+\(\sigma\), \(\sigma'\),
+\[
+(\forall f'.(f' \prec f \Rightarrow \ind{W}(f', p,\sigma, \sigma')))
+\Rightarrow \ind{W}(f, p, \sigma, \sigma')
+\]
+In other words, let us prove directly that \(\ind{W}\) holds for the
+minimum forest, i.e., \(\ind{W}(\el, p, \sigma, \sigma')\) is true, then,
+assuming that \(\ind{W}(f', p, \sigma, \sigma')\) holds for any \(f'\)
+such that \(f' \prec f\) (the \emph{induction hypothesis}), we shall
+establish that \(\ind{W}(f, p, \sigma, \sigma')\) holds too. The induction
+principle implies then that \(\forall f, p, \sigma, \sigma'.\ind{W}(f, p,
+\sigma, \sigma')\) holds, which, in turn, implies the completeness
+theorem.
+  \item \(f = \el\).\\ Let us assume
+    \begin{equation}
+      \fringe{\el} = \subst{p}{\sigma} \label{x:compl:0}
+    \end{equation}
+    and prove that there exists a substitution \(\sigma'\) such that
+    \(\mj{\el}{p}{\sigma_0}{\sigma'}\) and \(\sigma' \subseteq \sigma\). We
+    have \(\el \eqn{1} \fringe{\el} = \subst{p}{\sigma}\). Since the
+    empty pattern can only be the result of a substitution on the
+    empty pattern (cf. \(\eqn{5}\)), we deduce that \(p =
+    \el\). Therefore \(\match{\el}{p}{\sigma_0} =
+    \match{\el}{\el}{\sigma_0}\). Besides, an examination of the
+    inference rules shows that the only rule whose conclusion matches
+    the previous configuration is \textsf{END}. Therefore
+    \begin{equation}
+      \mj{\el}{\el}{\sigma_0}{\sigma_0} \label{x:compl:1}
+    \end{equation}
+    that is to say, \(\sigma' = \sigma_0\). The definition
+    \eqref{model:incl} of the inclusion of  substitutions implies,
+    for all \(\sigma\), 
+    \begin{equation}
+      \sigma_0 \subseteq \sigma \quad \text{since}\,\;
+      \dom{\sigma_0} = \varnothing \label{x:compl:2}
+    \end{equation}
+    As a conclusion, \eqref{x:compl:0}, \eqref{x:compl:1} and
+    \eqref{x:compl:2} imply \(\ind{W}(\el, p, \sigma, \sigma')\).
+
+  \item \(f \neq \el\).\\ The induction hypothesis being
+   \begin{equation}
+     \forall f'.(f'\prec f \Rightarrow \ind{W}(f', p, \sigma, \sigma'))
+   \end{equation}
+   we must prove that \(\ind{Q}(f, p, \sigma, \sigma')\) holds. Let us
+   then assume further that the following equality holds:
+   \begin{equation}
+     \fringe{f} = \subst{p}{\sigma} \label{x:compl:hypo}
+   \end{equation}
+   (otherwise the theorem is trivially true) and prove
+   \[
+     \mj{f}{p}{\sigma_0}{\sigma'} \;\, \text{and} \;\, \sigma' \subseteq
+     \sigma.
+   \]
+   Since \(f\) is not empty, it is of the form \(f =
+   \cons{t}{f'}\). We shall proceed case by case on the kind of \(t\).
+   \begin{align*}
+        \fringe{f} 
+     &= \fringe{\cons{t}{f'}}\\
+     &\eqn{2} \fringe{t} \cdot \fringe{f'}
+   \end{align*}
+
+
+% x_determinacy.tex
+
+We proceed firstly case by case on the shape of the
+pattern and, secondly, on the kind of rule that may end the
+derivations.
+
+  \item Case \(p = \el\).\\ Then, compulsorily, the derivation
+    \(\Delta\) simply corresponds to an instance of the rule
+    \textsf{END}, thus \(f = \el\) and \(\sigma = \sigma_0\). The same
+    is true about \(\Delta'\), and \(\sigma' = \sigma_0\). As a
+    consequence, \(\sigma = \sigma'\), that is to say, \(\ind{S}(\el,
+    f, \sigma, \sigma')\) holds.
+
+  \item Case \(p = \cons{l}{p'}\), where \(l \in {\cal L}\).\\ Only
+    two inference rules can contain \(\smat{f}{\cons{l}{p'}}\), where
+    \(l \in {\cal L}\), in the conclusion: \textsf{ELIM} and
+    \textsf{UNPAR}. Consequently, let us consider the four cases that
+    this induces for the derivations \(\Delta\) and \(\Delta'\).
+    \begin{enumerate}
+
+      \item Case where \(\Delta\) and \(\Delta'\) end by
+        \textsf{ELIM}.
+        \begin{mathpar}
+          \inferrule[\text{\sf ELIM}]
+            {\inferrule
+               {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+               {\smj{f'}{p'}{\sigma}}}
+            {\smj{\cons{l}{\!f'}}{\cons{l}{p'}}{\sigma}}
+          \,
+          \inferrule[\text{\sf ELIM}]
+            {\inferrule
+               {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+               {\smj{f'}{p'}{\sigma'}}}
+            {\smj{\cons{l}{\!f'}}{\cons{l}{p'}}{\sigma'}}
+        \end{mathpar}
+        where, since we assumed \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'},
+        \begin{enumerate}
+
+          \item \label{x:deter:1} \(l \in {\cal L}\),
+
+          \item \label{x:deter:3} \(p \triangleq \cons{l}{p'}\),
+
+          \item \label{x:deter:2} \(f \triangleq \cons{l}{f'}\).
+
+        \end{enumerate}
+        Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+        \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+        assume that the induction hypothesis holds for their
+        conclusions, i.e., \(\ind{S}(p', f', \sigma, \sigma')\)
+        holds. Therefore
+        \begin{equation}
+          \sigma = \sigma' \label{x:deter:4}
+        \end{equation}
+        Finally, the induction hypothesis, \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'} imply \eqref{x:deter:4}, i.e.,
+        \(\ind{S}(\cons{l}{p'}, \cons{l}{f'}, \sigma, \sigma')\).
+
+      \item \label{elim_unpar_bis} Case where \(\Delta\) ends by
+        \textsf{ELIM} and \(\Delta'\) ends by \textsf{UNPAR}.\\ This
+        case is impossible because this implies
+        \begin{enumerate}
+
+          \item \(f = \cons{l}{f_2}\) where \(l \in {\cal L}\) (from
+            \textsf{ELIM}),
+
+          \item \(f = \cons{c(f_1)}{f_2}\) (from \textsf{UNPAR}).
+
+        \end{enumerate}
+        and \(l \neq c(f_1)\) by definition of the lexemes as trees of
+        height \(0\) (\(c(f_1)\) is at least of height \(1\)).
+
+      \item Case where \(\Delta\) ends by \textsf{UNPAR} and
+        \(\Delta'\) ends by \textsf{ELIM}.\\ This case is the
+        symmetric of~(\ref{elim_unpar_bis}).
+
+      \item \label{unpar2_bis} Case where both \(\Delta\) and
+        \(\Delta'\) end by \textsf{UNPAR}.
+        \begin{mathpar}
+          \inferrule[\text{\sf UNPAR}]        
+            {\inferrule
+              {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+              {\smj{f_1 \!\cdot\! f_2}{p}{\sigma}}}
+            {\smj{\cons{c(f_1)\!}{\!f_2}}{p}{\sigma}}
+          \;
+          \inferrule[\text{\sf UNPAR}]        
+            {\inferrule
+              {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+              {\smj{f_1 \!\cdot\! f_2}{p}{\sigma'}}}
+            {\smj{\cons{c(f_1)\!}{\!f_2}}{p}{\sigma'}}
+        \end{mathpar}
+        where, since we assumed \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'},
+        \begin{enumerate}
+
+          \item \label{x:deter:5} \(f \triangleq
+            \cons{c(f_1)}{f_2}\).
+
+        \end{enumerate}
+        Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+        \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+        assume that the induction hypothesis holds for their
+        conclusions, that is, \(\ind{S}(p, f_1 \cdot f_2, \sigma,
+        \sigma')\) holds:
+        \begin{equation}
+          \sigma = \sigma' \label{x:deter:6}
+        \end{equation}
+        Finally, the induction hypothesis, \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'} imply \eqref{x:deter:6}, i.e.,
+        \(\ind{S}(p, \cons{c(f_1)}{f_2}, \sigma, \sigma')\).
+
+   \end{enumerate}   
+
+  \item Case where \(p = \cons{\meta{x}}{p'}\).\\ Only two inference
+    rules can contain the configuration
+    \(\smat{f}{\cons{\meta{x}}{p'}}\) as a conclusion: \textsf{UNPAR}
+    and \textsf{BIND}. Let us consider all the four possibilities.
+    \begin{enumerate}
+
+      \item Case where both \(\Delta\) and \(\Delta'\) end by
+        \textsf{UNPAR}.\\ This case is equivalent
+        to~(\ref{unpar2_bis}), because the kind of pattern is
+        irrelevant here.
+
+      \item Case where \(\Delta\) ends by \textsf{BIND} and
+        \(\Delta'\) ends by \textsf{UNPAR}.\\ This case is the
+        symmetric of~(\ref{bind_unpar_bis}). 
+
+      \item Case where \(\Delta\) and \(\Delta'\) both end by
+        \textsf{BIND}.
+        \begin{mathpar}
+          \inferrule[\text{\sf BIND}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+               {\smj{f'}{p'}{\sigma_1}}\\
+             \sigma_1 \subseteq \sigma_1 \oplus x \mapsto t
+            }
+            {\smj{\cons{t}{f'}}%
+                {\cons{\meta{x}}{p'}}%
+                {\sigma_1 \oplus x \mapsto t}}
+
+          \inferrule[\text{\sf BIND}]
+            {\inferrule*
+                {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+                {\smj{f'}{p'}{\sigma_2}}\\
+             \sigma_2 \subseteq \sigma_2 \oplus x \mapsto t}
+            {\smj{\cons{t}{f'}}%
+                {\cons{\meta{x}}{p'}}%
+                {\sigma_2 \oplus x \mapsto t}}
+        \end{mathpar}
+        where, since we assumed \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'},
+        \begin{enumerate}
+
+          \item \label{x:deter:8} \(p \triangleq
+            \cons{\meta{x}}{p'}\),
+
+          \item \label{x:deter:7} \(f \triangleq \cons{t}{f'}\),
+            with \(t \in {\cal T}\),
+
+          \item \label{x:deter:9} \(\sigma \triangleq \sigma_1 \oplus x
+            \mapsto t\),
+
+          \item \label{x:deter:10} \(\sigma' \triangleq \sigma_2 \oplus
+            x \mapsto t\).
+
+        \end{enumerate}
+        Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+        \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+        assume that the induction hypothesis holds for their
+        conclusions, i.e., \(\ind{S}(p', f', \sigma_1,
+        \sigma_2)\). Therefore
+        \begin{align}
+          \sigma_1 &= \sigma_2\notag\\
+          \sigma_1 \oplus x \mapsto t 
+          &= \sigma_2 \oplus x \mapsto t\notag\\
+          \sigma
+          &= \sigma'
+          &\text{by} \,\; \text{\ref{x:deter:9}} \,\; \text{and} \,\;
+          \text{\ref{x:deter:10}} \label{x:deter:12}
+        \end{align}
+        Finally, the induction hypothesis, \eqref{x:deter:delta} and
+        \eqref{x:deter:delta'} imply \eqref{x:deter:12}, i.e.,
+        \(\ind{S}(\cons{\meta{x}}{p'}, f, \sigma, \sigma')\).
+
+
+
+% x_soundness.tex
+
+We proceed firstly
+case by case on the shape of the pattern and, secondly, on the kind of
+rule that may end the derivation.
+
+\begin{enumerate}
+
+  \item Case \(p = \el\).\\ Because the inference system is ordered,
+    the derivation \(\Delta\) must correspond to an instance of the
+    axiom \textsf{END}, and not of the rule \textsf{UNPAR}. Therefore
+    we deduce that \(f = \el\), which leads to
+    \begin{gather*}
+    \subst{p}{\sigma} = \subst{\el}{\sigma} \eqn{1} \el \sqsubseteq
+    \el = f
+    \end{gather*} 
+    We conclude that \(\ind{R}(\el, f, \sigma)\) holds.
+
+ \item Case \(p = \cons{l}{p'}\), where \(l \in {\cal L}\).\\ Only two
+   inference rules can have \(\smj{f}{\cons{l}{p'}}{\sigma}\), with
+   \(l \in {\cal L}\), in the conclusion: \textsf{ELIM} and
+   \textsf{UNPAR}. Let us consider all the possible derivations
+   \(\Delta\).
+   \begin{enumerate}
+
+     \item Case where \(\Delta\) ends with \textsf{ELIM}.
+        \begin{mathpar}
+          \inferrule*[right=\text{\sf ELIM}]
+            {l \in {\cal L}\\
+             \inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\smj{f'}{p'}{\sigma}}
+            }
+            {\smj{\cons{l}{f'}}{\cons{l}{p'}}{\sigma}}
+       \end{mathpar}
+       where, since we assumed \eqref{x:sound:head},
+       \begin{enumerate}
+          
+         \item \label{x:sound:13} \(f \triangleq \cons{l}{f'}\),
+
+         \item \label{x:sound:14} \(p \triangleq \cons{l}{p'}\).
+
+       \end{enumerate}
+       Let us assume that the induction hypothesis holds for the
+       premise of \textsf{ELIM}, i.e., \(\ind{R}(p', f', \sigma)\)
+       holds. Therefore
+       \begin{gather}
+         \subst{p'}{\sigma} \sqsubseteq f' \label{x:sound:2}
+       \end{gather}
+        Besides, we have
+        \begin{align}
+          \subst{p}{\sigma}
+          &= \subst{\cons{l}{p'}}\notag
+          & \text{by} \,\; \text{\ref{x:sound:14}}\\
+          &\eqn{3} \cons{l}{\subst{p'}{\sigma}}\notag\\
+          &\sqsubseteq \cons{l}{f'}
+          &\text{by} \,\; \eqref{x:sound:2} \,\; \text{and} \,\;
+          \textsf{EQ}\notag\\
+          &= f
+          & \text{by} \,\; \text{\ref{x:sound:13}}\notag\\
+            \subst{p}{\sigma}
+          &\sqsubseteq f \label{x:sound:5}
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:sound:head} imply \eqref{x:sound:5}, so
+        \(\ind{R}(\cons{l}{p'}, f, \sigma)\) holds.
+
+     \item \label{unpar} Case where \(\Delta\) ends with
+       \textsf{UNPAR}.
+       \begin{mathpar}
+         \inferrule*[right=\text{\sf UNPAR}]
+           {\inferrule*
+              {\inferrule*[vdots=1.5em]{}{ }}
+              {\smj{f_1 \cdot f_2}{p}{\sigma}}}
+           {\smj{\cons{c(f_1)}{f_2}}{p}{\sigma}}
+       \end{mathpar}
+       where, since we assumed \eqref{x:sound:head},
+       \begin{enumerate}
+
+         \item \label{x:sound:15} \(f = \cons{c(f_1)}{f_2}\).
+       
+       \end{enumerate}
+       Let us assume that the induction hypothesis holds for the
+       premise of \textsf{UNPAR}, i.e., \(\ind{R}(p, f_1 \cdot f_2,
+       \sigma)\) holds. Then
+       \begin{gather}
+         \subst{p}{\sigma} \sqsubseteq f_1 \cdot f_2 \label{x:sound:4}
+       \end{gather}
+        Matching \eqref{x:sound:4} and inference rule \textsf{SUB}
+        imply
+        \begin{align}
+          \subst{p}{\sigma} &\sqsubseteq
+          \cons{c(f_1)}{f_2}\notag\\
+           &= f
+           &\text{by} \,\; \text{\ref{x:sound:15}}\notag\\
+            \subst{p}{\sigma}
+           & \sqsubseteq f \label{x:sound:I}
+        \end{align}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:sound:head} imply \eqref{x:sound:I}, so
+        \(\ind{R}(\cons{l}{p'}, f, \sigma)\) holds in this case
+        too. (Note that the structure of the pattern \(p\) is
+        irrelevant here.)
+
+   \end{enumerate}
+
+   \item Case \(p = \cons{\meta{x}}{p'}\).\\ Only two inference rules
+     can have the configuration \(\smat{f}{\cons{\meta{x}}{p'}}\) in
+     the conclusion: \textsf{UNPAR} and \textsf{BIND}. Let us consider
+     all the possible derivations.
+     \begin{enumerate}
+
+        \item Case where \(\Delta\) ends with \textsf{UNPAR}.\\ This
+          case is the same as case~(\ref{unpar}). 
+
+        \item Case where \(\Delta\) ends with \textsf{BIND}.
+        \begin{mathpar}
+          \inferrule*[right=\text{\sf BIND}]
+            {t \in {\cal T}\\
+              \inferrule*
+                {\inferrule*[vdots=1.5em]{}{ }}
+                {\smj{f'}{p'}{\sigma'}}}
+            {\smj{\cons{t}{\!f'}}%
+                {\cons{\meta{x}\!}{\!p'}}%
+                {\sigma' \oplus x \mapsto t}}
+        \end{mathpar}
+        where, because we assumed \eqref{x:sound:head},
+        \begin{enumerate}
+
+          \item \label{x:sound:17} \(f \triangleq \cons{t}{f'}\), where
+            \(t \in {\cal T}\),
+
+          \item \label{x:sound:18} \(p \triangleq
+            \cons{\meta{x}}{p'}\),
+
+          \item \label{bind_x} \(\sigma' \subseteq \sigma' \oplus x
+            \mapsto t\),
+
+            \item \label{bind_rho} \(\sigma \triangleq \sigma' \oplus
+              x \mapsto t\).
+
+        \end{enumerate}
+        Let us assume that the induction hypothesis holds for the
+        premise of \textsf{BIND}, i.e., \(\ind{R}(p', f', \sigma')\)
+        holds. Therefore
+        \begin{gather}
+          \subst{p'}{\sigma'} \sqsubseteq f' \label{x:sound:7}
+        \end{gather}
+        We also have
+        \begin{align}
+           \sigma(x) 
+          &\triangleq (\sigma' \oplus x \mapsto t)(x)
+          &\text{by} \,\; \text{\ref{bind_rho}}\notag\\
+          &= t
+          &\text{by} \,\; \eqref{model:oplus}\notag\\
+           \sigma(x)
+          &= t \label{x:sound:8}
+           \intertext{and}
+           \subst{p'}{\sigma'}
+           &= \subst{p'}{(\sigma' \oplus x \mapsto t)}
+           &\text{by} \,\; \text{\ref{bind_x}} \,\; \text{and} \,\;
+           \text{\ref{minimality}}\notag\\
+           \subst{p'}{\sigma'}
+           &= \subst{p'}{\sigma}
+           &\text{by} \,\; \text{\ref{bind_rho}} \label{x:sound:19}
+        \end{align}
+        Besides, we have
+        \begin{align}
+           \subst{p}{\sigma}
+        &\triangleq \subst{\cons{\meta{x}}{p'}}{\sigma}
+        &\text{by} \,\; \text{\ref{x:sound:18}}\notag\\
+        &\eqn{2} \cons{\sigma(x)}{\subst{p'}{\sigma}}\notag\\
+        &= \cons{t}{\subst{p'}{\sigma}}
+        &\text{by} \,\; \eqref{x:sound:8}\notag\\
+        &= \cons{t}{\subst{p'}{\sigma'}}
+        &\text{by} \,\; \eqref{x:sound:19}\notag\\
+        &\sqsubseteq \cons{t}{f'}
+        &\text{by} \,\; \eqref{x:sound:7} \,\; \text{and} \,\;
+           \textsf{EQ}\notag\\
+        &\triangleq f
+        &\text{by} \,\; \text{\ref{x:sound:17}}\notag\\
+           \subst{p}{\sigma}
+        &\sqsubseteq f \label{x:sound:9}
+        \end{align}
+        In the end, the induction hypothesis and \eqref{x:sound:head}
+        imply \eqref{x:sound:9}, so \(\ind{R}(\cons{\meta{x}}{p'}, f,
+        \sigma)\) holds. \hfill \(\Box\)
+     \end{enumerate}
+
+\end{enumerate}
+
+

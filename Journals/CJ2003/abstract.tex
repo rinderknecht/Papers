@@ -1,0 +1,28 @@
+%%-*-latex-*-
+
+\abstract{\emph{Abstract Syntax Notation One} (\ASN) is a standard
+  language for defining data types whose values may be exchanged
+  across a network between two communicating applications,
+  independently from the possible heterogeneity of the peers. \ASN has
+  been adopted by a wide range of applications, such as network
+  management, secure email, mobile telephony, voice over IP etc. It
+  offers a very involved subtyping paradigm consisting of constraints
+  upon recursive types, which restrict their sets of values in a
+  set-theoretic manner or in a structural way. Because of this great
+  expressiveness, most \ASN compilers are not likely to fully check
+  arbitrary combinations of subtyping constraints. We propose to fully
+  validate the \mbox{X.680} specifications, i.e., the main part of
+  \ASN, by means of an algorithm which relies on the set constraints
+  theory. Set constraints are inclusions between expressions
+  interpreted over the domain of sets of trees which may be
+  recursively defined. We define a system of constraints which can
+  model all the specifications, we provide a complete collecting
+  algorithm which extracts such constraints from a given
+  specification, and, finally, we give a solving procedure which
+  relies upon an algorithm of Aiken and Wimmers. As a result, either
+  the constraints have no solutions (and the specification must be
+  rejected), or the value sets can be finitely represented. It is
+  straightforward to determine whether these value sets are empty; if
+  they are empty then the specification is rejected. This article
+  addresses both the network tool implementors and the theorist
+  audience.}

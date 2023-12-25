@@ -1,0 +1,107 @@
+\section{Analysis of Algorithms}
+
+The branch of theoretical computer science devoted to the mathematical
+study of the efficiency of programs has been pioneered by Donald
+Knuth, who named it \emph{analysis of
+  algorithms}~\cite{Knuth:1997,Knuth:2000,SedgewickFlajolet:1996}. Given
+a function definition, this approach consists basically in three
+steps: defining a measure on the arguments, which represents their
+size; defining a measure on time, which abstracts the wall\hyp{}clock
+time; expressing the abstract time needed to compute calls to that
+function in terms of the size of its arguments. This function models
+the efficiency and is called the \emph{cost} (the lower the cost, the
+higher the efficiency). For example, when sorting objects, also called
+keys, by comparing them, the input size is the number of keys and the
+abstract unit of time is often one comparison, so the cost is the
+mathematical function which associates the number of objects and the
+number of comparisons to sort them. Of course, the cost varies
+depending on the algorithm and it also often depends on the original
+partial ordering of the keys, so, for a given procedure, the size does
+not capture all the aspects needed to assess efficiency. This quite
+naturally leads to consider bounds on the cost: for a given input
+size, the \emph{minimum cost} is the cost of the configurations
+leading to the smallest possible cost, or \emph{best case}; the
+\emph{maximum cost} corresponds to the \emph{worst case}. For example,
+some sorting algorithms have their worst case when the objects are
+already sorted, others when they are sorted in reverse order.
+
+Once we obtain bounds on a cost, the question about the \emph{average}
+or \emph{mean cost}~\cite[\S{}1.2.10]{VitterFlajolet:1990,Knuth:1997}
+arises as well. It is computed by taking the arithmetic mean of the
+costs for all possible inputs of a given size. Some care is necessary,
+as there must be a finite number of such inputs. For instance, to
+assess the mean cost of sorting algorithms based on comparisons, it is
+usual to assume that the input is a series of \(n\) distinct keys and
+that the sum of the costs is taken over all its permutations and
+divided by \(n!\), the total number of permutations. The uniqueness
+constraints actually allows the analysis to equivalently, and more
+simply, consider the permutations of \((1,2,\dots,n)\). Some sorting
+algorithms, like
+\emph{merge sort}~\cite[\S{}5.2.4]{Knuth:1998}~\cite[\S{}2.3]{CLRS:2009} or 
+\emph{insertion sort}~\cite[\S{}5.2.1]{Knuth:1998}~\cite[\S{}2.1]{CLRS:2009}, 
+have their average cost \emph{asymptotically equivalent} to their
+maximum cost, that is, for increasingly large numbers of keys, the
+ratio of the two costs become arbitrarily close to \(1\). Some others,
+like \emph{Hoare's sort}, also known
+as \emph{quicksort}~\cite[\S{}5.2.2]{Knuth:1998}~\cite[\S{}7]{CLRS:2009},
+have the growth rate of their average cost being of a lower magnitude
+than the maximum, on an asymptotic
+scale~\cite[\S{}9]{GrahamKnuthPatashnik:1994}.
+
+Sorting algorithms can be distinguished depending on whether they
+operate on the whole series of keys, or key by key. The former are
+said \emph{off\hyp{}line}, as keys are not sorted while they are
+coming in, and the latter are called \emph{on\hyp{}line}, as the
+sorting process can be temporally interleaved with the input
+process. For instance, insertion sort is an on\hyp{}line algorithm,
+whereas Hoare's sort is not because it is an instance of the
+divide\hyp{}and\hyp{}conquer strategy that partitions the data. This
+distinction is pertinent in other contexts as well, like with
+algorithms that are intrinsically \emph{sequential}, instead of
+allowing some degree of \emph{parallelism}. For instance, a database
+is updated by a series of atomic requests, but different requests on
+different parts of the data might be performed in parallel.
+
+Sometimes an update is costly because it is delayed due to an
+imbalance in the data structure that calls for an immediate
+remediation, but this remediation itself may lead to a state such that
+subsequent operations are faster than if the costly update had not
+happen. Therefore, when considering a series of updates, it may be
+overly pessimistic to cumulate the maximum costs of all the operations
+considered in isolation. Instead, \emph{amortized
+  analysis}~\cite{Okasaki:1998}~\cite[\S{}17]{CLRS:2009} takes into
+account the interactions between updates, so a lower maximum bound on
+the cost is derived. Note that this kind of analysis is inherently
+different from the average case analysis, as its object is the
+composition of different functions instead of independent calls to the
+same function on different inputs. Amortized analysis is a worst case
+analysis, but of a sequence of updates, not a single one.
+
+For example, consider a counter enumerating the integers from~\(0\)
+to~\(n\) in binary by updating an array containing
+bits~\cite[\S{}17.1]{CLRS:2009}. In the worst case, an increment leads
+to inverting \(\floor{\lg n} + 1\) bits, where \(\floor{x}\)~is the
+greatest integer lower or equal than \(x\) and \(\lg n\) is the binary
+logarithm of~\(n\), as it is the minimum number of bits required to
+encode~\(n\). The cost of the \(n\)~increments is thus bounded from
+above by \(n\lg n + n\), but this is too pessimistic, as carry
+propagation clears a series of rightmost bits to~\(0\), so the next
+addition will flip only one bit, the following two etc. A counting
+argument shows that the exact total number of flips is
+\(\sum_{k=0}^{\floor{\lg n}}{\floor{n/2^k}} < n\sum_{k \geqslant
+  0}{1/2^k} = 2n\), which is of a lower magnitude than expected. This
+particular example resorts to a particular kind of amortized analysis
+called \emph{aggregate analysis}, because it relies on enumerative
+combinatorics~\cite{Martin:2001} to reach its result (it aggregates
+positive partial amounts, often in different manners, to obtain the
+total cost). As such, it is very much suited to teach undergraduates
+because it can be illustrated with tables and figures. A visually
+appealing variation on the previous example consists in determining
+the average number of \(1\)-bits in the binary notation of the
+integers from~\(0\) to~\(n\)~\cite{Bush:1940}.
+
+Despite its didactic qualities, aggregate analysis is less frequently
+applied when the data structures are not directly in connection with
+numeration. We propose to extend its scope by showing a compelling
+case study on \emph{functional queues}.
+

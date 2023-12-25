@@ -1,0 +1,88 @@
+First of all, thank you for your interest in my paper and for taking
+the time to read it and assess its value.
+
+> This paper is a survey on literature to the subject. This must be
+> shown in the title, otherwise one would expect here results of
+> original research. I suggest a subtitle “- A Thematic Index to the
+> Literature”.
+
+How about "A Survey on the Teaching and Learning of Recursive
+Programming"? The words "thematic", "index" and "literature" are too
+widely used and would not help automatic indexing.
+
+> It is a pity that not all references are cited in the text. I think
+> that also (and in especially) a literature survey must cite all
+> given references.
+
+There are 252 bibliographic entries and, as I write in the foreword,
+it is not possible to cite them all with a summary of their
+contents. There is another, unrelated reason for this not to be
+possible: some obscure references I could not obtain and you would be
+surprised to learn how many papers, even doctoral dissertations, have
+been lost by their authors. Moreover, quite a few are behind expensive
+paywalls as well.
+
+> Why not present a semantic graph of the given literature? It would
+> give a good overview of the literature.
+
+I added a few words to my foreword to explain why this may not be a
+good idea. First, a semantic graph would make more sense in the
+context of a meta-analysis of the literature, where cross-referencing,
+publication timelines, experimental protocols and statistics would be
+in scope---they are not usually found in surveys. Second, I suspect
+that the graph would be pretty much complete, as the survey already
+shows that most concepts since the mid-80s are found across a vast
+number of articles. This may be future work.
+
+> It is mentioned in the introduction that Robert Boyle used 1660 in
+> print the word recursion, but no reference to this point is given.
+
+Indeed. I added the reference in the text, but not in the
+bibliography, so the latter can be detached from the main article
+without referring to publications which are not directly related to
+didactics.
+
+> Why not give examples to the concepts dicussed in the paper? it
+> would make the paper better readable.
+
+I give many examples, taken from the literature, for instance in
+section 4.1, and I explain in details several mental models of
+recursion. I added several programs in section 1 which illustrate
+different kinds of definitions of recursion. Please keep in mind that
+a survey is purposefully destined to be read by experts in the domain,
+and that the original materials have to be consulted for details.
+
+> Ad definition of tail recursion, page 3: Instead of A function call
+> is tail recursive if it is recursive and if its value is the value
+> of the function call being defined.  maybe better A function call is
+> tail recursive if it is recursive and if its value is the value of a
+> function call of the function being defined.
+
+Thanks. I decided to expand considerably this paragraph so this is not
+relevant anymore. I hope that my new, detailed explanation of
+recursion will be more accurate and informative. It was not my
+intention to present my views in detail, as this paper was, and still
+is, resolutely intended to be a survey. Nevertheless, your ranking of
+my technical quality as being "Average" spurred me into action.
+
+> The given little example f(x) := f(x, g(x)) has f on LHS with one
+> parameter and on the RHS with two parameters. This is
+> confusing. Please give better example.
+
+Good catch. I meant to show an accumulator at work: f(x,y) :=
+f(x,g(y)). 
+
+> Page 4: fonction -> function
+> Page 20: pionnier -> pionier
+
+Thank you.
+
+> Why not discuss: teaching (learning) of recursive procedures first
+> and recursive functions later? This is the way done by LOGO turtle
+> procedures (Papert) and also the way M. Resnick goes by allowing the
+> users to define recursive procedures in Scratch 2.0, but not
+> implementing self defined functions.
+
+The short answer is that my purpose is not to teach LOGO or Scratch,
+but to synthesise the research about the difficulties about teaching
+recursion: these are two different approaches.

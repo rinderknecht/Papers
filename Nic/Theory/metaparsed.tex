@@ -1,0 +1,21 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[nodesep=2pt,levelsep=20pt,treesep=7pt]{\TR{\textsf{pat}}}{
+  \pstree{\TR{\textsf{pat}}}{
+    \TR{\textsf{meta}\((y)\)}
+    \TR{\texttt{-}}
+    \TR{\textsf{meta}\((z)\)}
+  }
+  \TR{\texttt{-}}
+  \TR{\textsf{meta}\((t)\)}
+}
+\endTeXtoEPS
+
+\end{document}

@@ -1,0 +1,341 @@
+%%-*-latex-*-
+
+Till now, we have considered all the problems except solvability of
+subtyping constraints (see section~\ref{validation}). Let us start by
+quoting Olivier Dubuisson~\cite[\S{13.11}]{Dubuisson:2000}:
+
+\begin{quotation}
+`[...] the set operators potentially apply to any subtype constraints;
+the problem lies in the interpretation of the constraints in terms of
+sets of values to actually determine the possible values of the
+resulting type. The designers should be aware, however, that the \ASN
+compilers are not likely to check for [...] eccentric constraint
+combinations.'
+\end{quotation}
+
+The aim of this section is to provide a formal definition of
+the constraints, which will allow us (in
+section~\ref{full_collection_and_solving}) to determine the values of
+each subtype in a specification. The integration of this procedure into
+the analysis phase of an \ASN compiler frees the protocol designer
+from being `eccentric' or not. The idea is to collect constraints
+from the specification, and then solve them. Most of our constraints
+are or rely upon \emph{set constraints}. In the 1990s, the field of
+the set constraints has been extensively explored, and both major
+theoretical results (such as complexity for several classes of
+constraints, or links to other fields such as the tree automata
+theory) and practical achievements (such as constraint programming
+languages or static programme analysis) have been brought to the
+light.
+
+On one hand, the \ASN values have a tree structure, thus fit perfectly
+the usual domain of set constraints. On the other hand, the \ASN
+subtyping constraints are too general to be modeled only with set
+constraints: there are also constraints expressed in terms of
+intervals, regular expressions and powersets. (Our specific
+contribution is the use and resolution of these special constraints.)
+So, in order to unify the representation of these concepts, we need to
+abstract the values and make them simple constraints. We could
+directly reuse the abstract grammar (type $\V$ in
+section~\ref{abstract_grammar}), nevertheless it is worth abstracting
+further the values at this stage; for instance, from a semantic
+point of view, it is more suitable to consider that bit strings, octet
+strings, and general strings are all described by regular expressions.
+Also, it is more uniform to consider that an integer is in fact an
+interval reduced to one element. In order to simplify the introduction
+of the collection algorithm, we gather in the same definition the
+abstracted values, intervals, regular expressions, sets and powersets
+(they will be separated before the solving procedure, because they
+require specific algorithms):
+
+\begin{Def}[Expressions]\label{expressions} 
+An \emph{expression} $e$ is an element of the set $\E$ defined using
+the following grammar and OCaml type definitions:
+
+\medskip
+
+\noindent
+\begin{tabular}{ll}
+    $\E$ \ASSIGN 
+  & \hspace*{-4mm}
+    $\SEtop$
+    $\mid$ $\SEbot$
+    $\mid$ $\alpha$
+    $\mid$ $\SEneg\E$
+    $\mid$ $\E_0$ $\SEcup$ $\E_1$ 
+    $\mid$ $\E_0$ $\SEcap$ $\E_1$
+    $\mid$ $\E_0$ $\SEdiff$ $\E_1$\\
+  & \hspace*{-4mm} 
+    $\mid$ \ocamltypename{series}
+    $\mid$ \ocamltypename{map}
+    $\mid$ \wildcard $\pmb{:}$ \wildcardof
+           \ocamltypename{label} $\times$ $\E$
+    $\mid$ \kwdNULL{}\\
+  & \hspace*{-4mm} 
+    $\mid$ \ocamltypename{real\_interval}
+    $\mid$ \ocamltypename{closed\_int\_interval}
+    $\mid$ \kwdTRUE{}\\
+%\end{tabular}
+%\hspace*{7.2mm}
+%\begin{tabular}{ll}
+  & \hspace*{-4mm}
+    $\mid$ \kwdFALSE{}
+    $\mid$ \Enum{} \ocamlkwd{of} \ocamltypename{item}
+    $\mid$ \Regexp{} \ocamlkwd{of} \ocamltypename{string}\\
+  & \hspace*{-4mm}
+%%    $\mid$ \ocamltypename{integer}
+%%    $\mid$ \ocamltypename{real}
+    $\mid$ $\E \SEdiam \ocamltypename{closed\_int\_interval}$
+\end{tabular}
+
+\smallskip
+
+\noindent
+\ocamlkwd{and} \ocamltypename{series} = 
+\ocamlconstr{[}\Cons{} \ocamlkwd{of} $\E$ $\times$
+\ocamltypename{series} 
+$\mid$ \Nil \ocamlconstr{]}
+
+\noindent
+\ocamlkwd{and} \ocamltypename{map} =
+\ocamlconstr{[}\Bind{} \ocamlkwd{of} \ocamltypename{identifier}
+$\times$ $\E$ $\times$ \ocamltypename{map} $\mid$ \Nil
+\ocamlconstr{]} 
+
+\smallskip
+
+\noindent
+\ocamlkwd{and} \ocamltypename{real\_interval} =
+\ocamlconstr{[}\wildcard \wildcard \asnkwdconstr{..} \wildcard
+\wildcardof\\
+\hspace*{2mm}
+\ocamltypename{real\_bound} $\times$ \ocamltypename{in\_out} 
+$\times$ \ocamltypename{in\_out} $\times$
+\ocamltypename{real\_bound}\ocamlconstr{]}
+
+\noindent
+\ocamlkwd{and} \ocamltypename{real\_bound} =
+\ocamlconstr{[}\ocamltypename{real} 
+$\mid$ \MinInfReal{} 
+$\mid$ \PlusInfReal \ocamlconstr{]}
+
+\noindent
+\ocamlkwd{and} \ocamltypename{closed\_int\_interval} =\\
+\hspace*{2mm}
+\ocamlconstr{[}\Interval{} \ocamlkwd{of} \ocamltypename{int\_bound}
+$\times$ \ocamltypename{int\_bound}\ocamlconstr{]}
+
+\noindent
+\ocamlkwd{and} \ocamltypename{int\_bound} =
+\ocamlconstr{[}\ocamltypename{integer}{} 
+$\mid$ \MinInfInt{}
+$\mid$ \PlusInfInt \ocamlconstr{]}
+
+\smallskip
+
+\noindent
+As a special case, we define some useful constants:
+
+\noindent
+\begin{tabular}{lll}
+    $\ocamlkwd{let}$ 
+  & \hspace*{-4mm}
+    $\mathbb{N}$ 
+  & \hspace*{-5mm}
+    $= \Interval \, (\MinInfInt, \PlusInfInt)$\\
+    $\ocamlkwd{and}$
+  & \hspace*{-4mm}
+    $\mathbb{N}^{+}$
+  & \hspace*{-5mm}
+    $= \Interval \, (\PosInt \, (0), \PlusInfInt)$\\
+    $\ocamlkwd{and}$
+  & \hspace*{-4mm}
+    $\mathbb{R}$
+  & \hspace*{-5mm}
+    $= \MinInfReal \, \pmb{<} \asnkwdconstr{..} \pmb{<} \,
+     \PlusInfReal$ 
+\end{tabular}
+
+The constant $\SEtop$ denotes the set of all terms (see
+definition~\ref{terms}); $\SEbot$ the empty set; $\alpha$ is a
+variable denoting an expression (see
+definition~\ref{variables_in_expressions}); $\SEneg$ is the complement
+operator; $\SEcup$, $\SEcap$ and $\SEdiff$ are straightforward. These
+operators are the same as Aiken and Wimmers' ones (except their
+notation is not dotted). Next is the \ocamltypename{series} type,
+which captures a list of expressions; it will be used for encoding
+sets of \ASN values of type \kwdSETOF{} and \kwdSEQUENCEOF. Next comes
+the \ocamltypename{map} type, which represents mappings from
+identifiers to expressions; it will be used to denote sets of \ASN
+values of type \kwdSET{} and \kwdSEQUENCE. Next, there is the
+$\wildcard\pmb{:}\!\wildcard$ constructor that associates a
+\ocamltypename{label} with an expression; it will be used for encoding
+values of the \ASN{} type \kwdCHOICE. The \kwdNULL{} constructor is
+for the \kwdNULL{} value. Next, we find the
+\ocamltypename{real\_interval} type that defines an interval on the
+\kwdREAL{} values. Next, we get the
+\ocamltypename{closed\_int\_interval} type which represents the closed
+intervals on the \kwdINTEGER{} values (in theory, it is not necessary
+to have closed intervals, but this design decision makes the algorithm
+simpler). The constructors \kwdTRUE{} and \kwdFALSE{} are
+obvious. Following, we have the \Enum{} constructor which denotes the
+enumerated constants; then \Regexp{} which denotes the \ASN regular
+expressions (we call \emph{regexp} for short); then the
+\ocamltypename{integer} type; then the \ocamltypename{real} type. The
+constructor $\SEdiam$ denotes a powerset (see below). The constructors
+\MinInfReal, \PlusInfReal{} stand respectively for $-\infty$ and
+$+\infty$ on the \ASN real numbers; \MinInfInt, \PlusInfInt{} are
+$-\infty$ and $+\infty$ on the integers.
+\end{Def}
+
+The mapping from abstracted values to expressions is quite
+straightforward. Just notice that integer and real numbers are mapped
+into intervals, and that the value reference names (of type
+\ocamltypename{string}) are cast into the set $V$ of variables:
+
+\begin{Def}[From values to expressions]\label{mu}
+\noindent
+$\ocamlkwd{let} \,\, \ocamlkwd{rec} \,\, \mu : \V \rightarrow \E
+= \ocamlkwd{function}$\\
+\noindent
+\begin{tabular}{rl}
+           & \hspace*{-4mm}
+             $\List \, [\,] \mid \Map \, \{\} \rightarrow \Nil$\\
+         $\mid$ 
+           & \hspace*{-4mm}
+             $\List \, (\ocamlvaluename{v} \CONS \textnormal{L})
+              \rightarrow
+              \Cons \, (\mu \, (\ocamlvaluename{v}), \mu \, (\List
+              \, (\textnormal{L})))$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $\Map \, (\IdEnv{\{l\} \disjunion \Labels}) \rightarrow
+              \Bind \, (l, \mu \, (\IdEnv{}(l)),
+              \mu \, (\Map \, (\IdEnv{\Labels})))$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $\BinStr \, (s) \mid \HexStr \, (s) \mid \pvString \, (s)
+              \rightarrow \Regexp \, (s)$\\
+         $\mid$ 
+           & \hspace*{-4mm} 
+             $(\PosInt \, \wildcard \mid \NegInt \, \wildcard) \AS
+             \ocamlvaluename{v} \rightarrow 
+             \Interval \, (\ocamlvaluename{v}, \ocamlvaluename{v})$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $(\PosReal \, \wildcard \mid \NegReal \, \wildcard) \AS
+             \ocamlvaluename{v} \rightarrow \ocamlvaluename{v}
+             \, \pmb{\leqslant} \asnkwdconstr{..} \pmb{\leqslant} \,
+             \ocamlvaluename{v}$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $\kwdMINUSINFINITY \rightarrow \MinInfReal \,
+             \pmb{\leqslant} \asnkwdconstr{..} \pmb{\leqslant}
+             \MinInfReal$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $\kwdPLUSINFINITY \rightarrow \PlusInfReal \,
+             \pmb{\leqslant} \asnkwdconstr{..} \pmb{\leqslant}
+             \PlusInfReal$\\
+         $\mid$ 
+           & \hspace*{-4mm}
+             $\ocamlvaluename{l}\/ \pmb{:} \ocamlvaluename{v}
+             \rightarrow \ocamlvaluename{l}\/ \pmb{:} \mu 
+             (\ocamlvaluename{v})
+             \mid
+             \VRef \, (y) \rightarrow (y : V)$\\
+         $\mid$
+           & \hspace*{-4mm}
+             $\ocamlvaluename{v} \rightarrow \ocamlvaluename{v}$
+\end{tabular}
+\end{Def}
+
+The next step is to build the constraints on top of the expressions:
+
+\begin{Def}[Constraints]\label{constraints_def}
+A \emph{constraint} $\kappa$ is a conjunction of inclusions over
+expressions. The set of constraints is:
+${\cal K}$ \ASSIGN ${\cal K}_0 \CEand {\cal K}_1$
+            $\mid$ $\E_0 \CEsubseteq \E_1$
+            $\mid$ $\E_0 \CEeq \E_1$.
+\end{Def}
+
+Note that the notations for the operators defining the constraints are
+double-dotted, e.g. $\CEand\!$. The operator $\CEeq$ stands for the
+double inclusion.
+
+%% In the next sections, it will be used with several annotations:
+%% equality between two integer expressions ($e_0 \CEeqI e_1$),
+%% equality between two real expressions ($e_0 \CEeqF e_1$), equality
+%% between two regexp expressions ($e_0 \CEeqR e_1$), equality between
+%% two basic expressions ($e_0 \CEeqS e_1$), equality over whatever
+%% expressions ($e_0 \CEeq e_1$) and equality between two powerset
+%% expressions ($\pi_0 \PSCEeq \pi_1$).
+
+Let us consider the sets of value sets associated with \kwdSETOF{} and
+\kwdSEQUENCEOF{} types, i.e. powersets of values. For instance,
+\texttt{\small A ::= SET (SIZE (4..7)) OF INTEGER} denotes the set of
+integer sets whose cardinals belong to the interval $[4;7]$. For each
+value of the cardinal it is possible to give the corresponding integer
+set expression, and then make the union to get the expression
+associated with type \texttt{\small A}. In general, this encoding is
+bulky, it makes the constraint solving inefficient and it is unable
+to cope with the infinite bound $\mathbb{N}^{+}\!$. A better idea is
+to keep the interval of cardinals \emph{together with} an
+over-approximation of the powerset itself (this latter contains sets
+of any size). The powerset expression $e \SEdiam \varsigma$ is a pair
+of an expression $e$ which denotes a powerset (coming from \kwdSETOF{}
+and \kwdSEQUENCEOF{} types), and an interval $\varsigma$ of the
+elements' cardinals (coming from \kwdSIZE{} subtyping constraints).
+
+%% \begin{Def}[Powerset Expressions]\label{powerset_expressions} A
+%% \emph{powerset expression} $\pi$ is an element of the set $\Pi$
+%% defined by: $\Pi$ \ASSIGN $\alpha$ $\mid$ $\E \SEdiam
+%% \ocamltypename{closed\_int\_interval}$ $\mid$ $\Pi_0 \PSEsum \Pi_1$
+%% $\mid$ $\Pi_0 \PSEprod \Pi_1$ $\mid$ $\Pi_0 \PSEdiff \Pi_1$.  It
+%% can be a variable $\alpha$ denoting another powerset expression.
+
+%% The expression $\pi_0 \PSEsum \pi_1$ is the union of the powerset
+%% expressions $\pi_0$ and $\pi_1$, the expression $\pi_0 \PSEprod
+%% \pi_1$ is the intersection of $\pi_0$ and $\pi_1$, and $\pi_0
+%% \PSEdiff \pi_1$ is the difference between $\pi_0$ and $\pi_1$. If
+%% $\varsigma_1$ and $\varsigma_2$ are disjoint, we can write $\alpha
+%% \SEdiam \varsigma_1 \stackrel{\bot}{\PSEsum} \beta \SEdiam
+%% \varsigma_2$ instead of $\alpha \SEdiam \varsigma_1 \PSEsum \alpha
+%% \SEdiam \varsigma_2$.  \end{Def}
+
+%% \begin{Def}[Powerset Constraints]\label{powerset_constraints} A
+%% \emph{powerset constraint} is defined similarly to the (basic)
+%% constraints, but using powerset expressions instead of (basic)
+%% expressions: ${\cal P}$ \ASSIGN ${\cal P}_0 \! \CEand \! {\cal
+%% P}_1$ $\mid$ $\Pi_0 \CEsubseteq \Pi_1$ $\mid$ $\Pi_0 \CEeq
+%% \Pi_1$.  \end{Def}
+
+%% We shall use the annotation P (for \emph{powerset}) in $\pi_0
+%% \PSCEeq \pi_1$. For the sake of commodity, we shall mix powerset
+%% constraints (${\cal P}$) and basic constraints (${\cal K}$) in the
+%% same constraint, which will be split after the collection into
+%% different systems (i.e. sets of constraints), because the solving
+%% procedure is different.
+
+Our idea is to analyse the subtypes in \core and to produce a mixed
+constraint for each one. Since component types are all type references
+(see section~\ref{mapping}, step~\ref{component_types}) and type
+declarations are of the form {\small $<$\textsf{type reference}$>$
+\textsf{::=} $<$\textsf{non-reference type without inner
+constraints}$>$ \textsf{(}$<$\textsf{subtyping
+constraint}$>$\textsf{)}} or simply {\small $<$\textsf{type
+reference}$>$ \textsf{::=} $<$\textsf{non-reference type without inner
+constraints}$>$} (see step~\ref{type_references}), we can parse each
+subtyping constraint without destructuring the type it applies to
+(indeed, the constraints on component types are only found at the
+top-level). Thanks to this specific shape of \core, the collection
+process has two weakly interdependent aspects: the collection on types
+and the collection on (proper) subtypes. The link between the two
+collections is due to the component types, i.e. type references,
+because a type reference can denote either a type or a proper subtype;
+hence this link will appear in the treatment of the \TRef{}
+constructor.
+
+
+

@@ -1,0 +1,30 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[nodesep=2pt,levelsep=20pt,treesep=7pt]{\TR{\(a\)}}{
+  \pstree{\TR{\(b\)}}{
+    \pstree{\TR{\(c\)}}{
+      \TR{\(1\)}
+    }
+    \pstree{\TR{\(\cdot\)}}{
+      \TR{\([\,]\)}
+      \TR{\(2\)}
+    }
+  }
+  \Tn 
+  \TR{\(()\)}
+  \pstree{\TR{\(d\)}}{
+    \pstree{\TR{\(d\)}}{
+      \TR{\(x\)}
+    }
+  }
+}
+\endTeXtoEPS
+
+\end{document}

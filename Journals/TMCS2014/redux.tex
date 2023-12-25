@@ -1,0 +1,163 @@
+\section{Definitions and Assumptions}
+
+In this section, we gather the facts necessary to compare top-down and
+bottom-up merge sorts, from our previous article in this
+journal~\cite{Rinderknecht_2013}.
+
+\subsection{Merging}
+
+\emph{Merging} consists in combining two ordered series of keys into
+one ordered series. Without loss of generality, we shall be only
+interested in sorting keys in increasing order. One way to achieve
+this consists in comparing the two smallest keys, output the smallest
+and repeat the procedure until one of the series becomes empty, in
+which case the other is wholly appended. 
+
+By definition, the cost of merging is the number of comparisons
+performed.
+
+\paragraph{Minimum cost}
+\label{merge:best_case}
+
+Let \(\B{\Join}{m,n}\) be the minimum cost when merging series of
+length \(m\)~and~\(n\). We have
+\begin{equation}
+\B{\Join}{m,n} = \min\{m,n\}.\label{eq:best_merge}
+\end{equation}
+
+\paragraph{Maximum cost}
+
+The maximum cost \(\W{\Join}{m,n}\) when merging series of length
+\(m\) and~\(n\) is
+\begin{equation}
+\W{\Join}{m,n} = m + n - 1.\label{eq:worst_merge}
+\end{equation}
+
+\paragraph{Average cost}
+
+The average cost \(\M{\Join}{m,n}\) of merging series of size \(m\)
+and~\(n\) is
+\begin{equation}
+\M{\Join}{m,n} = m + n - \frac{m}{n+1} - \frac{n}{m+1}.
+\label{eq:mean_merge}
+\end{equation}
+
+\paragraph{Sorting}
+
+Merging can be used to sort \emph{one} series of keys by splitting in
+two the initial series of keys, then the two pieces are split again
+etc. until only singletons remain. These are then merged pairwise
+etc. until only one series remains, which is inductively sorted, since
+a singleton is a sorted series on its own and the merger of~\(s\)
+and~\(t\) is sorted if~\(s\) and~\(t\) are. This scheme leaves open
+the choice of a splitting strategy:
+\begin{itemize}
+
+  \item \emph{top-down merge sort} consists in cutting a series of
+  \(n\)~keys into two series of equal or almost equal lengths, that
+  is, \(\ceiling{n/2}\) and \(\floor{n/2}\), where \(\floor{x}\)
+  (\textsl{floor of~\(x\)}) is the greatest integer less than or equal
+  to~\(x\), and \(\ceiling{x}\) (\textsl{ceiling of~\(x\)}) is the
+  least integer greater than or equal to~\(x\);
+
+  \item \emph{bottom-up merge sort} consists in cutting the series in
+    two pieces of lengths \(2^{\ceiling{\lg n}-1}\) and
+    \(n-2^{\ceiling{\lg n}-1}\), where \(\lg n\)~is the binary
+    logarithm of~\(n\) --~in other words, we cut at the largest power
+    of~\(2\) smaller than~\(n\).
+
+\end{itemize}
+The difference between the two variants can be easily seen in the
+\fig~\ref{fig:comp}.
+\begin{figure}
+\centering
+\subfloat[Bottom-up\label{fig:bot_up}]{%
+\includegraphics{bot_up}}
+\qquad
+\subfloat[Top-down\label{fig:top_down}]{%
+\includegraphics{top_down}}
+\caption{Comparing merge sorts on \((6,3,2,4,1,5)\)\label{fig:comp}}
+\end{figure}
+
+\subsection{Sorting $2^n$ keys}
+
+These two strategies agree in the case of \(2^p\)~keys, as seen in
+\fig~\ref{fig:bot_up1}.
+\begin{figure}[b]
+\centering
+\includegraphics[bb=71 633 244 721]{bot_up1}
+\caption{Sorting \((7,3,5,1,6,8,4,2)\)
+\label{fig:bot_up1}}
+\end{figure}
+
+\paragraph{Minimum cost}
+
+Let us note \(\B{}{2^p}\) the minimum number of comparisons to sort
+\(2^p\)~keys. We have
+\begin{equation*}
+\B{}{2^p} = p2^{p-1}.
+\end{equation*}
+
+\paragraph{Maximum cost}
+
+Let~\(\W{}{2^p}\) be the maximum number of comparisons for sorting
+\(2^p\)~keys. We have
+\begin{equation*}
+\W{}{2^p} = (p-1)2^p + 1.
+\end{equation*}
+
+\paragraph{Average cost}
+
+Let \(\M{}{2^p}\) be the average number of comparisons for sorting
+\(2^p\)~keys, and let \(\alpha := \sum_{k \geqslant 0}\frac{1}{2^k+1}
+\simeq 1.264499\). We have
+\begin{equation*}
+\M{}{2^p}
+  = p2^p - \alpha 2^p + \sum_{k \geqslant 0}\frac{1}{2^{k}+2^{-p}}.
+\end{equation*}
+
+
+\subsection{Top-down merge sort}
+
+%% The cost \(\C{\top}{n}\) for top-down merge sort satisfies the
+%% equations
+%% \begin{equation}
+%% \C{\top}{0} = \C{\top}{1} = 0,\quad
+%% \C{\top}{n} = \C{\top}{\floor{n/2}}
+%% + \C{\top}{\ceiling{n/2}}
+%% + \C{\Join}{\floor{n/2},\ceiling{n/2}}.
+%% \label{eq:Ctop}
+%% \end{equation}
+
+\paragraph{Minimum cost}
+
+Let \(\B{\top}{n}\) be the minimum cost of using top-down merge
+sort on \(n\)~keys. We have \(\B{\top}{n} = \B{\top}{\floor{n/2}} +
+\B{\top}{\ceiling{n/2}} + \floor{n/2}\). Let \(\nu_k\)~be the number
+of \(1\)-bits in the binary notation of~\(k\). We have
+\begin{equation}
+\B{\top}{n} = \sum_{k=0}^{n-1}{\nu_k}.
+\label{eq:Btop}
+\end{equation}
+
+\paragraph{Maximum cost}
+
+Let \(\W{\top}{n}\) be the maximum cost of using top-down merge
+sort on \(n\)~keys. We have \(\W{\top}{n} = \W{\top}{\floor{n/2}} +
+\W{\top}{\ceiling{n/2}} + n - 1\) and
+\begin{equation}
+\W{\top}{n} = n\ceiling{\lg n} - 2^{\ceiling{\lg n}} + 1.
+\label{eq:Wtop}
+\end{equation}
+
+\paragraph{Average cost}
+
+Let \(\M{\top}{n}\) be the average cost of using top-down merge
+sort on \(n\)~keys. We have
+\begin{equation}
+\M{\top}{n} = \M{\top}{\floor{n/2}} +
+\M{\top}{\ceiling{n/2}} + n -
+\frac{\floor{n/2}}{\ceiling{n/2}+1} 
+- \frac{\ceiling{n/2}}{\floor{n/2}+1}.
+\label{eq:Mtop}
+\end{equation}

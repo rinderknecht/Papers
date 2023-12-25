@@ -1,0 +1,59 @@
+%%-*-latex-*-
+
+\section{Introduction}
+
+The wide variety of software and hardware architectures in distributed
+systems and telecommunications makes it valuable to use a common
+high-level data notation in protocol specifications. To fulfill this
+need, the ISO organization and the International Telecommunication
+Union (ITU) defined the Abstract Syntax Notation One (\ASN) series of
+standards. \ASN~\cite{Dubuisson:2000,X.680:2002,X.681:2002,X.682:2002,X.683:2002}
+is a language for data types allowing the protocol designer to capture
+numerous networking concepts, such as protocol data units, without
+worrying about the possible environment and implementation
+heterogeneity of the peers. The peers share a set of \ASN modules and
+agree upon a set of \emph{encoding rules}, such
+as~\cite{X.690:2002,X.691:2002}, which is a method for encoding values
+produced at run-time by the communicating applications, into series of
+bits. \ASN has been adopted for a wide range of applications, such as
+network management, secure e-mail, mobile telephony, air traffic
+control etc.
+%, video conferencing over the internet, electronic commerce,
+%digital certificates, radio paging, financial service systems etc.
+
+\medskip
+
+In the last few years, the press has reported several alleged
+vulnerabilities of \ASN and the Basic Encoding Rules (BER) related to
+network protocols like SNMP and, more recently, OpenSSL. Each time, an
+accurate description of the problem has been finally published,
+showing that the weakness lay in \emph{implementations} poorly written
+and insufficiently tested. The real vulnerabilities were almost all
+related to improper decoding of ill-formed BER encodings (or
+\emph{codes}) causing buffer overflows, unspecified
+(non-deterministic) behaviours, stack corruptions and, in the end, a
+possible denial of service.
+
+\medskip
+
+From now on, it is important to understand and remember that \ASN and
+the BER, intrinsically, have nothing to do with security or
+cryptographic protocols. Both are used for modeling and handling the
+data part of protocols, not the control. As a consequence, the
+soundness property we aim at in this article must not be considered as
+a security property about \emph{control} but as mere correctness of
+composition of encoding and decoding with the BER of \emph{values}
+specified by means of \ASN. For instance, there are no attackers, no
+nonces etc. here. Nevertheless, the difficulty is not lesser.
+
+\medskip
+
+More precisely, in this work we want to prove that the design of the
+BER themselves is flawless, whatever the network protocol is and
+whatever the values to be transmitted are. To achieve this goal we
+need the support of formal methods. We start by a formal modeling of
+the BER which abstracts away low-level details but captures the design
+principles. Then we define a soundness property representing the
+security warranty we require and finally we prove that this property
+holds for all values that can be specified with \ASN.
+

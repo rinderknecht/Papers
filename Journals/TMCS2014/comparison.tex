@@ -1,0 +1,320 @@
+\section{Comparison}
+
+In this section, we relate the costs of top-down and bottom-up merge
+sort. Let \(\B{\top}{n}\), \(\W{\top}{n}\) and \(\M{\top}{n}\) be,
+respectively, the minimum, maximum and average costs of top-down merge
+sort for an input of size~\(n\). Precisely, we shall prove the
+following inequalities:
+\begin{equation*}
+\B{\top}{n} = \B{\bot}{n},
+\quad
+\W{\top}{n} \leqslant \W{\bot}{n}
+\quad\text{and}\quad
+\M{\top}{n} \leqslant \M{\bot}{n}.
+\end{equation*}
+In other words, top-down merge sort is always to be
+preferred. Moreover, we will characterise the values of~\(n\) for
+which the inequalities are tight. We already know a kind of such
+values, because top-down and bottom-up merge sorts agree when
+\(n=2^p\), hence
+\begin{equation}
+\W{\top}{2^p} = \W{\bot}{2^p}
+\quad\text{and}\quad
+\M{\top}{2^p} = \M{\bot}{2^p}.
+\label{eq:2p}
+\end{equation}
+
+\paragraph{Minimum cost}
+
+Equation~\eqref{eq:Btop} tells us that \(\B{\top}{n}\) is the sum of
+the bits composing~\(n\). In \fig~\ref{fig:Btms_table},
+if we count the 1-bits of the numbers from \(0\) to~\(2^p-1\), and
+from \(2^p\) to~\(2^p+i-1\), we find \(\B{\top}{2^p+i} = \B{\top}{2^p}
++ \B{\top}{i} + i\), where the term~\(i\) is the sum of the leftmost
+bits. This is the same equation satisfied by the minimum cost of
+bottom-up merge sort, as seen in~\eqref{eq:Bbot_2p_i}, therefore
+\begin{equation}
+\B{\top}{n} = \B{\bot}{n}.
+\label{eq:Btop_Bbot}
+\end{equation}
+\begin{figure}[h]
+\centering
+\includegraphics[bb=71 595 210 721]{Btms_table}
+\caption{$\protect\B{\top}{2^p+i} = \protect\B{\top}{2^p}
+  + \protect\B{\top}{i} + i$\label{fig:Btms_table}}
+\end{figure}
+
+\paragraph{Maximum cost}
+
+Let's prove, for all \(n \geqslant 0\), \(\pred{W\(_L\)}{n} \colon
+\W{\top}{n} \leqslant \W{\bot}{n}\). From~\eqref{eq:2p},
+\(\pred{W\(_L\)}{2^0}\) holds. Let the induction hypothesis be
+\(\forall m \leqslant 2^p.\pred{W\(_L\)}{m}\). The induction principle
+requires that we prove \(\pred{W\(_L\)}{2^p+i}\), for all \(0 < i <
+2^p\). Equations \eqref{eq:Wbms_2p_i} and~\eqref{eq:2p} yield
+\(\W{\bot}{2^p+i} = \W{\top}{2^p} + \W{\bot}{i} + 2^p + i - 1
+\geqslant \W{\top}{2^p} + \W{\top}{i} + 2^p + i - 1\), where the
+inequality is the instance \(\pred{W\(_L\)}{i}\) of the induction
+hypothesis. Consequently, if \(\W{\top}{2^p} + \W{\top}{i} + 2^p + i -
+1 \geqslant \W{\top}{2^p+i}\) holds, the result
+\(\pred{W\(_L\)}{2^p+i}\) ensues. Let us try to prove this sufficient
+condition. Let \(n = 2^p + i\). Then \(p = \floor{\lg n}\) and
+\(\ceiling{\lg n} = \floor{\lg n} + 1\). Equation~\eqref{eq:Wtop}
+entails
+\begin{equation*}
+\W{\top}{2^p+i} = (2^p+i)(p+1)-2^{p+1}+1 = \W{\top}{2^p} + (p+1)i.
+\end{equation*}
+Thus, we only need to prove that \(pi \leqslant \W{\top}{i} + 2^p -
+1\). Using equation~\eqref{eq:Wtop} again, this inequality is
+seen to be equivalent to
+\begin{equation}
+(p - \ceiling{\lg i})i \leqslant 2^p - 2^{\ceiling{\lg i}}.
+\label{conj}
+\end{equation}
+To prove it, we have two complementary cases to analyse:
+\begin{itemize}
+
+  \item \(i=2^q\), with \(0 \leqslant q < p\). Then \(\lg i = q\) and
+  equation~\eqref{conj} is equivalent to \((p-q)2^q \leqslant 2^p -
+  2^q\), that is
+  \begin{equation}
+   p-q \leqslant 2^{p-q} - 1.\label{conj0}
+  \end{equation}
+  Let \(f(x) := 2^x - x - 1\), with \(x > 0\). We have \(f(0) = f(1) =
+  0\) and \(f(x) > 0\) for \(x>1\), so the inequality~\eqref{conj0}
+  holds and is tight if, and only if, \(x=1\), that is, \(q=p-1\).
+
+  \item \(i = 2^q + j\), with \(0 \leqslant q < p\) and \(0 < j <
+    2^q\). Then \(\floor{\lg i} = q = \ceiling{\lg i} - 1\) and
+    inequation~\eqref{conj} is then equivalent to \((p-q-1)i \leqslant
+    2^p - 2^{q+1}\), that is to say,
+    \begin{equation}
+      (p-q+1)2^q + (p-q-1)j \leqslant 2^p.\label{conj1}
+    \end{equation}
+    Since \(p-q-1 \geqslant 0\) and \(j < 2^q\), we have \((p-q-1)j
+    \leqslant (p-q-1)2^q\) (tight if \(q=p-1\)). Hence
+    \((p-q+1)2^q+(p-q-1)j \leqslant
+    (p-q)2^{q+1}\). Inequation~\eqref{conj1} is entailed if \(2(p-q)
+    \leqslant 2^{p-q}\). Let \(g(x) := 2^x - 2x\), with \(x > 0\). We
+    have \(g(1) = g(2) = 0\) and \(f(x) > 0\) for \(x > 2\). Thus,
+    inequality~\eqref{conj1} holds and is tight if, and only if,
+    \(x=1\), that is, \(q=p-1\) (the case \(x=2\) implies \(i
+    \leqslant 2^{p-1}\), which cannot be tight).\hfill\(\Box\)
+
+\end{itemize}
+
+Let us find now the shape of~\(n\) when \(\pred{W\(_L\)}{n}\) is
+tight. We proved above that if \(q=p-1\), that is, the binary notation
+of~\(n\) starts with two 1-bits, formally written as
+\((11(0+1)^*)_2\), then the following inequality holds:
+\begin{equation*}
+\W{\top}{2^p+i} =
+\W{\top}{2^p} + \W{\top}{i} + 2^p + i - 1 \leqslant
+\W{\top}{2^p} + \W{\bot}{i} + 2^p + i - 1 =
+\W{\bot}{2^p+i}.
+\end{equation*}
+The inequality is tight, \(\smash{\W{\top}{2^p+i}} =
+\smash{\W{\bot}{2^p+i}}\), if, and only if, \(\W{\bot}{i} =
+\W{\top}{i}\). \index{bms@$\W{\bot}{n}$} \index{tms@$\W{\top}{n}$}
+Using the case analysis above, if \(i = 2^q + j\), we have
+\(\smash{\W{\top}{2^p+i}} = \smash{\W{\bot}{2^p+i}}\), if, and only
+if, \(\smash{\W{\top}{2^{p-1}+j}} =
+\smash{\W{\bot}{2^{p-1}+j}}\). These equivalences can be repeated,
+yielding two strictly decreasing sequences of positive integers,
+\(2^p+i > 2^{p-1}+j > 2^{p-2}+k > \dots\) and \(i > j > k > \dots\)
+The end of the latter recursive descent is simply~\(0\), which means
+that the former stops at a power of~\(2\), for which we know
+equation~\eqref{eq:2p}. In other words, the binary representation
+of~\(n\) is made of a series of one or more 1-bits (from \(2^p\),
+\(2^{p-1}\), \(2^{p-2}\), \ldots), possibly followed by successive
+0-bits, which we formally write \(n=(1^+0^*)_2\). This means that
+\(n\)~is the difference between two powers of~\(2\):
+\begin{equation}
+\boxed{\W{\bot}{n} = \W{\top}{n} \Leftrightarrow n=2^p - 2^q.}
+\label{eq:Wbms_eq_Wtms}
+\end{equation}
+
+\paragraph{Average cost}
+
+We want to prove \(\M{\top}{n} \leqslant \M{\bot}{n}\) by
+induction. We already now that the bound is tight when \(n=2^p\), so
+let us check the inequality for \(n=2\) and let us assume that it
+holds up to~\(2^p\) and proceed to establish that it also holds for
+\(2^p+i\), with \(0 < i < 2^p\). Let us recall
+equation~\eqref{eq:Abms_2p_i}:
+\begin{equation*}
+\M{\bot}{2^p+i} = \M{\bot}{2^p} + \M{\bot}{i}
++ 2^p + i - \frac{2^p}{i+1} - \frac{i}{2^p+1}.
+\end{equation*}
+Since \(\M{\bot}{2^p} = \M{\top}{2^p}\) and, by
+hypothesis, \(\M{\top}{i} \leqslant \M{\bot}{i}\), then
+\begin{equation}
+\M{\bot}{2^p+i} \geqslant \M{\top}{2^p} + \M{\top}{i}
++ 2^p + i - \frac{2^p}{i+1} - \frac{i}{2^p+1}.
+\label{ineq:Atms_Abms}
+\end{equation}
+If we could show the right-hand side to be greater than or equal
+to \(\M{\top}{2^p+i}\), we would win. Let us actually generalise
+this sufficient condition and express it as the following lemma:
+\begin{equation*}
+  \pred{T}{m,n} \colon
+  \M{\top}{m+n} \leqslant \M{\top}{m} + \M{\top}{n} +
+  m + n - \frac{m}{n+1} - \frac{n}{m+1}.
+\end{equation*}
+Let us use a lexicographic ordering on the pairs \((m,n)\) of natural
+numbers \(m\)~and~\(n\). The base case, \((0,0)\), is easily seen to
+hold. We observe that the statement to be proved is symmetric,
+\(\pred{T}{m,n} \Leftrightarrow \pred{T}{n,m}\), hence we only need to
+make three cases: \((2p,2q)\), \((2p,2q+1)\) and \((2p+1,2q+1)\).
+\begin{enumerate}
+
+  \item \((m,n) = (2p,2q)\). In this case,
+    \begin{itemize}
+
+      \item \(\M{\top}{m+n} = \M{\top}{2(p+q)} =
+        2\M{\top}{p+q} + 2(p+q) - 2 + 2/(p+q+1)\);
+
+      \item \(\M{\top}{m} = \M{\top}{2p} =
+        2\M{\top}{p} + 2p - 2 + 2/(p+1)\);
+
+      \item \(\M{\top}{n} = \M{\top}{2q} = 
+        2\M{\top}{q} + 2q - 2 + 2/(q+1)\).
+
+    \end{itemize}
+    Then, the right-hand side of \(\pred{T}{m,n}\) is
+    \begin{equation*}
+      r := 2\left(\!\M{\top}{p}\! + \M{\top}{q}\! + 2(p+q-1)
+        + \frac{1}{p+1} + \frac{1}{q+1} - \frac{p}{2q+1} - 
+        \frac{q}{2p+1}\!\right).
+    \end{equation*}
+    The induction hypothesis \(\pred{T}{p,q}\) is
+    \begin{equation*}
+      \M{\top}{p+q} \leqslant \M{\top}{p} +
+      \M{\top}{q} + p + q - \frac{p}{q+1} - \frac{q}{p+1}.
+    \end{equation*}
+    Therefore, \(\tfrac{1}{2}r \geqslant \M{\top}{p+q} + p + q -
+    2 + \tfrac{q+1}{p+1} + \tfrac{p+1}{q+1} - \tfrac{p}{2q+1} -
+    \tfrac{q}{2p+1}\). If the right-hand side is greater than or
+    equal to \(\tfrac{1}{2}\M{\top}{m+n}\), then
+    \(\pred{T}{m,n}\) is proved. In other words, we need to prove
+    \begin{equation*}
+      \frac{p+1}{q+1} + \frac{q+1}{p+1} \geqslant 1 +
+      \frac{p}{2q+1} + \frac{q}{2p+1} + \frac{1}{p+q+1}.
+    \end{equation*}
+    We expand everything in order to get rid of the fractions; we then
+    observe that we can factorise~\(pq\) and the remaining bivariate
+    polynomial is~\(0\) if \(p=q\) (the inequality is tight), which
+    means that we can factorise by \(p-q\) (actually, twice). In the
+    end, this inequation is equivalent to the following:
+    \(pq(p-q)^2(2p+2q+3) \geqslant 0\), with \(p,q \geqslant 0\),
+    which means that \(\pred{T}{m,n}\) holds.
+
+  \item \((m,n) = (2p,2q+1)\). In this case,
+    \begin{itemize}
+
+      \item \(\M{\top}{m+n} = \M{\top}{2(p+q)+1} =
+        \M{\top}{p+q} + \M{\top}{p+q+1} \! + 2(p+q) - 1 +
+        2/(p+q+2)\);
+
+      \item \(\M{\top}{m} = \M{\top}{2p} =
+        2\M{\top}{p} + 2p - 2 + 2/(p+1)\);
+
+      \item \(\M{\top}{n} = \M{\top}{2q+1} =
+        \M{\top}{q} + \M{\top}{q+1} + 2q - 1 + 2/(q+2)\).
+
+    \end{itemize}
+    Then, the right-hand side of \(\pred{T}{m,n}\) is
+    \begin{equation*}
+      r := 2\M{\top}{p} \! + \M{\top}{q} \! + \M{\top}{q+1} \! +
+      4(p+q) - 2 + \frac{2}{p+1} + \frac{2}{q+2} - \frac{p}{q+1} -
+      \frac{2q+1}{2p+1}.
+    \end{equation*}
+    The induction hypotheses \(\pred{T}{p,q}\) and \(\pred{T}{p,q+1}\)
+    are
+    \begin{itemize}
+
+      \item \(\M{\top}{p+q} \leqslant \M{\top}{p} +
+      \M{\top}{q} + p + q - p/(q+1) - q/(p+1)\),
+
+    \item \(\M{\top}{p+(q+1)} \leqslant \M{\top}{p} + \M{\top}{q+1} +
+      p + (q + 1) - p/(q+2) - (q+1)(p+1)\).
+
+    \end{itemize}
+    Thus, \(r \geqslant \M{\top}{p+q} + \M{\top}{p+q+1} +
+    2(p+q) - 3 + \tfrac{2q+3}{p+1} + \tfrac{p+2}{q+2} -
+    \tfrac{2q+1}{2p+1}\). If the right-hand side is greater than
+    or equal to \(\M{\top}{m+n}\), then \(\pred{T}{m,n}\) is
+    proved. In other words, we need to prove
+    \begin{equation*}
+      \frac{2q+3}{p+1} + \frac{p+2}{q+2} \geqslant 2 +
+      \frac{2q+1}{2p+1} + \frac{2}{p+q+2}.
+    \end{equation*}
+    By expanding and getting rid of the fractions, we obtain a
+    bivariate polynomial with the trivial factors~\(p\) and \(p-q\)
+    (because if \(p=q\), the inequality is tight). A computer algebra
+    system can factorise it and the inequality is found to be
+    equivalent to \(p(p-q)(p-q-1)(2p+2q+5) \geqslant 0\), therefore
+    \(\pred{T}{m,n}\) holds.
+
+  \item \((m,n) = (2p+1,2q+1)\). In this case,
+    \begin{itemize}
+
+      \item \(\M{\top}{m+n} = \M{\top}{2(p+q+1)} =
+        2\M{\top}{p+q+1} + 2(p+q) + 2/(p+q+2)\);
+
+      \item \(\M{\top}{n} = \M{\top}{2p+1} =
+        \M{\top}{p} + \M{\top}{p+1} + 2p - 1 + 2/(p+2)\).
+
+      \item \(\M{\top}{n} = \M{\top}{2q+1} =
+        \M{\top}{q} + \M{\top}{q+1} + 2q - 1 + 2/(q+2)\).
+
+    \end{itemize}
+    Then, the right-hand side of \(\pred{T}{m,n}\) is
+    \begin{align*}
+      r &:= \M{\top}{p} + \M{\top}{q} + \M{\top}{p+1}
+      + \M{\top}{q+1} + 4(p+q)\\
+        &\phantom{:=} \; + \frac{2}{p+2} + \frac{2}{q+2}
+      - \frac{2p+1}{2q+2} - \frac{2q+1}{2p+2}.
+    \end{align*}
+    The (symmetric) induction hypotheses \(\pred{T}{p,q+1}\) and
+    \(\pred{T}{p+1,q}\):
+    \begin{itemize}
+
+      \item \(\M{\top}{p+(q+1)} \leqslant \M{\top}{p} +
+        \M{\top}{q+1} + p + q + 1 - p/(q+2) - (q+1)/(p+1)\);
+
+      \item \(\M{\top}{(p+1)+q} \leqslant \M{\top}{p+1} +
+        \M{\top}{q} + p + q + 1 - (p+1)/(q+1) -
+        q/(p+2)\).
+
+    \end{itemize}
+    Thus, \(r \geqslant 2\M{\top}{p+q+1} + 2(p+q-1) +
+    \tfrac{q+1}{p+1} + \tfrac{q}{p+2} + \tfrac{p+1}{q+1} +
+    \tfrac{p}{q+2} + \tfrac{2}{p+2} + \tfrac{2}{q+2} -
+    \tfrac{2p+1}{2q+2} - \tfrac{2q+1}{2p+2}\). If the right-hand
+    side is greater than or equal to \(\M{\top}{m+n}\), then
+    \(\pred{T}{m,n}\) is proved. In other words, we need to prove
+    \begin{equation*}
+      \frac{q+1}{p+1} + \frac{q+2}{p+2} + \frac{p+2}{q+2} +
+      \frac{p+1}{q+1} \geqslant 2 + \frac{2p+1}{2q+2} +        
+      \frac{2q+1}{2p+2} + \frac{2}{p+q+2}.
+    \end{equation*}
+    After expansion to form a positive polynomial, we note that the
+    inequality is tight if \(p=q\), so the polynomial has a factor
+    \(p-q\). After division, another factor \(p-q\) is clear. The
+    inequality is thus equivalent to \((p-q)^2(2p^2(q+1) + p(2q^2 + 9q
+    + 8) + 2(q+2)^2) \geqslant 0\), so \(\pred{T}{m,n}\) holds in this
+    case as well.
+
+\end{enumerate}
+In total, \(\pred{T}{m,n}\) holds in each case, therefore the lemma is
+true for all \(m\)~and~\(n\). By applying the lemma
+to~\eqref{ineq:Atms_Abms}, we prove the theorem \(\M{\top}{n}
+\leqslant \M{\bot}{n}\), for all~\(n\). Collecting all the cases where
+the bound is tight shows what we would expect: \(m=n\), \(m=n+1\) or
+\(n=m+1\). For~\eqref{ineq:Atms_Abms}, this means \(i=2^p\) or
+\(i=2^p-1\). That is, if \(p \geqslant 0\),
+\begin{equation*}
+\boxed{\M{\top}{n} = \M{\bot}{n} \Leftrightarrow n=2^p
+  \;\text{or}\; n=2^p-1.}
+\end{equation*}

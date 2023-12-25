@@ -1,0 +1,35 @@
+\section{Introduction}
+
+Merge sort features prominently amongst the sorting algorithms most
+widely taught in colleges because it epitomises the important solving
+strategy known as \emph{divide and conquer}: the input is split, each
+non-trivial part is recursively processed and the partial solutions
+are finally combined to form the complete solution. This process is
+analogous to the method of analysis and synthesis in mathematics.
+
+As a sorting algorithm, the input is a finite series of \emph{keys},
+ranging over a totally ordered set. Merge sort relies on a basic
+operation called \emph{merging} for the combining phase, whereby two
+ordered series of keys are used to produce one ordered series
+containing all the keys. The choice of a splitting rule gives rise to
+variants: the two most common ones are \emph{top-down} merge sort and
+\emph{bottom-up} merge sort.
+
+Top-down merge sort is perhaps the most popular, one reason being that
+it can be efficiently implemented on arrays (a linear, static data
+structure). Bottom-up merge sort is often preferred when sorting
+linked lists (a linear, dynamic data structure) and when stability or
+onlining (that is, the sorting process is temporally interleaved with
+the input process) is required --~in particular, functional languages
+tend to favour such a variant.
+
+An analysis of their asymptotic \emph{costs}, to wit, the number of
+comparisons, shows that both merge sorts belong to the class
+\(O(n\log{n})\), where \(n\)~is the number of sorted keys. Precise
+bounds of the form $\alpha n\log_2 n + \beta n + \gamma$ do not tell
+them apart because these bounds overlap, and students tend to confuse
+both variants in the end. Instead, starting from recurrent equations
+for the costs, we propose a direct comparison in the best, worst and
+average cases, demonstrating that the top-down variant is always to be
+preferred. Moreover, we identify precisely the values of~\(n\) for
+which both variants have the same cost, for each case.

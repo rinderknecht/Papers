@@ -1,0 +1,576 @@
+Bas van Vlijmen, editorial assistant, wrote:
+
+Reviewers have now commented on your paper. I appreciate your
+contribution but are not convinced that it can be published in its
+current form.
+
+The main points of criticism are:
+(a) You should better explain the novelty of your idea.
+(b) You should give a more fair description of related work.
+(c) The link between theoretical work and practical implementation is
+not strong.
+(d) The paper is very long and contains much introductory material.
+
+I suggest that you follow the steps suggested by reviewer #1 when you
+revise your paper. The style of your earlier papers in PEPM08 and
+PPDP06 could give some guidance.
+
+[[ The paper has been thoroughly revised. Its length is now 39 pages,
+mainly obtained by reducing the amount of introductory material (point
+(d)). Around four pages in total have been added in order to clarify
+some points and we rewrote following the reviewers' remarks. We answer
+all the critiques and suggestions below. This, altogether, corresponds
+to your points (a)--(c). As for the style of our previous papers, we
+think that the added value of this submission is a self-contained
+formalisation, including proofs of important properties of our
+proposed algorithms. We hope this way help bridging the cultural gap
+between theorists and practitioners. ]]
+
+
+Reviewer #1: Summary of the submission:
+
+This paper proposes "unparsed patterns" that are intended for use in
+source code analysis tools.  In many systems patterns used for
+analysis are first converted in a tree and then this tree is used for
+matching the parsed source code (also a tree). The key point of the
+paper is the desire to avoid the parsing phase of patterns. The
+solution the authors propose is to keep the pattern in string form and
+to selectively unparse the parse tree of the source code. By doing a
+lexeme-by-lexeme comparison, a similar effect can be achieved as in
+the case of using a tree representation of the pattern.
+
+The paper gives extensive introductory-level background material
+(parse trees, rewriting, inference rules,...), an extensive
+theoretical motivation and two algorithms to do the matching.  The
+backtracking based algorithm is slow and the linear time algorithm is
+incomplete and requires adding additional parentheses to the pattern.
+
+
+Analysis of the submission:
+
+The idea of unparsed patterns is interesting but not necessarily
+completely new. Here are two similar approaches:
+(1) The patterns in the scanf functions in the C library.
+(2) The ATmatch functions in the ATerm library that do precisely what
+is described here. See for details:
+
+@article{BJKO00,
+author =      {Brand, {M.G.J. van den} and Jong, {H.A. de} 
+       	      and P. Klint and P. Olivier},
+title =       {{E}fficient {A}nnotated {T}erms},
+journal =     {Software, Practice \& Experience},
+year =        {2000},
+pages =       {259--291},
+volume =      {30}
+} 
+
+I think the authors have the obligation to prove the novelty of their
+approach.
+
+Comparing the current paper with [19] and the author's PEPM08 paper
+(not cited) it is clear that the current paper has been heavily
+expanded in the direction of formalization without achieving more
+clarity or becoming more convincing.
+
+[[ We added two paragraphs near the beginning of the Related work
+section to comment the differences between unparsed patterns,
+scanf-tyle format strings and ATerms. With respect to the latter, the
+fundamental difference is that our patterns are written in concrete
+syntax, while ATmatch patterns use the (concrete) syntax of ATerms,
+which is an abstract syntax for the manipulated language. ]]
+
+The discussion of GLR-based approaches is unbalanced, biased and
+anecdotal.
+
+[[ We improved the discussion of the GLR approach to be more
+objective. Basically, we now insist on the difficulty of migrating a
+legacy parser to a new technology (be it GLR, Earley, etc.), instead
+of arguing about performance issues. ]]
+
+Recommendations: (Based on your findings, please provide your
+recommendations to the editor in chief. Do you advise to accept,
+accept after revison or reject? Why?)
+
+I think the authors should get a chance to present their ideas in a
+better fashion so I advice a major revision. This would imply:
+- Seriously reducing the theoretical sections.
+
+[[ Done. ]]
+
+- Presenting the algorithms in more algorithmic form (functional
+language?)
+
+[[ We added a Prolog implementation of the backtracking algorithm and
+an OCaml implementation of the ES(1) algorithm. The parsers are not
+given but these programs demonstrate clearly our claim that the
+theoretical framework translates straightforwardly into functional or
+logical programs. ]]
+
+- Showing more of the applications of this approach.
+- Give a more fair description of related work.
+
+[[ Done. ]]
+
+- Reduce the paper in size. Indication: go from 60 to 30 pages.
+
+[[ We settled to 38 pages because we think that a journal paper must
+be as much self-contained as possible. Basically, we removed the
+Appendix and almost all introductory material. We hope this is
+enough. ]]
+
+
+Reviewer #2: 
+
+This paper describes a novel way (algorithm and data-structures) to
+provide pattern matching in concrete syntax. The authors to propose to
+(lazily) unparse the object tree and match it to a subject pattern
+that is not parsed (i.e. a string). This trick is beneficial since it
+can be added to an existing parser *without modifying the language*,
+which is otherwise needed to be able to recognize meta
+variables. Modifying parsers, or reverse engineering them, is a hard
+and frequently infeasible engineering task.
+
+The problem with the simple algorithm that is proposed is that
+non-determinism of recognition as well as ambiguity of the patterns
+does not go away when the parsing/matching algorithm changes. It is
+the language of sub-languages that is inherently ambiguous in most
+cases. To solve this issue, the authors introduce 'meta brackets',
+with which all ambiguity and eventually all non-determinism can be
+eliminated by letting the pattern programmer explicitly bracket the
+patterns. In the worst case, this makes the patterns reduce to very
+much unreadable trees. This trick is not surprising, but the authors
+go to some length in explaining its algorithmic consequences and
+details.
+
+This paper is well written. It is very long for the contributions it
+proposes, which is due to (a) introductory material on general
+computer science knowledge (making the paper very accessible), (b)
+extensive proofs, examples and explanations (again serving to clarify)
+and (c) superfluous definitions and remarks (not much though). If the
+authors see ways of shortening the paper, I'd be happy about
+that. Nevertheless, this is a nicely written paper and I appreciate
+the effort that has been put into it.
+
+The paper's motivation is not so good. It compares to other
+approaches, claiming this one is faster and simpler. The argumentation
+is imprecise and sometimes false. The actual contribution, however,
+does not suffer from this and I think with a few minor adaptations the
+motivation can be fixed. Also, the analysis on the "simplicity" of
+implementing the algorithm and its competitors is rather weak. I'd
+propose to not emphasize this too much, but leave it at the fact that
+the language does not have to be changed to implement this matching
+algorithm. This is 'major' enough and further hand waving is
+completely unnecessary. It does require the authors to explain in more
+detail why changing or reverse engineering parsers is such a hard job.
+
+[[ We added more explanations in the introduction about the difficulty
+to add patterns in a grammar. Basically, we give two kinds of
+conflicts that are introduced everywhere in grammars, due to (1)
+parsing program fragments out of context and (2) productions allowing
+to derive a non-terminal X into a single non-terminal Y. ]]
+
+Detailed but unlocated comments:
+
+The choice of meta variable syntax is not discussed but is essential,
+since it must not overlap with any other lexeme in the object
+language.
+
+Meta variables are untyped, so how to deal with the ambiguous pattern
+"%id + 1"? Does %id match only an identifier or entire expressions?
+See page 29 "the programmer usually wants to bind the biggest tree".
+
+[[ (Page 28, not 29.) When matching the pattern "%x + 1" with a tree
+of the form plus(T, lex("+"), 1), x matches the first subtree T, be it
+a simple identifier or a complex expressions. In other terms, our
+algorithm gives the "maximal" binding, that is the *direct* subtree on
+that position, or the "biggest tree". This maximal solution allows the
+user to later select any smaller subtree of it, so we believe it is
+the most general choice. We also added typed metavariables in ES(1) to
+deal with such ambiguities, that is, a metavariable can be forced to
+bind a certain kind of node. ]]
+
+What happens with parse trees/AST's that have optional parts,
+i.e. does one have to write %(%) all the time?
+
+[[ No. Empty patterns %(%) are actually not allowed (this was the
+purpose of function `check' in the metaparsing algorithm and the
+condition $p_1 \neq []$ in the definition of metaparsed
+patterns). Since the parse tree is unranked, when a subtree is missing
+because it is optional in the grammar, it is simply skipped. For
+example, given the EBNF grammar excerpt
+
+Decl := [Scope] [Qualifier] [Type] Name;
+Scope := public|private
+Qualifier := static|extern
+Type := void|int
+
+we can have the following (constructed) parse trees:
+
+decl([name("x")])
+decl([type(["void"]), name("x")])
+decl([scope(["public"]),qualifier(["static"]),type(["int"]),name("x")])
+
+Consequently, missing subtrees do not have to be modeled in the
+pattern in any way. For instance, the pattern "void %n" matches the
+second tree above, but neither the first nor the third one. So does
+the pattern "%t x".  On the other hand, the pattern "%t x" would also
+match the tree decl([qualifier(["static"]), name("x")]), when using
+untyped pattern variables. In our revised submission, ES(1) allows
+pattern variables to be optionnally tagged with a constructor
+name. For instance "%<type>t x" matches decl([type(["void"]),
+name("x")]) but not decl([qualifier(["static"]), name("x")]). ]]
+
+
+Detailed comments:
+
+ Page 4: The name "GLR" is commonly used to identify Tomita's/CYK's
+ GLR algorithm(s) which recognize and constructs parse trees in
+ polynomial time. The fact that the Bison implementation calls its
+ implementation GLR is a misnomer. Please fix this.
+
+[[ Fixed. ]]
+
+Page 4 to 5: the analysis of why the GLR algorithm does not scale to
+production quality is very very much hand-waving. First of all, the
+factor 10 does not even have to be noticeable, since the extended
+parser is used to parse patterns and not large amounts of source
+code. Secondly, the amount of extra ambiguity (you say "highly") is in
+practise very low using common disambiguation rules that prefer to
+recognize meta variables over object language syntax. Finally, GLR has
+been used on extremely large and large amounts of patterns in
+production quality products. I guess that you have been guessing here.
+
+And, the trick of adding brackets to make parsing of patterns
+deterministic is also a commonly used "design pattern" for the users
+of GLR based matching tools. I.e. the user can define her own 'meta
+brackets' which will be removed from the parse tree of the pattern
+before matching begins.
+
+The final remark in 1.3 on the porting of parsers is a valid one. I
+would definitely emphasize this in favour of the previous
+hand-waving. Creating parsers is hard using any technology, especially
+if they need to exactly simulate the behaviour of another. Explain
+why!
+
+[[ We re-formulated the argumentation to focus indeed on the problem
+of extending legacy parsers, instead of arguing about efficient
+parsing, given that in practice patterns are expected to be small. ]]
+
+Page 8: what is "quasi isomorphic"?? You mean homomorphic? (which
+should probably be explained as well for consistency, since you
+explain other basic algebraic concepts in such an accessible way)
+
+[[ We meant "almost isomorphic", that is, usually, the difference in
+structure between the parse tree and the abstract syntax tree is small
+or regular enough to translate what is said about the parse tree to
+the AST. Anyway, the introductory material has been very much reduced,
+for room's sake, so this part has been cut off. ]]
+
+Page 9: "by definition of parsing ..." - I a bit confused here. I'm my
+world, the non-terminals in a grammar do not have an arity, it's their
+alternative productions that do. One particular non-terminal may have
+productions of different arity, such as "Exp ::= Integer | Exp + Exp |
+Exp * Exp" which has both productions of arity 1 and 2.
+
+[[ There was a very awkward formulation about arity of constructors,
+which constrasted with the rest of the formal model. Now it is clearly
+stated that the parse trees are unranked trees, so constructors
+themselves have no arity, only terms have. All the proofs already
+relied on lists of constructors' arguments instead of
+tuples. Importantly, constructors cannot have zero arguments (see
+below comment about matching optional subtrees). Lexemes are constant
+constructors. ]]
+
+The notation for concatenation [ h | f ] is not a mathematical one I
+think, rather something of a programming language, and could be
+unfamiliar to many readers.
+
+[[ Actually [h|f] is not concatenation, it stands for what is called
+in functional and logic programming as "cons". The concatenation is
+noted with a period, which is common in formal language theory. ]]
+
+The definition of parse forest is somewhat different that I
+expected. Maybe you could have a small footnote on that. I'm used to
+parse forests being related to one particular input string, i.e. a
+parse forest is a collection of different derivations for the same
+input string, rather than all parse forests.
+
+[[ We agree. The text was rather unclear and misleading. We clarified
+that. ]]
+ 
+To define catenation here I think really is overkill. You are
+burdening the reader with trivial detail.
+
+[[ Point taken. ]]
+
+Page 14: yields -> yield
+
+[[ Thanks. ]]
+
+Page 14: "or the latter should be fully unparsed" is not clear to
+me. I think the sentence is too long and too important for me to parse
+linearly.  "These two alternatives", I haven't found two alternatives
+in the previous text. The word "configuration" is not defined yet and
+I don't know how to understand it.
+
+[[ Rephrased now. Good catch about "configuration" not been yet
+defined. ]]
+
+Page 15: In case of failure, you should mention that backtracking
+should undo any the bindings that have already been done on that
+level.
+
+[[ This is a low-level consideration, not even implementation-level if
+programmed in Prolog, for instance. We added the Prolog version of the
+backtracking algorithm to show how direct is the translation from the
+model with inference rules to a real program. ]]
+
+Page 18: Maybe add a footnote that determinacy = confluence from the
+term rewriting point of view. Or introduce the concept too in the
+introductory sections.
+
+[[ Quite right, but it was asked from us to reduce the model
+presentation. ]]
+
+Page 18: the definition of "matching" to mean inclusion of the tree
+somewhere at the bottom seems weird to me. Matching usually starts a
+the top.
+
+[[ We agree. We use now "inclusion", insisting that it implies that
+the fringe of the closed pattern is included in the fring of the parse
+tree. ]]
+
+Page 24: or, you could say that fully meta-parenthesized patterns are
+equivalent to tree matching with prefix syntax, as explained in the
+introduction, but with an even uglier syntax.
+
+[[ Yes. ]]
+
+Page 25: as opposed to the remark in the footnote, rather I'm puzzled
+by the necessity of all this detail. This seems to be a simple parser
+for bracketed expressions that builds a tree.  Could this not have
+been left out?
+
+[[ Agreed. ]]
+
+Page 40: saying that the technique can be applied to scanner-less
+parsing is somewhat overstating it. Remember that if the tokens are
+not scanned, one must put meta brackets down to the lexical level to
+make this work. I don't think anybody could deal with that in
+practice.
+
+[[ Point taken. We removed this paragraph from the paper. For your
+information, the implementation doesn't perform any lexical analysis
+on the pattern, but rather builds lexemes in the pattern on demand, to
+match the current lexeme in the AST (no matter if the lexemes in the
+AST were produced by a scannerful or scannerless parser), but this
+implementation technique is somewhat more difficult to formalize, so
+has been left out from the theory. As a consequence, we agree that
+this claim is invalid in the paper. ]]
+
+Page 42: "implementation is much simpler"... mmmm.. if one has access
+to the implementation of a parser, which is needed to adapt the
+unparsing anyway, I'd say extending the parser with meta variable
+syntax is not THAT hard. 
+
+[[ This point is surely not hand-waving. We added a paragraph in the
+introduction presenting our extensive experience of adding patterns to
+LALR(1) grammars, to more thoroughly support this argument. We're sure
+that with a scanneless/GLR system this is much easier, especially
+using the "prefer" productions, but in Bison-based parsers commonly
+used in legacy parsers, including more advanced ones such as [10],
+this is really hard work. ]]
+
+Also, tree pattern matching is a lot simpler algorithm than your
+proposed algorithm is.
+
+[[ We agree that tree matching itself is very simple. It's only that
+it requires parsing the patterns, which is difficult as discussed in
+the motivation. Now concerning our algorithm, we hope that the
+provided OCaml implementation demonstrates that it is as easy to
+implement as tree matching (excluding the parsing part in the
+latter). ]]
+
+The fact that meta variables stand for anything is a weakness of your
+approach, not a strength. It limits the expressibility of the pattern
+matching as opposed to what the tree based algorithms can do. You can
+either call it flexibility or imprecision depending on you mood (read
+use-case).
+
+[[ There was a misunderstanding due to a poor formulation of this
+advantage. We rewrote the phrase:
+
+ <<Metavariables may stand for anything that is represented as a
+ subtree in the AST>>
+
+as: 
+
+ <<Metavariables may *appear, within a code fragment, in any
+ position* that is represented as a subtree in the AST...>>
+
+The advantage is over some parsed approaches that only go half-way to
+enable patterns (due to the mentioned difficulties of this task) and
+restrict metavariables to a few positions in the code, such as
+expressions, but not type qualifiers; statements, but not THEN/ELSE
+clauses of an IF, etc.
+
+Beyond this simple misunderstanding, we now demonstrate that
+our approach is also compatible with typed variables. ]]
+
+
+Reviewer #3: Summary of the submission:
+
+To extend a compiler, by adding an optimization or an analysis phase
+for instance, a classical approach consists in describing the rules at
+the abstract syntax level. As a consequence, the abstract syntax tree
+(AST) representation has to be known.  There exists another
+alternative, consisting in expressing the rules at the concrete syntax
+level.  The later approach is interesting for the user (who describes
+the optimization rules) but is quite tedious for the
+implementor. Indeed, writing the parser for the concrete syntax of the
+language, and combining it with the syntax for describing the rules is
+quite complex.
+
+In this paper, the authors propose a new approach to introduce pattern
+matching facilities in an existing language. The technique is based on
+what the authors call "unparsed patterns".  The idea is quite
+simple. Instead of describing the pattern in an abstract way, they are
+described in a textual way (using the concrete syntax of the
+language). Only the variables (that corresponds to the holes), are
+introduced using a special escaping character. These introduced
+variables are called meta-variables.  To match an unparsed pattern
+against an AST, the AST is pretty-printed, such that the matching
+algorithm occurs at the syntactic level.
+
+
+Analysis of the submission:
+
+As mentioned in the paper, the authors have already presented the main
+ideas in a conference paper. In this journal paper, the authors
+propose a formalization of their approach. This formalization consists
+in clearly defining the main notions (trees, substitutions, rewrite
+systems, inference systems). The authors define a general matching
+algorithm in section 3 and show some interesting properties:
+
+- soundness: when the algorithm computes a substitution, this
+  corresponds to a solution of the matching problem
+
+- completeness: if a matching solution exists, the proposed algorithm
+  will find a substitution
+
+The main drawback of the presented algorithm is its inefficiency.
+
+In section 4, the authors propose an extension: patterns may contain
+meta-parenthesis to help reducing the ambiguities. The authors
+presents a new matching algorithm which is more efficient: the
+complexity is linear.  The algorithm is shown to be sound, but
+unfortunately, the algorithm is not complete.  As a consequence, an
+ambiguous pattern has to be decorated by meta-parenthesis to make this
+new algorithm usable in practice.  An extreme case consists is adding
+meta-parenthesis everywhere, making the pattern unreadable, but
+isomorphic to a classical AST.
+
+In section 5, the authors present two implementations. A first
+implementation has been done in MyGCC, making this compiler an
+extensible version of GCC. A second implementation is a stand-alone
+library (Matchbox), which implements the algorithm described in
+section 4.  Some examples are given and an evaluation of the
+implementation technique is performed.  In section 6, the proposed
+approach is compared to other existing approaches.
+
+Detailed comments:
+page 11, l1-10: not very clear
+
+[[ This paragraph was not essential and consequently removed. ]]
+
+page 12, l32: "e.g.." -> "e.g."
+
+[[ Fixed. ]]
+
+page 12, l38: "non-overlapping" is not defined
+
+[[ It is now defined latter, when presenting the backtracking
+algorithm. Thus this part has been removed. ]]
+
+page 16, l3: "the inference system *given* in figure 6"
+
+[[ Thanks. ]]
+
+page 16, 3.1.4: the example should be detailed enough to help the
+reader to make the connection between the formalization and the
+practice. Please, give more explanations.
+
+page 17: figure 7 is not easy to understand.
+
+[[ You are quite right, but we have been required to reduce greatly
+the length of the paper. Instead, we have provided two programs
+implementing the two algorithms, one in Prolog, whose execution model
+includes backtracking, and one in Objective Caml (for ES(1)). We hope
+this will convince the readers that the step from the models to the
+code (in the case of standalone usage, as opposed to embedding the
+code into an existing compiler) is not large. Perhaps if the editor
+allows it, we could detail a proof tree. There are nonetheless some
+examples of real runs of Matchbox in the Implementation section. ]]
+
+page 17, l54: "the system *if* not ...". should be "is"
+
+[[ Fixed. ]]
+
+page 26, figure 10: p, \bar{p} and \tilde{p} are different objects
+(this is not the same 'p'), in a same rule, I would recommend to use
+different name to avoid any ambiguity. For example:
+shift(\bar{p},[pat(q)]) -> ...
+
+[[ Good suggestion, but this definition had to be cut off for room's
+sake. ]]
+
+page 27, l52: "remaining forest f1". Shouldn't it be "f2" ?
+
+[[ Yes. Good catch. ]]
+
+page 29, 4.2: the example is difficult to understand. I would
+recommend to avoid cross-ref, and to make the example
+self-contained. I also think that a giving a derivation tree would
+help the reader to understand how the inference rules are applied.
+
+[[ See answer above. ]]
+
+page 35, l34-35: check this sentence.
+
+page 58: check the bibliography. In particular [9], [15], [21]
+
+[[ Fixed. ]]
+
+Recommendations: (Based on your findings, please provide your
+recommendations to the editor in chief. Do you advise to accept,
+accept after revision or reject? Why?)
+
+The article is quite interesting because it presents a new approach to
+avoid implementing something that is complex (concrete syntax
+matching).  The quality of the presentation is correct. The authors
+have made a serious work of formalization. It is not so easy, in
+particular when trying to explain in a rigorous way an implementation
+technique.
+
+Now, as a potential user, I am not sure to be convinced by the
+proposed approach.  The use of concrete syntax is good because it make
+the description of the rules simpler (at least in a first step). It
+also has some drawbacks, but this is not the topic of this paper. I am
+not really convinced by the use of meta-parenthesis because it is not
+very clear to know when and where they should be added. Adding them
+everywhere is not a viable solution. In that case, writing the rule at
+the AST level should be better.  When the pattern is not fully
+meta-parenthesised, it does not seem possible to know (at compile
+time) if the matching will be complete or not. I understand that the
+proposed approach is a lightweight approach to solve a complex
+problem. But, in my opinion, in particular when dealing with program
+analysis or program manipulation, it is very important to offer tools
+that help to improve the quality of the program we are writing. And
+this is not really the case.
+
+[[ We added a paragraph in the Related work section, right after the
+comparison with parsed patterns, that views unparsed patterns as being
+mid-way path between regular expressions and parsed patterns. The
+usability model of unparsed patterns is indeed very similar to those
+of regular expressions, while the matching power is that of parsed
+patterns. ]]

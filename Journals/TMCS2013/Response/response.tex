@@ -1,0 +1,158 @@
+\documentclass[10pt]{article}
+
+\usepackage{hyphenat}
+\usepackage{amsmath,amssymb,amsthm,stmaryrd}
+\usepackage{url}
+
+\title{Answers to the referee's report}
+
+\author{Christian Rinderknecht}
+\date{}
+
+\input{commands}
+
+% Main document
+%
+\begin{document}
+
+\maketitle
+
+\allowdisplaybreaks
+
+\paragraph{About the Executive summary} In the introduction I try to
+make the case, citing Knuth, that Bachmann's \(O\)~notation is often misused for lower bounds and it is
+deceptively simple, as it must be abused to be really useful and it
+seems to conflict with algebra over numbers. Using the
+\(\Theta\)~notation when possible is better, but the extra work of
+doing so then may become on par with determining asymptotic
+equivalences, where multiplicative constants are explicit. As for the
+relevance of finding out the exact linear coefficients, it is probably
+an overkill for most undergraduate students. The average cost and its
+linear terms may be of interest to postgraduate students with
+theoretical leanings and can be carried out as a series of
+homeworks. The point of this paper is to make this analysis easier, in
+any case, at the cost of slightly less precision sometimes.
+
+\paragraph{About the detailed comments}
+
+\begin{itemize}
+
+  \item ``Two minor points in the “Minimum cost” paragraph on page~2.
+     [...]''\\
+     You are right.
+
+  \item ``Figure 1 on page 3 has errors in the first three
+    rows. [...]''\\
+    You are right.
+
+  \item ``Another minor point [...]''\\
+    Agreed.
+
+  \item ``A very minor point: [...]''\\
+    Yes.
+
+  \item ``Equation (12) on page 6 needs to be better
+    motivated. [...]''\\
+    I clarified in the text. It comes from observing that, in the case
+    \(n=2^p\), we have \(\B{}{n} = \frac{1}{2}n\lg n\), so we would
+    like to know any additional linear correction in the general
+    case. As for the strange notation \(\pred{L}{\cdot}\) for
+    predicates, it is indeed not usual but, as a computer scientist, I
+    like to distinguish the different levels of discourse more than
+    mathematicians, who are more comfortable with slight notational
+    ambiguities. (By the way, if you magnify the text, you will see
+    that it has nothing to do with the notation for the absolute
+    value.)
+    
+  \item ``I cannot derive the displayed inequality that follows
+    equation~(13) on page~7. [...]''\\
+    Please note that, for didactical reasons, I switch to a backward
+    mode of reasoning here, as indicated by ``is implied by'' and
+    ``the following inequality implies the result''. Hence, for
+    instance,
+\begin{equation*}
+\tfrac{1}{2}(m+i)\lg(m+i) + a(m+i) + b
+\leqslant
+\tfrac{1}{2}m\lg m + (\tfrac{1}{2}i\lg i + ai + b) + i
+\end{equation*}
+and the inductive hypothesis 
+\begin{equation*}
+\tfrac{1}{2}m\lg m + (\tfrac{1}{2}i\lg i + ai + b) + i
+\leqslant 
+\B{}{m} + \B{}{i} + i = \B{}{m+i}
+\end{equation*}
+imply the inductive step we are looking for:
+\begin{equation*}
+\tfrac{1}{2}(m+i)\lg(m+i) + a(m+i) +
+b \leqslant \B{}{m+i}.
+\end{equation*}
+In other words, this step is about finding a necessary condition so
+that, together with the inductive hypothesis, the result follows.
+
+Your point about the inexistence of a constant~\(a\) is mistaken: your
+conditions are satisfiable by having \(a < 0\), which is exactly what
+happens to be the case.
+
+  \item ``I do not see where the next displayed inequality on
+    page~7. [...]''\\
+    If you gather the definitions in the text, namely \(m=2^p\) and
+    \(i=x2^p\), you have \(i=mx\), which you substitute in 
+\begin{equation*}
+\tfrac{1}{2}(m+i)\lg(m+i) + a(m+i) + b
+\leqslant
+\tfrac{1}{2}m\lg m + (\tfrac{1}{2}i\lg i + ai + b) + i.
+\end{equation*}
+to obtain the equivalent inequality
+\begin{equation*}
+a \leqslant \Phi(x), \;\text{where \(\Phi(x) := \tfrac{1}{2}x\lg x - \tfrac{1}{2}(1+x)\lg(1+x) + x\)}.
+\end{equation*}
+
+\item ``On page~7, where determining \(a_{\text{max}}\) in line~6 from
+  the bottom, [...]''\\
+  Good catch!
+
+  \item ``On page~7, the second line from the bottom, [...]''\\
+    By definition of~\(x\) such that \(i=x2^p\).
+
+  \item ``Similarly, where does the expression in the first line of
+    page~8 [...]''\\
+    We have \(\B{}{n} - \tfrac{1}{2}n\lg(\tfrac{3}{4}n) = \B{}{n} -
+    \tfrac{1}{2}n\lg n + \left(\tfrac{1}{2}\lg\tfrac{4}{3}\right)n
+    \geqslant \lg\tfrac{4}{3}\). We want to minimise the lefthand side
+    \emph{for \(n\)~integer} to see how close it can get to the tight
+    lower bound \(\lg\tfrac{4}{3}\) and determine the shape of
+    these values for~\(n\).
+
+  \item ``On page~9, it might be worth mentioning [...]''\\
+    Indeed.
+
+  \item ``I cannot derive equation~(19). [...]''\\
+    What you do is assume equation~(19) and find another expression
+    for \(\W{}{n}\). It does not match equation~(19), but both are
+    nonetheless true, which would qualify as a theorem, I suppose. My
+    expression for \(\W{}{n}\) is simpler, that is all.
+
+  \item ``In the second bullet point on page~9, the notation \(\{x\}\)
+    is used before it is defined.''\\
+    Good catch!
+
+  \item ``On page~10, why should inequalities~(9) suggest to look for
+    bounds [...]''\\
+    I added an explanation to the text. It reads as follows now:
+    ``Inequalities~(9) are equivalent to \(n\lg n - \alpha n + \alpha
+    < \M{}{n} < n\lg n - \alpha n + 2\) where \(n = 2^p\), and this
+    suggests us to also look for bounds of the form \(n\lg n + an +
+    b\) when \(n \neq 2^p\).''
+
+  \item ``On page~10, the displayed equation [...]''\\
+    Agreed.
+
+  \item ``In the middle of page~11, the claim [...]''\\
+    You are right, I explained how to obtain the limit.
+
+\end{itemize}
+
+\emph{Thank you very much for having taken the time to carefully read
+  my preprint.}
+
+\end{document}

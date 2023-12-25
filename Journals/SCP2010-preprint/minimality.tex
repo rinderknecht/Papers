@@ -1,0 +1,166 @@
+%%-*-latex-*-
+
+\subsection{Minimal Substitution}
+
+A substitution on a pattern is a function which replaces all the
+meta\-variables in the pattern by abstract syntax tree. It is
+formally defined as
+\begin{align*}
+  \subst{\el}{\sigma} 
+&\eqn{1} \el\\
+  \subst{\cons{\cstr{meta}{x}}{\overline{p}}}{\sigma}
+&\eqn{2} \cons{\sigma(x)}{\subst{\overline{p}}{\sigma}}\\
+  \subst{\cons{l}{\overline{p}}}{\sigma}
+&\eqn{3} \cons{l}{\subst{\overline{p}}{\sigma}}\\
+  \subst{\cons{\pat{\overline{p}_1}}{\overline{p}_2}}{\sigma}
+&\eqn{4}
+  \cons{\pat{\subst{\overline{p}_1}{\sigma}}}%
+       {\subst{\overline{p}_2}{\sigma}}
+\end{align*}
+Note that we distinguish the substitution on a meta\-variable
+\(x\) from the substitution on a pattern \(\overline{p}\) by noting
+the former \(\sigma(x)\) and the latter
+\(\subst{\overline{p}}{\sigma}\).
+
+\medskip
+
+\noindent\textsc{Lemma}~\ref{minimality} (Minimal Substitution)\hfill
+\label{minimality_proof}
+\begin{center}
+If \(\sigma \subseteq \sigma'\) 
+then \(\subst{\overline{p}}{\sigma} = \subst{\overline{p}}{\sigma'}\).
+\end{center}
+\noindent In other words, for a given substitution, there exists a
+minimal substitution yielding the same result (if defined) for any
+pattern.
+
+\medskip
+
+\noindent\textsc{Proof}. Let \(\beth(\sigma, \sigma', \overline{p})\)
+be the proposition
+\begin{center}
+\emph{If} \(\sigma \subseteq \sigma'\) 
+\emph{then} \(\subst{\overline{p}}{\sigma} =
+  \subst{\overline{p}}{\sigma'}\).
+\end{center}
+Let us prove it by induction on the structure of the pattern
+\(\overline{p}\), that is to say, we shall assume that \(\beth(\sigma,
+\sigma', \overline{p}')\) holds for all the immediate subpatterns
+\(\overline{p}'\) of \(\overline{p}\) (that is the \emph{induction
+  hypothesis}) and then prove that \(\beth(\sigma, \sigma',
+\overline{p})\) holds too. The immediate subpatterns are the
+subpatterns used to build the pattern in one step, by means of the
+definition. More precisely, we can define the relation \((\prec)\)
+such that \(\overline{p}' \prec \overline{p}\) holds if
+\(\overline{p}'\) is an immediate subpattern of \(\overline{p}\) as:
+\begin{gather*}
+\overline{p}' \prec \cons{e}{\overline{p}'} \qquad\qquad 
+\overline{p}' \prec \cons{\pat{\overline{p}'}}{\overline{p}_1}
+\end{gather*}
+We shall prove, for all \(\sigma\), \(\sigma'\) and \(\overline{p}\),
+\begin{gather*}
+(\forall \overline{p}'.(\overline{p}' \prec \overline{p} \Rightarrow
+  \beth(\sigma, \sigma', \overline{p}'))) \Rightarrow \beth(\sigma,
+  \sigma', \overline{p})
+\end{gather*}
+which, by the structural\hyp{}induction principle, implies \(\forall
+\sigma, \sigma', \overline{p}.\beth(\sigma, \sigma',
+\overline{p})\). We shall proceed by distinguishing firstly the case
+when \(\overline{p}\) is the minimal pattern, i.e., \(\overline{p} =
+\el\), and secondly the other cases (for which \(\overline{p}'\)
+exists).
+\begin{enumerate}
+
+  \item Case \(\overline{p} = \el\).\\ We have \(\subst{\el}{\sigma}
+    \eqn{1} \el \eqn{1} \subst{\el}{\sigma'}\), i.e., \(\beth(\sigma,
+    \sigma', \el)\) holds.
+
+  \item Case \(\overline{p} = \cons{e}{\overline{p}'}\).\\ Let us
+    assume the induction hypothesis
+    \[
+    \forall \overline{p}'.(\overline{p}' \prec \overline{p}
+    \Rightarrow \beth(\sigma, \sigma', \overline{p}')).
+    \]
+    Since in this case we have a \(\overline{p}'\) such that
+    \(\overline{p}' \prec \overline{p}\), then we deduce
+    \(\beth(\sigma, \sigma', \overline{p}')\). Let us suppose now
+    \(\sigma \subseteq \sigma'\) (otherwise the theorem is trivially
+    true). Therefore, we have
+    \begin{gather}
+      \sigma \subseteq
+      \sigma' \label{eq:subst:00}\\ \subst{\overline{p}'}{\sigma} =
+      \subst{\overline{p}'}{\sigma'}. \label{eq:subst:01}
+    \end{gather}
+    Let us now consider the different kinds of \(e\).
+    \begin{enumerate}
+
+      \item Case \(e = \meta{x}\).
+        \begin{align}
+          \subst{\cons{e}{\overline{p}'}}{\sigma} &\triangleq
+          \subst{\cons{\meta{x}}{\overline{p}'}}{\sigma}\notag\\ 
+          &\eqn{1}
+            \cons{\sigma(x)}{\subst{\overline{p}'}{\sigma}}\notag 
+            \intertext{The definition of \(\subseteq\) and
+              \eqref{eq:subst:00} imply that 
+            \(\sigma(x) = \sigma'(x)\), therefore} 
+          &= \cons{\sigma'(x)}{\subst{\overline{p}'}{\sigma}}\notag\\ 
+          &= \cons{\sigma'(x)}{\subst{\overline{p}'}{\sigma'}} 
+          & \text{by} \,\;
+          \eqref{eq:subst:01}\notag\\ &\eqn{1}
+          \subst{\cons{\meta{x}}{\overline{p}'}}{\sigma'}\notag\\ 
+          &\triangleq
+          \subst{\cons{e}{\overline{p}'}}{\sigma'}\notag\\
+            \subst{\overline{p}}{\sigma}
+          &= \subst{\overline{p}}{\sigma'}. \label{eq:subst:02}
+        \end{align}
+        Finally, \eqref{eq:subst:02} and \eqref{eq:subst:00} imply
+        \(\beth(\sigma, \sigma', \overline{p})\).
+
+      \item Case \(e = l \in {\cal L}\).
+        \begin{align}
+          \subst{\cons{e}{\overline{p}'}}{\sigma}
+          &\triangleq \subst{\cons{l}{\overline{p}'}}{\sigma}\notag\\
+          &\eqn{2} \cons{l}{\subst{\overline{p}'}{\sigma}}\notag\\
+          &= \cons{l}{\subst{\overline{p}'}{\sigma'}}
+          & \text{by} \,\; \eqref{eq:subst:01}\notag\\
+          &\eqn{2} \subst{\cons{l}{\overline{p}'}}{\sigma'}\notag\\
+          &\triangleq \subst{\cons{e}{\overline{p}'}}{\sigma'}\notag\\
+          \subst{\overline{p}}{\sigma}
+          &= \subst{\overline{p}}{\sigma'}. \label{eq:subst:03}
+        \end{align}
+        Finally, \eqref{eq:subst:03} and \eqref{eq:subst:00} imply
+        \(\beth(\sigma, \sigma', \overline{p})\). 
+
+  \item Case \(e = \pat{\overline{p}_1}\).\\ Since \(\overline{p}_1
+    \prec \overline{p}\), the induction hypothesis also implies here
+    \(\beth(\sigma, \sigma', \overline{p}_1)\), that is
+    \begin{gather}
+      \subst{\overline{p}_1}{\sigma} =
+      \subst{\overline{p}_1}{\sigma'} \label{eq:subst:05}
+    \end{gather}
+    since we already assumed \eqref{eq:subst:00}.
+    \begin{align}
+      \subst{\cons{e}{\overline{p}'}}{\sigma}
+       &\triangleq
+      \subst{\cons{\pat{\overline{p}_1}}{\overline{p}'}}{\sigma}\notag\\
+      &\eqn{4}
+      \cons{\pat{\subst{\overline{p}_1}{\sigma}}}%
+           {\subst{\overline{p}'}{\sigma}}\notag\\
+      &= \cons{\pat{\subst{\overline{p}_1}{\sigma}}}%
+              {\subst{\overline{p}'}{\sigma'}}
+      & \text{by} \,\; \eqref{eq:subst:01}\notag\\
+      &= \cons{\pat{\subst{\overline{p}_1}{\sigma'}}}%
+              {\subst{\overline{p}'}{\sigma'}}
+      & \text{by} \,\; \eqref{eq:subst:05}\notag\\
+      &\eqn{4} \subst{\cons{\pat{\overline{p}_1}}{\overline{p}'}}%
+                     {\sigma'}\notag\\
+      &\triangleq \subst{\cons{e}{\overline{p}'}}{\sigma'}\notag\\
+         \subst{\overline{p}}{\sigma}
+      &= \subst{\overline{p}}{\sigma'}. \label{eq:subst:04}
+    \end{align}
+    Finally, \eqref{eq:subst:04} and \eqref{eq:subst:00} imply
+    \(\beth(\sigma, \sigma', \overline{p})\).\hfill \(\Box\)
+
+    \end{enumerate}
+
+\end{enumerate}

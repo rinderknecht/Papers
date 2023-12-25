@@ -1,0 +1,282 @@
+\section{Introduction}
+
+\subsection{Objectives}
+
+The new trends in network technology (Internet, ATM) lead to the
+design of new protocols and services. In most of cases the latter
+shall interconnect heterogeneous elements which must be tested in
+order to certify their interoperability. Both interoperability testing
+and experimentation with these new products are hence becoming
+strategic activities in the telecom software industry, not only for
+the operators but also for equipment vendors and tool providers.
+
+Companies have to develop an important activity in order to warranty
+the correct behaviours of their software implementing the protocols
+and services. Due to this validation effort and experimentation on
+real platforms, trustable services will be produced, and the
+time-to-market reduced.
+
+The development and implementation of a validation and experimentation
+platform (multi-protocols and multi-services), in close relationship
+between academic world and industry, will address the companies
+concern of assessing applications in a systematic way, and will allow
+the academic members to experiment their innovations on a real-world
+test bed.
+
+Mobility is the main focus on the platform. In particular, we plan to
+study protocols and services including mobility and the WAP, and also
+the technologies that allow the deployment of these services (GSM, GPRS,
+UMTS). Note though that the platform is generic enough to be used with
+other protocols and services, such as those of wired
+network.
+
+A platform is a set of software tools and equipments offering
+complementary functions and allowing real experimentations. In
+particular, the \textsc{Platonis} platform is oriented to the cover
+all the aspects of conformance and interoperability testing (from
+specification, test selection, automated test generation to test
+execution).
+
+Moreover, when designing, implementing and deploying a system, it must
+be checked that it not only supplies the expected functionalities, but
+that it also provides acceptable performances, in terms of loading
+rates, processing capacity, response time, etc. Such a study allows
+also to preview the collapse of the system by identifying the
+potential bottle-necks, and to determine an optimal configuration for
+the ressources (buffer sizes, number of servers, distribution of
+processes on the different machines, network topologies, etc.)
+according to criteria like ``quality over cost''.
+
+The \textsc{Platonis} platform will be opened to other users: 
+
+\begin{itemize}
+  \item companies wishing to experiment the new functionalities
+        proposed by a given service;
+
+  \item universities for research and teaching purposes (students'
+        training to these new technologies).
+\end{itemize}
+
+In this context, the project has the following main objectives:
+
+\begin{enumerate}
+
+  \item the implementation of a platform for validating and
+        experimentating new protocols and services;
+  
+  \item the validation and experimentation of the platform related to
+        the terminals mobility. We plan to check whether some protocol
+        exchanges in WAP over GSM are correct and if different
+        entities may interwork properly;
+
+  \item a method supported by tools, allowing to analyse some quality
+        of service (QoS) properties, in consistency with the
+        functional validation;
+
+  \item the openness: the platform will be used at the beginning for
+        teaching GET\footnote{Groupe des Écoles des
+        Télécommunications} and university students of
+        the academic partners, and also the engineers of the member
+        companies. It is planned to widen the use of the platform to
+        other companies and academic institutions to a legal and
+        commercial framework defined by the \textsc{Platonis}
+        consortium.
+
+\end{enumerate}
+
+
+\subsection{Partnership and project management}
+
+The \textsc{Platonis} project started in March 2001 and the duration
+of the project is two years.  The project is managed by
+INT\footnote{Institut National des T\'el\'ecommunications} which is in
+charge of the coordination between the sub-projects and is the
+representative to the ministry. The project is divided into four
+sub-projects:
+
+  \begin{enumerate}
+
+  \item \emph{Platform and network implementation.}  Partner in
+    charge: INT. The INT owns a test laboratory~\cite{besse,ASE,hit}.
+
+  \item \emph{Protocols design and coding.}  Partner in charge: France
+    T\'el\'ecom R\&D. France T\'el\'ecom R\&D brings its experience on
+    the modeling, the QoS, the protocol validation and is a
+    contributor to standardization institutions (ITU, ETSI
+    etc.)~\cite{Alabau,Monin}.
+
+  \item \emph{Experimentation and validation of proposed
+      applications.}  The partner in charge is LaBRI-Universit\'e de
+    Bordeaux. The LaBRI\footnote{Laboratoire Bordelais de Recherche en
+      Informatique} has a significant experience in the area of
+    interoperability testing~\cite{kone,castanet,rafiq}.
+
+  \item \emph{Implementation of a demonstrator.}  Partner in charge:
+    Kaptech. Kaptech is a new telecom operator for companies, and will
+    bring its experience in industrial applications.
+
+  \item Another partner, LIMOS\footnote{Laboratoire d'Informatique de
+      Mod\'elisation et d'Optimisation des Syst\`emes.} - Universit\'e
+    Blaise Pascal, is also associated to this project. The LIMOS has
+    already an experience in protocol testing, and will cooperate
+    mainly in the first and third sub-projects~\cite{laurencot}.
+
+  \end{enumerate}
+
+
+
+\subsection{Formal models}
+   
+One main activity associated closely with the \textsc{Platonis}
+platform is the formal modelisation of part of the system architecture
+and its behaviour: some protocol layers (the highest), some APIs and
+the service factory infrastructure. This should allow to integrate in
+several steps concepts like OSA (\emph{Open Service Access}) and VHE
+(\emph{Virtual Home Environment}). We chose the \emph{Specification
+  and Description Language} (SDL) for the behaviour formalisation and
+the \emph{Unified Modeling Language} (UML) for the architecture.
+
+     The rationale for formalisation is the following:
+
+     \begin{itemize}
+
+        \item automatic production of test suites for different
+              interfaces;
+
+        \item QoS analysis starting from the service design and
+              specification, taking into account the concepts of
+              negociation (essential in the UMTS) between different
+              peers;
+
+        \item functional validation (simulation and animation) of
+              protocols, of APIs and services in the context of the
+              given architecture, but independently of a protocol or
+              of a peculiar platform;
+
+        \item it is important to make sure that the model, which
+              includes the concepts of OSA (and APIs) and VHE, is
+              really based on the independence of a layer respectively
+              to different possible implementations. We believe
+              that formalisation is the best way.
+
+    \end{itemize}
+  
+  \subsection{Conformance and interoperability\label{validation}}
+
+     The validation platform provides two kinds of test:
+     \emph{interoperability testing} (in a first step
+     between the clients and the server, and in a second step
+     between two terminals), and \emph{conformance} of a protocol
+     layer (if there is no direct access to the layer under test, then
+     \emph{embedded testing} will be envisaged, i.e. testing the layer
+     through the upper layers). Moreover loading and robustness tests
+     are taken into account.
+
+     These tests are supposed to validate that different
+     implementations interwork correctly, i.e. they provide the
+     expected global service, while complying with the standards. Two
+     kinds of standards are used: one is based upon the use of mobile
+     phones using the WAP, and the second is based on the use of
+     \emph{Personal Digital Assistants} (PDA) either on the WAP stack
+     or a WML/UDP/IP stack over GPRS or UMTS. The security layer is not
+     considered in a first step.
+
+     The tests should be generated automatically, if possible, which
+     implies a preliminary formal specification of the protocols and
+     services. As mentionned previously we chose in that aim to
+     modelise in SDL (standard of the ITU-TS). Once the protocol and
+     the services are formally described, it will allow the automatic
+     generation of the test sequences guaranting a coverage of the
+     given specification, and allowing to detect different kind of
+     faults, like output faults. The last step is the implementation
+     of these test cases in a test architecture by a demonstrator.
+
+     There are three kind of services to be tested:
+
+     \begin{itemize}
+
+       \item \emph{Terminal services.} The mobile terminal are
+             characterized by data like the size of the screen, the
+             character set, the available colours, telephonic abilities
+             etc. These features are likely to be tested with methods
+             from the Java Mexe (\emph{Mobile station application
+             EXecution Environment}). The WAP Forum yet proposes some
+             tests validating the mobile phones functionalities. It is
+             indeed possible to run on-line these tests on the
+             terminals, thus they will be skipped in a first step.
+
+       \item \emph{Protocol-layer services.} These services are
+             supplied by some protocol layers and are specified by
+             event-driven diagrams.
+
+       \item \emph{Application services.} Thery are of two kind. The
+             first kind is \emph{general services}. These correspond
+             to the execution of programmes interacting either
+             directly or not with the end-users' mobile terminal. A
+             mobile location service will be defined. Note that this
+             kind of service requires the agreement of the operators,
+             since access to this information is restricted. The
+             second kind of application services is \emph{specific
+             services}. We plan to define and test a service of
+             network management and equipment maintenance provided by
+             Kaptech. The application services are harder to formalise
+             than the previous ones.
+
+     \end{itemize}
+
+     The tests and procedures likely to be implemented under the
+     proposed test architectures are the following:
+
+     \begin{itemize}
+
+       \item \emph{Protocol-layer conformance testing.} These tests address
+             the conformance of a given WAP layer. This assumes that
+             the consortium owns its own WAP gateway.
+
+       \item \emph{Interoperability testing.} These
+             tests allows to check, for instance, the interoperability
+             between an application running on a terminal and an
+             application on a server. They will be carried out with a
+             terminal simulator, using log files. In a second step,
+             and only if the emulation software can run on the
+             wireless PDAs, then the tests will be executed on these
+             latter.
+
+%             This validation implies the observation of the HTTP
+%             responses to the terminal requests. The formal modeling
+%             of request schemes is possible, allowing thus automatic
+%             test generation, but the complete modeling of an
+%             application is far beyond the scope of the
+%             \textsc{Platonis} project objectives. These tests have to
+%             be implemented in one hand with an open-source gateway,
+%             and, in another hand, with an operator gateway (that can
+%             be considered as a reference). The demonstrator has to
+%             allow the test execution.
+
+     \end{itemize}
+
+%  \subsection{Performance evaluation}
+%
+%  The simulation techniques and real tests are complementary when
+%  assessing the performance of a complex system. Simulation consists
+%  in modeling the system behaviour with a system of queues, and to
+%  exercise its transitions. It is both easier and more realistic than
+%  the analytic method which looks for mathematical formul{\ae} with
+%  strong hypothesis (like independence of events). It is also much
+%  less expensive in hardware and software than the ``real test''
+%  approach, because it exploits a model instead of a real system. The
+%  execution time of a simulation does not depend on the real
+%  processing-time of the application, hence it allows to explore a
+%  great number of scenarios just varying the parameters corresponding
+%  to the different configurations of the system. The major difficulty
+%  of this approach is to have the precisest knowledge as possible on
+%  the bottle-necks. in order to get a performance model we ought own a
+%  precise system specification (either formal or not) and some
+%  quantitative informations on the duration of each elementary
+%  task. In number of cases, the former is owned; on the contrary, the
+%  latter is remains always a problem. We can envisage, when a formal
+%  specification is available --- in SDL for instance ---, to
+%  automatically generate the required quantitative informations by
+%  previewing points of measurement when producting the implementation
+%  code. This would make compulsory to complete the specifications with
+%  temporal annotations.

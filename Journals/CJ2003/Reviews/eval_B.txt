@@ -1,0 +1,39 @@
+-------------------------------------------------------------------------
+
+REFEREE B:
+
+
+Paper number: 	02-025
+Authors: 	Christian Rinderknecht
+Title of Paper:	A set-based semantics for validating
+                ASN.1 specifications
+
+
+Evaluation:
+
+Please rank from 1 = Poor to 5 = Excellent. 
+
+Technical Quality: 		4	
+Knowledge of field: 		5
+Rigour of arguments: 		4
+Originality: 			5
+Clarity of presentation: 	4
+Organisation: 			4
+Standard of English: 		3
+References to other work:	5
+
+Summary: 
+> The paper defines semantics for the ASN.1 language. This
+> language is based on types in order to define data types. It is used
+> in exchanging data across a network between two communicating
+> applications.
+
+Further comments to the author(s):
+> Some minors English errors or mistypings. Also mind some
+> explicit or implicit redundant expressions.
+
+More detailed recommendations:
+>
+>		Accept without revisions
+
+-------------------------------------------------------------------------

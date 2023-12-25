@@ -1,0 +1,96 @@
+%%-*-latex-*-
+
+\documentclass[11pt,a4paper]{article}
+
+% Language
+%
+\usepackage[british]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{hyphenat}
+
+% Graphics and figures
+%
+\usepackage[font=sf,justification=raggedright]{caption}
+\usepackage{subfig}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+
+% Tables
+%
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{hhline}
+
+% Maths
+%
+\newcommand\bmmax{0}
+\usepackage{amssymb,amsmath,stmaryrd,txfonts,bm}
+
+% Algorithms
+%
+\usepackage{clrscode}
+
+% Miscellanea
+%
+\usepackage{url}
+\usepackage{xspace}
+\usepackage{alltt}
+
+% New commands
+%
+\newcommand\XML{\textsf{XML}\xspace}
+\newcommand\el{[\,]}
+\newcommand\cons[2]{[{#1}\mid{#2}]}
+\newcommand\Prolog{\textsf{Prolog}\xspace}
+\newcommand\MathML{\textsf{MathML}\xspace}
+\newcommand\XPath{\textsf{XPath}\xspace}
+\newcommand\XQuery{\textsf{XQuery}\xspace}
+\newcommand\query[2]{\langle #1 \mid #2\rangle}
+\newcommand\prj[2]{{#1}\raisebox{-2.5pt}{\(\big|_{#2}\)}}
+\newcommand{\LogAnd}{\textbf{and} }
+\newcommand{\LogOr}{\textbf{or} }
+\newcommand\wildcard{{\Huge\_}\xspace}
+\newcommand\fig[1]{\textsc{figure}~\ref{#1}}
+\newcommand\Fig[1]{\textsc{Figure}~\ref{#1}}
+
+% Author, title, date
+%
+\title{Matching pairwise divergent paths in \XML streams}
+\author{Christian Rinderknecht\\\\
+\small Department of Programming Languages and Compilers\\
+\small E\"otv\"os Lor\'and University\\
+\small Budapest, Hungary\\
+\small \url{rinderkn@caesar.elte.hu}}
+
+% Document
+%
+\begin{document}
+
+\maketitle
+
+\input{abstract}
+
+% Setting for the sub-figures
+%
+\captionsetup[subfloat]{labelformat=simple,%
+                        labelfont={rm,bf},%
+                        labelsep=period,%
+                        textfont=sf}
+% Sections
+%
+\input{introduction}
+\input{problem}
+\input{naive}
+\input{stack}
+\input{table}
+\input{conclusion}
+
+% Bibliography
+%
+\bibliographystyle{plain}
+\bibliography{divergent2007}
+
+\end{document}

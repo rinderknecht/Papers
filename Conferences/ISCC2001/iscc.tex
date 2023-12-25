@@ -1,0 +1,67 @@
+%\NeedsTeXFormat{LaTeX2e}[1995/01/01]
+\documentclass[10pt,twocolumn]{article}
+\usepackage{latex8}
+\usepackage{times}
+% Predefined packages
+%
+%\usepackage[english]{babel}
+%\usepackage{a4wide}
+\usepackage{epsfig}
+%\usepackage{psfig}
+\usepackage{bigbox}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{url}
+\usepackage{xspace}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+%\usepackage{doublespace}
+
+\newcommand{\audio}{conference call\xspace}
+%\floatplacement{figure}{H}
+\pagestyle{empty}
+
+%\usepackage{hrefpdf}
+
+\begin{document}
+
+\title{A Service-Component Testing Method and a Suitable CORBA Architecture}
+\author{Ana Cavalli, Bruno Defude, Christian Rinderknecht, Fatiha Zaïdi\\
+Institut National des Télécommunications\\
+9 rue Charles Fourier\\
+F-91011 Évry Cedex\\
+\{Ana.Cavalli, Bruno.Defude, Christian.Rinderknecht,
+Fatiha.Zaidi\}@int-evry.fr}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+This paper presents a method for service-component testing and a
+suitable CORBA test architecture. This test environment allows the
+service validation from its components and is a close step towards the
+execution of the obtained tests on a CORBA environment. Two aspects
+are relevant: the test of components and the test architecture. The
+testing method for components is new: it is based on the generation of
+partial graphs and avoids the combinatorial explosion of number of
+states of the global system. The test architecture on a CORBA platform
+is also new, since there are few works on testing based on these
+environments. As an application we present a case study on a real
+\audio service.\\ {\bf Keywords} Components testing, test generation,
+test architecture, CORBA
+\end{abstract}
+
+%\submitted[March 1st, 2000]{ICNP}{1}
+
+\input{introduction_new.tex}
+\input{corps_art_ieee.tex}
+\input{CORBA_Correction.tex}
+\input{conclusion.tex}
+\nocite{*}
+
+\bibliographystyle{latex8}
+\bibliography{iscc}
+
+%\input{annex.tex}
+
+\end{document}

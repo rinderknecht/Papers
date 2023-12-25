@@ -1,0 +1,424 @@
+%%-*-latex-*-
+
+\section{Formal model}
+\label{model}
+
+A formal model is a framework based on logic that allows one to define
+precisely the concepts involved in a problem and its solution. In
+order to reduce the gap between the program and its specification, we
+restrict ourselves to basic mathematical constructs that can be mapped
+to data structures and functions of the implementation programming
+language. Functions here are elementary functions over sets of
+objects, called \emph{terms}, so the implementer can translate them
+into functions, procedures, methods, processes etc., depending on the
+target. Let us review the different kinds of terms in our formal
+model.
+\begin{itemize}
+
+  \item \emph{Integers} are the familiar numbers.
+
+  \item \emph{Variables} are names, e.g., \(x\), \(y\) or \(z\). We
+    assume that there exists a denumerable infinity of them.
+
+  \item \emph{Tuples} are finite and ordered sets of terms.  Each term
+    in a tuple is called a \emph{component}. Tuples can be nested, as
+    in \((a, (b, c), d)\).  The empty tuple is \(()\).
+
+  \item \emph{Lists} are possibly empty series of terms, called
+    \emph{items}. The first item is called the \emph{head} and the
+    remaining sub\hyp{}list the \emph{tail}. Here, we shall follow the
+    \Prolog notation for lists and write \(\el\) for the empty list
+    and \(\cons{e}{l}\) for the non\hyp{}empty list whose head is
+    (denoted by) \(e\) and tail is (denoted by) \(l\). Some shorthands
+    prove useful, like writing \([a, b, c]\) instead of
+    \(\cons{a}{\cons{b}{\cons{c}{\el}}}\). It is also convenient
+    sometimes to distinguish several items past the head, and write
+    \(\cons{a, b}{l}\) instead of \(\cons{a}{\cons{b}{l}}\).  Notice
+    also that, from an algorithmic point of view, the lists of our
+    model are \emph{stacks} (the head of the list corresponds to the
+    top of the stack).
+%% From an implementation point
+%%    of view, e.g., in \Clang, lists can be one\hyp{}way linked lists.
+
+  \item \emph{Constructors} are names which can be associated with a
+    tuple of terms. They act like a tag for a tuple and, as such, are
+    always written with the tuple they distinguish (the constructor
+    precedes the tuple).  For example \(c(1, d(n))\) is a term
+    constructed with constructors \(c\) and \(d\). It is possible for
+    the tuple to be empty. 
+%% (In \Clang, this situation corresponds to enumerated values.)  
+    For example, \(c(1, d())\) contains the
+    constructor \(d\) applied to (that is, tagging) the empty tuple.
+    Note that, in order to distinguish constructors from variables, we
+    always retain the parentheses, like \(d()\) (whereas \(d\) alone
+    is a variable). The number of components of a constructor \(c\) is
+    called \emph{arity} and noted \(A(c)\).
+
+%Different tuples tagged by the same constructor are supposed to belong
+%to the same set of constructed terms.
+
+\end{itemize}
+\piccaption{\label{tree}}
+\smallskip
+\parpic[r]{\fbox{\includegraphics[bb=72 652 123 721]{tree}}} It is
+useful to graphically represent terms as \emph{trees}. Constructors
+then denote \emph{nodes} and their components denote subtrees. Empty
+tuples, variables and integers denote \emph{leaves}. For example
+\(d((), e([1]))\) can be interpreted as a tree of \emph{root} \(d\)
+and whose first subtree is the representation of the empty tuple
+\(()\) and the second corresponds to \(e([1])\). Figure~\ref{tree}
+represents the tree corresponding to \(a(b(c(1), (\el, 2)), (),
+d(d(x)))\), where the root is \(a\) and the leaves are \(1\), \(\el\),
+\(2\), \(()\) and \(x\). When a tuple has no constructor, the
+corresponding inner node is a centered dot. Arity is constant for each
+kind of node, so we cannot have in the model both \(c(a())\) and
+\(c(a(),b())\). In other words, our trees are \emph{ranked}. Never the
+less, for technical reasons, it is useful to have unranked trees. The
+way to circumvent this limitation is to encode a variable arity by an
+arity of \(1\) and a list as subtree. Then we can have both \(c([1])\)
+and \(c([1, (2)])\) and pretend that the arity of \(c\) is \(1\) in
+the former case and \(2\) in the latter.
+
+Let us now use these generic terms to build the terms that model the
+problem at hand.
+
+\paragraph{Lexemes.}
+
+The first stage of a compiler consists in the lexical analysis
+(sometimes called scanning or lexing) of the source code: the input
+string of characters is analysed and segmented into the longest
+substrings that can be classified according to the lexicon of the
+input language. This is similar to transforming a line of text into
+words that have been checked against a dictionary. The output consists
+of a series of \emph{lexemes}. Since the ambition of this study is to
+cope with all programming languages, we shall make no assumptions on
+the nature of the lexemes. We shall often designate a lexeme by \(l\)
+and their (unspecified) set will be noted \(\cal L\).
+
+\paragraph{Concrete\hyp{}Syntax versus Abstract\hyp{}Syntax Trees.}
+
+The second stage of a compiler is the syntax analysis, also known as
+\emph{parsing}, of the lexeme stream. This is akin to checking whether
+a series of words makes up a correct sentence, with respect to a given
+grammar, like the English grammar. The result of such a process is a
+tree called the \emph{concrete\hyp{}syntax tree}, or \emph{parse
+tree}, capturing the structure of the analysed sentence in terms of
+the language grammar. In practice, this tree is usually not built
+entirely and lives in the analysis stack of the parser for the time of
+the processing. Instead, the programmer often chooses to output a
+tree, called \emph{abstract\hyp{}syntax tree} (AST), which also
+captures the structure of the input program, with or without
+references to the grammatical rules. The inner nodes of the parse tree
+denote non\hyp{}terminal symbols of the grammar, as usually specified
+in Backus\hyp{}Naur Form or an extended version of it, and the leaves
+are the lexemes of the input. In contrast, the AST usually does not
+include the lexemes (see our example in the introduction) and the
+nodes denote kinds of constructs with or without reference to the
+grammar. Therefore, the converse of parsing, called \emph{unparsing},
+is naturally defined on the parse tree. On the one hand, the parse
+tree is not available as a data structure and, on the other hand, the
+AST can be arbitrary. Fortunately, the AST is often quasi isomorphic
+to the parse tree or is a compact version of it, which makes unparsing
+from the AST workable in practice. Therefore, without loss of
+generality, we define the unparsing inductively on the structure of
+the parse tree, which renders the unparsing dependent only on the
+grammar.
+
+Each non\hyp{}terminal symbol of the grammar corresponds to one or
+more constructors of the parse tree, depending on the number of
+productions with that symbol on the left\hyp{}hand side. For example,
+the productions \verb/Exp ::= Integer | Exp + Exp/ \verb/| Exp * Exp/
+lead to three constructors being associated to \verb|Exp|, of
+respective arity 1, 2 and 2. Let \({\cal C}\) be the set of
+constructors of parse trees, each constructor having a strictly
+positive arity. In general, we write \(c(f)\), where \(f\) is the list
+of the components of constructor \(c \in {\cal C}\). By definition,
+the leaves of the parse trees are lexemes\footnote{We leave out the
+  empty word, \(\varepsilon\).}, so let \({\cal H}_0 = {\cal L}\) be
+the set of parse trees of height \(0\) and let us define recursively
+the set of trees of height \(n+1\) by the equation \({\cal H}_{n+1} =
+{\cal H}_n \cup \{c([h_1, h_2, \dots, h_{A(c)}]) \mid c \in {\cal C},
+h_i \in {\cal H}_n\}\), for all \(n \geqslant 0\). The cumulative
+infinite series \({\cal H}_0 \subseteq {\cal H}_1 \subseteq \dots\)
+has a smallest upper bound \(\cal H\), which is the set of all the
+parse trees. Let us note \(\cal T\) the set of all trees which are not
+reduced to one node, i.e., \({\cal T} = {\cal H} \setminus {\cal
+  L}\). We note \(l\) the lexemes (\(l \in {\cal L}\)), \(t\) the
+trees not reduced to one node (\(t \in {\cal T}\)) and \(h\) the
+general trees (\(h \in {\cal H}\)). A \emph{parse forest} is a list
+(algorithmically, a stack) of parse trees for a given input. The set
+of all the forests is inductively defined as the smallest set \(\cal
+F\) such that
+\begin{itemize}
+
+  \item \(\el \in {\cal F}\),
+
+  \item if \(h \in {\cal H}\) and \(f \in {\cal F}\) then
+    \(\cons{h}{f} \in {\cal F}\).
+
+\end{itemize}
+The expression \(f_1 \cdot f_2\) denotes the \emph{catenation} of the
+forests \(f_1\) and \(f_2\), formally defined here as
+\begin{align}
+  \el \cdot f &= f \label{model:conc:1}\\
+  \cons{h}{f_1} \cdot f_2 &= \cons{h}{f_1 \cdot f_2}
+  && \text{where} \;\, h \in {\cal H}. \label{model:conc:2}
+\end{align}
+For instance, let \(a, b, c, d, e \in {\cal H}\) (that is to say,
+\(a\), \(b\), \(c\), \(d\) and \(e\) are variables denoting unknown
+trees). Then
+\begin{align*}
+[a,b,c] \cdot [d,e] &= \cons{a}{[b,c]} \cdot [d,e] = \cons{a}{[b,c]
+  \cdot [d,e]}\\
+ &= \cons{a}{\cons{b}{[c]} \cdot [d,e]} = \cons{a}{\cons{b}{[c] \cdot
+    [d,e]}}\\
+ &= \cons{a}{\cons{b}{\cons{c}{\el} \cdot [d,e]}}\\
+ &= \cons{a}{\cons{b}{\cons{c}{\el \cdot [d,e]}}}\\
+ &= \cons{a}{\cons{b}{\cons{c}{[d,e]}}} = [a,b,c,d,e]
+\end{align*}
+
+\paragraph{Unparsed Patterns.}
+Unparsed patterns are series of lexemes (which are expected to match
+the leaves of a given parse tree) and \emph{meta\-lexemes} (which
+cannot be found in the programming language) whose purpose is to
+control the matching process. Depending on the matching, we shall have
+different kinds of meta\-lexemes, but all unparsed patterns can at
+least contain \emph{meta\-variables} whose purpose is to be bound to a
+subtree of the parse tree, but not to a leaf (contrast this with the
+lexemes in the patterns which only match leaves of the parse
+tree). For example, consider again
+figure~\ref{intro:concrete_pattern}: in case of a successful match,
+the lexemes \texttt{for} and \texttt{++} match leaves of the parse
+tree, while the meta\-variables \texttt{\%x} and \texttt{\%n} are
+bound to some subtree of the parse tree.
+
+Let \({\cal V}\) be an infinite denumerable set of variables. A
+meta\-variable is formally an element of the set \(\{\meta{x} \mid
+\textsf{meta} \not\in {\cal C}, x \in {\cal V}\}\), and not element of
+this set in included in \({\cal L}\). That means that a meta\-variable
+is a variable which is not a node of any parse tree. The concrete
+syntax (i.e., the character string) of \(\meta{x}\) is the concrete
+variable \texttt{x} escaped by \texttt{\%}, i.e.,
+\texttt{\%x}. Sometimes, we shall call \(x\) a meta\-variable (instead
+of a variable), when it should be \(\meta{x}\) instead. Formally, an
+unparsed pattern, noted \(\overline{p}\), is a list of lexemes and
+meta\-lexemes. The set of unparsed patterns is noted \(\overline{\cal
+P}\). (The line over \(p\) and \(\cal P\) evokes the flatness of the
+structure.)
+
+\paragraph{Substitutions.}
+
+A \emph{substitution} \(\sigma\) is a mapping whose domain
+\(\dom{\sigma}\) is a finite subset of (meta)variables \({\cal V}\)
+and the co\hyp{}domain is a finite subset of parse trees \({\cal
+T}\). A \emph{binding} \(x \mapsto t\) is the pair \((x, t)\), where
+\(x \in {\cal V}\) and \(t \in {\cal T}\). Conceptually, a
+substitution can be thought of as a table which maps variables to
+parse trees. The substitution \(\sigma \oplus x \mapsto t\) is the
+\emph{update} of the substitution \(\sigma\) by the binding \(x
+\mapsto t\), as defined by
+\begin{equation}
+(\sigma \oplus x \mapsto t)(y) \triangleq
+\begin{cases}
+  t         & \text{if} \; x = y\\
+  \sigma(y) & \text{otherwise}
+\end{cases}
+\label{model:oplus}
+\end{equation}
+%% Let \(\sigma(\textsf{x}) = t_1\) and \(\sigma(\textsf{y}) = t_2\),
+%% where \textsf{x} and \textsf{y} are two different variables, \(t_1\)
+%% and \(t_2\) are parse trees. We have
+%% \begin{align*}
+%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{x})
+%%   &= \sigma(\textsf{x}) = t_1\\
+%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{y})
+%%   &= \sigma(\textsf{y}) = t_2\\
+%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{z})
+%%   &= t_3
+%% \end{align*}
+%% which suggests that substitutions can be handily expressed as sets of
+%% bindings:
+%% \begin{align*}
+%%   \sigma &= \{\textsf{x} \mapsto t_1, \textsf{y} \mapsto t_2\}\\
+%%   \sigma \oplus \textsf{z} \mapsto t_3 &= \{\textsf{x} \mapsto t_1,
+%%   \textsf{y} \mapsto t_2, \textsf{z} \mapsto t_3\}\\
+%% \end{align*}
+%% But updates are not set unions as shown by
+%% \begin{align*}
+%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{x}) 
+%%   &= t'_1\\
+%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{y}) 
+%%   &= \sigma(\textsf{y}) = t_2
+%% \end{align*}
+%% which is equivalent to the more readable
+%% \begin{equation*}
+%%   \sigma \oplus \textsf{x} \mapsto t'_1 
+%%   = \{\textsf{x} \mapsto t'_1, \textsf{y} \mapsto t_2\}
+%% \end{equation*}
+Let us extend updates to substitutions as follows:
+\begin{equation}
+(\sigma_1 \oplus \sigma_2)(y) \triangleq
+\begin{cases}
+  \sigma_2(y) & \text{if} \; y \in \dom{\sigma_2}\\
+  \sigma_1(y) & \text{otherwise}
+\end{cases}
+\label{model:oplus:ext}
+\end{equation}
+Let us define the inclusion between substitutions as
+\begin{align}
+  \sigma_1 \subseteq \sigma_2
+&\Longleftrightarrow 
+  \forall x \in \dom{\sigma_1}.(\sigma_1(x) =
+  \sigma_2(x)) \label{model:incl}
+\end{align}
+Interpreting substitutions as sets of bindings, \(\sigma_1 \subseteq
+\sigma_2\) simply means the inclusion of the sets associated with the
+respective substitutions. We shall note \(\sigma_\varnothing\) the
+empty substitution (empty domain). Notice also that the inclusion is
+transitive:
+\begin{gather}
+(\sigma_1 \subseteq \sigma_2) \wedge (\sigma_2 \subseteq \sigma_3)
+\Rightarrow \sigma_1 \subseteq \sigma_3% \label{model:incl:trans}
+\end{gather}
+
+\paragraph{Rewrite Systems.}
+
+We shall use different frameworks for defining the matching function,
+avoiding unnecessary complexity. Perhaps the simplest modelling
+technique consists in defining a \emph{rewrite system}\footnote{More
+precisely, an orthogonal rewrite system.}~\cite{HTCS:1990}, i.e., a
+finite set of rewrite rules. A rewrite rule is a relation between two
+terms (made up from the formal model) and is always printed as a kind
+of arrow symbol. The intended interpretation of the relation is that
+the left\hyp{}hand side can be replaced by the right\hyp{}hand side in
+any context, defining a computation. The factorial function
+\textsf{fact} can be defined as the ordered system\footnote{The rules
+are tried on the current term to be rewritten starting from the first
+and the first matching left\hyp{}hand side selects the rule to be
+applied.}
+\begin{align*}
+\textsf{fact}(0) &\rightarrow 1\\
+\textsf{fact}(n) &\rightarrow n \times \textsf{fact}(n-1)
+\end{align*}
+Consider now a more sophisticated (unordered) system 
+\begin{align*}
+\textsf{append}(\textsf{nil}(), s) &\rightarrow s\\
+\textsf{append}(\textsf{push}(h,t), s) &\rightarrow 
+\textsf{push}(h, \textsf{append}(t, s))
+\end{align*}
+defining the function \textsf{append} which appends a stack to
+another; \textsf{nil} and \textsf{push} are constructors:
+\(\textsf{nil}()\) denotes the empty stack and \(\textsf{push}(h, t)\)
+is the stack denoted by \(t\) on top of which the item \(h\) has been
+pushed. Note that (1)~the recursion on the second rule allows this
+system to handle stacks of all sizes; (2)~the nature of the items in
+the stacks does not matter, enabling a generic (sometimes called
+polymorphic) function definition (the second stack, \(s\), does not
+even need to be a stack!); (3)~the function \textsf{append} is
+equivalent to the catenation \((\cdot)\) defined by
+equations~\eqref{model:conc:1} and~\eqref{model:conc:2}: set \(\el
+\triangleq \textsf{nil}()\) and \(\cons{h}{t} \triangleq
+\textsf{push}(h, t)\), then \(\textsf{append}(s_1, s_2) = s_1 \cdot
+s_2\).
+
+There is another interesting concept related to the rewrite
+systems. When there is no overlapping of the left\hyp{}hand sides of
+the rewrite rules, the system is said to be
+\emph{syntax\hyp{}directed}, because choosing one rule rather than
+another is a decision taken only by considering the left\hyp{}hand
+sides, not the future success or failure of the alternatives. A
+syntax\hyp{}directed system implies that the rewrite relation is
+actually a function, thus so is the transitive closure. (Note that a
+system which is not syntax\hyp{}directed can define a function.) From
+an implementor's point of view, this means that there is no need to
+order the rules or to program a backtracking mechanism.
+
+\paragraph{Inference Systems.}
+
+An inference system is a finite set of \emph{inference
+  rules}. Inference rules constitute a framework for defining
+relations which is more expressive than rewrite systems. For example,
+they allow a rewrite step to be taken only if some conditions hold,
+e.g., if some other rewrite step is valid (recursively). Another
+improvement is that, whilst rewrite systems define a binary relation,
+inference rules can define any kind of statement or proposition,
+called, in this context, \emph{judgement}. An inference rule is a
+logical implication whose general form is as follows:
+\[
+P_1 \wedge P_2 \wedge \ldots \wedge P_n \Rightarrow C
+\]
+where \(\wedge\) stands for the boolean conjunction (`and'). The more
+intuitive presentation of an inference rule is
+\[
+\inferrule
+  {P_1 \\ P_2 \\ \ldots \\ P_n}
+  {C}
+\]
+The propositions \(P_i\) are called \emph{premises} and \(C\) is the
+\emph{conclusion} (it is the judgement defined by the rule). When
+premises are lacking, then \(C\) is called an \emph{axiom} and is
+simply written \(C\) (without the horizontal line). An axiom is
+unconditionally true, that is, it is true by definition, but only in
+the context of the system it belongs to (as such, it is often called
+\emph{non\hyp{}logical axiom}).
+
+What makes this formalism interesting is that it allows two kinds of
+interpretation: logical and computational. The logical reading has
+just been sketched: if all the premises hold, then the conclusion
+holds. This top\hyp{}down reading qualifies as \emph{deductive}. The
+computational interpretation is bottom\hyp{}up instead: in order to
+compute the conclusion, the premises must be computed first (their
+order is unspecified). This reading is said \emph{inductive}. A single
+formalism with this double interpretation is powerful because a
+relationship logically defined by means of inference rules can then be
+considered as an algorithm as well. Conversely, the logical aspect
+enables proving theorems about the algorithm.
+
+Rules and axioms may contain variables that are not explicitly
+quantified (universally or existentially, i.e., \(\forall\) or
+\(\exists\)). In this case, they are implicitly considered as
+universally quantified at the rule level. For example,
+\begin{mathpar}
+\inferrule{}{\textsf{even}(0)}
+\and
+\inferrule{\textsf{odd}(n)}{\textsf{even}(n+1)}
+\and
+\inferrule{\textsf{even}(n)}{\textsf{odd}(n+1)}
+\end{mathpar}
+is equivalent to the following propositions:
+\begin{gather*}
+\textsf{even}(0)\\
+\forall n.(\textsf{odd}(n) \Rightarrow \textsf{even}(n+1))\\
+\forall n.(\textsf{even}(n) \Rightarrow \textsf{odd}(n+1))
+\end{gather*}
+A \emph{proof tree}, or a \emph{derivation}, is a finite tree whose
+nodes are (instances of) conclusions of an inference system and their
+children are the premises of the same rule. The leaves of the tree are
+axioms. The conclusion of the proof (a shorthand for `proof tree' in
+some contexts), is then the root of the tree, which is traditionally
+set at the bottom of the page.
+
+\piccaption{\label{three}}
+\smallskip
+\parpic[r]{\fbox{\includegraphics[bb=226 660 275 721]{three}}}
+
+\noindent For instance, figure~\ref{three} shows the proof that \(3\)
+is odd in the previous system. The root (the theorem) is
+\(\textsf{odd}(3)\) and the leaf (the axiom) is
+\(\textsf{even}(0)\). Note that, since the rules here only have one
+premise, the proof tree is actually a proof list (i.e., a degenerate
+tree). This was the deductive view of the inference system. The
+inductive view provides an algorithm to determine whether an integer
+is even or odd, e.g., \(n\) is odd if the term \(\textsf{even}(n-1)\)
+can be derived.
+
+The concept of syntax\hyp{}directed system, which was introduced for
+the rewrite systems, also applies to inference systems: an inference
+system is syntax\hyp{}directed if the conclusions have
+non\hyp{}overlapping shapes.
+
+In the next section, we introduce a pattern matching based on unparsed
+patterns, which has pleasant properties but requires backtracking,
+thus too costly in practice. It is nevertheless simple and, as such,
+serves as an introduction to the formal specifications and proof
+techniques we use later on.

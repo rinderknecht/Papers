@@ -1,0 +1,27 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[treemode=U,levelsep=0.75cm,nodesep=2pt,dash=3pt 3pt,treesep=8pt,framearc=.4]{\TR{\textsf{UNPAR}\(_2\)}}{
+  \pstree{\TR{\textsf{BIND}\(_1\)}}{
+    \pstree{\TR{\textsf{UNPAR}\(_1\)}}{
+      \pstree{\TR{\textsf{UNPAR}\(_1\)}}{
+        \pstree{\TR{\textsf{BIND}\(_1\)}}{
+          \TR{\textsf{BIND}\(_3\)}
+        }
+        \pstree{\TR{\textsf{ELIM}}}{
+          \TR{\textsf{BIND}\(_3\)}
+        }
+      }
+      \TR{\textsf{END}}
+    }
+  }
+}
+\endTeXtoEPS
+
+\end{document}

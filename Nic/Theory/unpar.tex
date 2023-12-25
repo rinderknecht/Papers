@@ -1,0 +1,114 @@
+%%-*-latex-*-
+
+\documentclass[]{cj}
+
+% Language
+%
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{hyphenat}
+
+% Graphics and figures
+%
+\usepackage{picins}
+\usepackage{subfig}
+\usepackage{float}
+
+% Maths
+%
+\usepackage{amssymb,amsmath,stmaryrd}
+\usepackage{mathpartir}
+\usepackage{accents}
+
+% Miscellanea
+%
+\usepackage[nottoc]{tocbibind}
+\usepackage{xspace}
+\usepackage{url}
+%\usepackage{pdfdraftcopy}
+\input{cpp}
+
+\newcommand\match[3]{\langle{#2},{#1},{#3}\rangle}
+\newcommand\mj[4]{\match{#1}{#2}{#3} \twoheadrightarrow {#4}}
+\newcommand\smat[2]{\langle{#2},{#1}\rangle}
+\newcommand\smj[3]{\smat{#1}{#2} \twoheadrightarrow {#3}}
+\newcommand\cons[2]{[{#1}\mid{#2}]}
+\newcommand\cstr[2]{\textsf{#1}(#2)}
+\newcommand\unary[1]{\textsf{#1}\xspace}
+\newcommand\lpar{\unary{lpar}}
+\newcommand\rpar{\unary{rpar}}
+\newcommand\mlp{\unary{mlp}}
+\newcommand\mrp{\unary{mrp}}
+\newcommand\pat[1]{\cstr{pat}{#1}}
+\newcommand\meta[1]{\cstr{meta}{#1}}
+\newcommand\subst[2]{{#2}\llbracket{#1}\rrbracket}
+\newcommand\fringe[1]{\phi\llbracket{#1}\rrbracket}
+\newcommand\eqn[1]{\stackrel{#1}{=}}
+\newcommand\joker{\text{\Large\_}}
+\newcommand\dom[1]{\text{\it dom}(#1)}
+\newcommand\ind[1]{\aleph}
+\newcommand\len[1]{\lvert{#1}\lvert}
+\newcommand\el{[\,]}
+\newcommand\subterms[1]{t_{#1}}
+\newcommand\close[1]{\accentset{\circ}{#1}}
+
+\newcommand\Clang{\textsf{C}\xspace}
+\newcommand\Ada{\textsf{Ada}\xspace}
+\newcommand\Prolog{\textsf{Prolog}\xspace}
+\newcommand\Java{\textsf{Java}\xspace}
+\newcommand\ML{\textsf{ML}\xspace}
+\newcommand\GCC{\textsf{GCC}\xspace}
+\newcommand\Matchbox{\textsf{Matchbox}\xspace}
+\newcommand\Bison{\textsf{Bison}\xspace}
+\newcommand\MyGCC{\textsf{myGCC}\xspace}
+\newcommand\XPath{\textsf{XPath}\xspace}
+\newcommand\XQuery{\textsf{XQuery}\xspace}
+\newcommand\Gimple{\textsf{Gimple}\xspace}
+\newcommand\XML{\textsf{XML}\xspace}
+\newcommand\XSLT{\textsf{XSLT}\xspace}
+\newcommand\CDuce{\textsf{CDuce}\xspace}
+\newcommand\SDF{\textsf{SDF}\xspace}
+\newcommand\Scruple{\textsf{Scruple}\xspace}
+\newcommand\Haskell{\textsf{Haskell}\xspace}
+\newcommand\MetaAspectJ{\textsf{Meta\hyp{}AspectJ}\xspace}
+\newcommand\AspectJ{\textsf{AspectJ}\xspace}
+
+% Main document
+%
+\title[Theory and Practice of Unparsed Patterns]{Theory and Practice of\\ Unparsed Patterns for Metacompilation}
+\author{Christian Rinderknecht}
+\affiliation{Konkuk University, 143-701 Seoul Gwanjin-gu Hwayang-dong,
+  South Korea}
+\author{Nic Volanschi}
+\affiliation{\emph{my}\textbf{gcc}, \url{http://mygcc.free.fr}}
+\email{rinderkn@konkuk.ac.kr, nic.volanschi@free.fr}
+
+\input{abstract}
+
+\keywords{pattern matching, tree pattern, code checking,
+  metacompilation, formal methods}
+\shortauthors{Christian Rinderknecht, Nic Volanschi}
+\volumeyear{2009}
+\volumenumber{NN}
+\issuenumber{NN}
+
+\begin{document}
+
+\maketitle
+
+\allowdisplaybreaks
+
+\input{introduction}
+\input{model}
+\input{backtracking}
+\input{es1}
+\input{implementation}
+\input{related_work}
+\input{conclusion}
+\input{appendix}
+
+\bibliographystyle{unsrt}
+\bibliography{unpar}
+
+\end{document}

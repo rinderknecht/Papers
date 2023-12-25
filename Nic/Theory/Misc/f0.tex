@@ -1,0 +1,212 @@
+%%-*-latex-*-
+
+\section{Algorithm \textit{F}(0)}
+\label{f0}
+
+\subsection{Definitions}
+
+\paragraph{Abstract Syntax Trees and Unparsed Patterns.}
+
+Trees have been formally defined in paragraph \emph{Abstract Syntax
+  Trees} at section~\ref{model}. Here, forests are inductively defined
+here as the smallest set \(\cal F\) such that
+\begin{itemize}
+
+  \item \(\el \in {\cal F}\);
+
+  \item if \(t \in {\cal H}\) and \(f \in {\cal F}\) then
+    \(\cons{t}{f} \in {\cal F}\);
+
+  \item if \(f \in {\cal F}\) then \(\cons{\lpar}{f} \in {\cal F}\) and
+    \(\cons{\rpar}{f} \in {\cal F}\).
+
+\end{itemize}
+The terms \lpar and \lpar correspond respectively to the opening and
+closing parentheses. They can be present in the syntax of the
+programming language, i.e., \(\lpar, \rpar \in {\cal L}\), or not, the
+point here being that the user is also allowed to insert them in the
+unparsed patterns in order to help matching against the programme tree
+by specifying that the enclosed unparsed pattern must match the same
+subtree. They can be added anywhere in the unparsed pattern as long as
+they are properly paired (the native parentheses follow the rules of
+the source language). Unparsed patterns are formally defined as the
+smallest set \(\cal P\) such that
+\begin{itemize}
+
+  \item \(\el \in {\cal P}\);
+
+  \item if \(l \in {\cal L}\) and \(p \in {\cal P}\) then
+    \(\cons{l}{p} \in {\cal P}\);
+
+  \item if \(x \in {\cal V}\) and \(p \in {\cal P}\) then
+    \(\cons{\meta{x}}{p} \in {\cal P}\);
+
+  \item if \(p_1, p_2 \in {\cal P}\) then \([\lpar] \cdot p_1 \cdot
+    [\rpar] \cdot p_2 \in {\cal P}\).
+
+\end{itemize}
+The reason why parenthesis are explicitly present in the definition of
+\(\cal F\) is technical: during the pattern matching, the
+extra\hyp{}parenthesis found in the unparsed pattern are injected in
+the forest.
+
+
+\paragraph{Substitutions and Ground Patterns.} 
+
+Let us extend substitutions to cope with patterns, not just
+meta\hyp{}variables. The effect of a substitution on a pattern is to
+replace \emph{all} the meta\hyp{}variables it contains by abstract
+syntax trees. In order to distinguish a substitution which applies to
+a meta\hyp{}variable \(x\) and a substitution which applies to an
+unparsed pattern \(p\), we shall note \(\sigma(x)\) the
+former and \(\subst{p}{\sigma}\) the latter. The result of
+a substitution on a pattern is called a \emph{ground pattern}, whose
+set is defined inductively as the smallest set \(\hat{\cal P}\) such
+that
+\begin{itemize}
+
+  \item \(\el \in \hat{\cal P}\);
+
+  \item if \(t \in {\cal H}\) and \(\hat{p} \in \hat{\cal P}\) then
+    \(\cons{t}{p} \in \hat{\cal P}\);
+
+  \item if \(\hat{p}_1, \hat{p}_2 \in \hat{\cal P}\) then
+    \([\lpar] \cdot \hat{p}_1 \cdot [\rpar] \cdot \hat{p}_2 \in
+    \hat{\cal P}\).
+
+\end{itemize}
+The formal definition of substitutions on patterns is given in
+figure~\ref{f0_subst_def}.
+\begin{figure}
+\framebox[\columnwidth]{%
+\(
+\begin{aligned}
+\subst{\el}{\sigma} 
+&\eqn{1} \el\\
+\subst{\cons{\meta{x}}{p}}{\sigma}
+&\eqn{2} \cons{\sigma(x)}{\subst{p}{\sigma}}\\
+\subst{\cons{l}{p}}{\sigma}
+&\eqn{3} \cons{l}{\subst{p}{\sigma}} 
+\qquad \text{if} \; l \in {\cal L} \cup \{\lpar, \rpar\}
+\end{aligned}
+\)
+}
+\caption{Substitution \textit{F}(0)\label{f0_subst_def}}
+\end{figure}
+The first equation means that the substitution on the empty pattern is
+always the empty forest. The second equation defines the substitution
+of a meta\hyp{}variable by its associated tree: the tree is added to
+the resulting forest and the substitution proceeds recursively over
+the remaining pattern. The third and last equation specifies that the
+substitutions always let the lexemes in the pattern invariant.
+
+\paragraph{Tree Matching.}
+
+We need a relation between a ground pattern and an abstract syntax
+tree which captures the concept of \emph{tree matching}. Intuitively,
+a ground pattern matches a tree if and only if the elements of the
+pattern are embedded in the tree, in the same order. In case the
+element is a pattern tree, its subtrees must match the same subtree in
+the abstract syntax tree. The elements of a ground pattern contain
+either abstract syntax trees or pattern trees whose leaves are leaves
+of the abstract syntax tree. Let us note \(\hat{p} \sqsubseteq t\) the
+relation `The ground pattern \(\hat{p}\) matches the abstract syntax
+tree \(t\).' The formal definition we propose is based on ordered
+inference rules (see formal model), given in
+figure~\ref{f0_tree_matching_def}. Rule \textsf{ONE} states that a
+pattern matches a tree if the same pattern matches the corresponding
+singleton forest. This allows to relate a pattern and a tree. Rule
+\textsf{EMP} says that the empty pattern always matches the empty
+forest. Rule \textsf{EQ} specifies that if the head of the pattern and
+the forest is the same abstract syntax tree, then the pattern matches
+the forest if the pattern and the tree without their heads match. Rule
+\textsf{SUB}, to be always considered after rule \textsf{EQ} when
+selecting a rule based on the conclusion (the system is ordered),
+states that if the two heads are different trees, there is a match if
+the pattern matches the catenation of the subtrees \(f_1\) of the tree
+in the forest, embedded in a pair of parenthesis, and the remaining
+forest \(f_2\).
+\begin{figure}
+\framebox[\columnwidth]{
+\begin{mathpar}
+\inferrule*{}{\el \sqsubseteq \el}
+\;\TirName{\text{\sf EMP}}
+
+\inferrule
+  {t \in {\cal H} \cup \{\rpar\}\and \hat{p} \sqsubseteq f}
+  {\cons{t}{\hat{p}} \sqsubseteq \cons{t}{f}}
+\,\TirName{\text{\sf EQ}}
+
+\inferrule*[right=\text{\sf SUB}]
+  {\hat{p} \sqsubseteq f_1 \cdot [\rpar] \cdot f_2}
+  {\cons{\lpar}{\hat{p}} \sqsubseteq \cons{c(f_1)}{f_2}}
+\quad
+\inferrule*[right=\text{\sf ONE}]
+  {\hat{p} \sqsubseteq [t]}
+  {\hat{p} \sqsubseteq t}
+\end{mathpar}
+}
+\caption{Tree matching \textit{F}(0)\label{f0_tree_matching_def}}
+\end{figure}
+
+\paragraph{Pattern Matching.} 
+
+Pattern matching is defined by the rewrite system given in
+figure~\ref{f0_match_def}, where \(l \in {\cal L} \cup \{\rpar\}\),
+\(t \in {\cal T}\) and \(\sigma \subseteq \sigma \oplus x \mapsto t\).
+\begin{figure}
+\framebox[\columnwidth]{
+\(
+\begin{aligned}
+\match{\el}{\el}{\sigma} 
+& \rightarrow \sigma
+& \!\!\textsf{END}\\
+\match{\cons{l}{f}}{\cons{l}{p}}{\sigma} 
+& \rightarrow \match{f}{p}{\sigma}
+& \!\!\textsf{ELIM}\\
+\match{\cons{c(f_1)\!}{\!f_2}}{\cons{\lpar\!}{\!p}}{\sigma}
+& \rightarrow
+\match{f_1 \cdot \cons{\rpar\!}{\!f_2}}{p}{\sigma}
+& \!\!\textsf{UNPAR}\\
+\match{\cons{t}{f}}{\cons{\meta{x}}{p}}{\sigma}
+& \rightarrow
+\match{f}{p}{\sigma \oplus x \mapsto t}
+& \!\!\textsf{BIND}
+\end{aligned}
+\)
+}
+\caption{Pattern matching \textit{F}(0)\label{f0_match_def}}
+\end{figure}
+A term \(\match{f}{p}{\sigma}\) is called a \emph{configuration}. The
+rewrite system above is syntax\hyp{}directed, i.e., the shape alone of
+each configuration selects either no rewrite rule or only one. Let us
+define \(\smat{t}{p} \triangleq \match{[t]}{p}{\sigma}\) whenever
+\(\dom{\sigma} = \varnothing\). The pattern matching relation
+\((\rightarrow)\) is defined by means of a rewrite system which is
+syntax\hyp{}directed, therefore the relation is actually a
+function. Rule \textsf{END} is the rule that must terminate any valid
+series of rewrite steps. Rule \textsf{ELIM} eliminates the same lexeme
+from the heads of the pattern and the forest. Rule \textsf{UNPAR}
+unparses the abstract syntax tree in the head of the forest when an
+opening parenthesis \lpar is matched against it. This means that the
+tree is replaced by its subtrees between a pair of parentheses. Note
+that it would have been more natural to define \textsf{UNPAR} as
+\begin{align*}
+\match{\cons{c(f_1)\!}{\!f_2}}{\cons{\lpar\!}{\!p}}{\sigma}
+&\rightarrow
+\match{[\lpar] \! \cdot f_1 \! \cdot \! [\rpar] \! \cdot \!
+  f_2}{\cons{\lpar\!}{\!p}}{\sigma}
+\intertext{but since the next step would necessarily be
+  \textsf{ELIM}:}
+&\rightarrow \match{f_1 \! \cdot \! [\rpar] \! \cdot \!
+  f_2}{p}{\sigma}
+\end{align*}
+ we chose to optimise a bit by defining \textsf{UNPAR} as the
+ composition of both rules. Finally, rule \textsf{BIND} handles the
+ case of a meta\hyp{}variable: it must be bound to a tree (not a
+ lexeme), by means of a substitution update.
+
+
+\subsection{Soundness}
+\input{f0_soundness}
+

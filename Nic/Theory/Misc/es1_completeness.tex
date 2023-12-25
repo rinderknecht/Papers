@@ -1,0 +1,516 @@
+%%-*- latex -*-
+
+The completeness of our algorithm means that every time a substitution
+on a pattern matches a tree, our algorithm computes a substitution
+which is included in the first one (which may contain useless
+meta\hyp{}variable bindings). In other words, all minimal
+substitutions that enable a tree\hyp{}matching are computed by our
+pattern matching. Formally, this can be expressed as the following
+theorem.
+\begin{theorem}[Completeness]\hfill
+\begin{center}
+If   \(\subst{{p}}{\sigma} \sqsubseteq h\)
+then \(\smat{h}{{p}} \twoheadrightarrow \sigma'\) 
+and  \(\sigma' \subseteq \sigma\).
+\end{center}
+\end{theorem}
+
+
+\paragraph{Proof.}
+
+Let \(\ind{Z}({p}, f, \sigma, \sigma')\) be the proposition
+\begin{center}
+\emph{If}   \(\subst{{p}}{\sigma} \sqsubseteq f\)
+\emph{then} \(\smj{f}{{p}}{\sigma'}\)
+\emph{and} \(\sigma' \subseteq \sigma\).
+\end{center}
+The completeness is equivalent to \(\ind{Z}({p}, [h], \sigma,
+\sigma')\). First, let us assume that
+\begin{align}
+  \subst{{p}}{\sigma} \sqsubseteq f \label{es1:compl:1}
+\end{align}
+(otherwise the theorem would be trivially true). This means that there
+exists a derivation \(\Delta\) in the inference system defining
+\((\sqsubseteq)\), at figure~\ref{es1_tree_matching_def}, whose
+conclusion is \(\subst{{p}}{\sigma} \sqsubseteq f\). This
+derivation is a tree, which makes it possible to reckon by general
+induction on its structure, i.e., we assume that \(\ind{Z}\) holds for
+the conclusion of any sub\hyp{}derivation of \(\Delta\) (the
+\emph{induction hypothesis}) and then prove that \(\ind{Z}\) holds for
+\(\subst{{p}}{\sigma} \sqsubseteq f\). We proceed case by
+case on the kind of rule that can end the derivation.
+\begin{enumerate}
+
+  \item Case where \(\Delta\) ends with \textsf{EMP}.\\ We have \(f =
+    \el\) and also \(\subst{{p}}{\sigma} = \el \eqn{1}
+    \subst{\el}{\sigma}\). Therefore \({p} = \el\) (the
+    substitution is injective by construction), which leads to
+    \(\smat{f}{{p}} = \smj{\el}{\el}{\sigma_\varnothing}\) by
+    means of the axiom \textsf{END} (figure~\ref{es1_match_def}). And
+    we trivially have \(\sigma_\varnothing \subseteq \sigma\). We
+    conclude that \(\ind{W}(\el, \el, \sigma, \sigma_\varnothing)\)
+    holds.
+
+  \item Case where \(\Delta\) ends by \textsf{EQ}.\\ Then, for all
+    abstract syntax tree \(h_1\) (perhaps reduced to a single lexeme),
+    there exists a closed pattern \(\close{p}\) and a forest \(f'\) such
+    that
+    \begin{align}
+      \subst{{p}}{\sigma} &\triangleq
+      \cons{h_1}{\close{p}} \label{es1:compl:2}\\ 
+      f &\triangleq \cons{h_1}{f'} \label{es1:compl:3}
+    \end{align}
+    and \(\Delta\) has the shape
+    \begin{mathpar}
+      \inferrule*[right={\text{\sf EQ}}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{ }}
+           {\close{p} \sqsubseteq f'}}
+        {\cons{h_1}{\close{p}} \sqsubseteq \cons{h_1}{f'}}
+    \end{mathpar}
+    By examining the definition of substitutions at
+    figure~\ref{es1_subst_def}, we deduce that we have two exclusive
+    options for \(h_1\):
+    \begin{enumerate}
+
+      \item Case where \(h_1 = l \in {\cal L}\).\\ Definition
+        \eqref{es1:compl:2} and definition \((\eqn{3})\) of the
+        substitutions imply that there exists a meta\hyp{}parsed
+        pattern \({p}'\) such that
+        \begin{align}
+          {p} &= \cons{l}{{p}'}\label{es1:compl:4}\\
+          \close{p} &= \subst{{p}'}{\sigma}\notag
+        \end{align}
+        So \(\Delta\) has the refined shape
+        \begin{mathpar}
+          \inferrule*[right={\text{\sf EQ}}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\subst{{p}'}{\sigma} \sqsubseteq f'}}
+            {\subst{{p}}{\sigma} \sqsubseteq f}
+        \end{mathpar}
+        Let us assume that the induction hypothesis holds for the
+        premise of \textsf{EQ}, i.e.,
+        \begin{align}
+          \smat{f'}{{p}'} &\twoheadrightarrow
+          \sigma' \label{es1:compl:6}\\
+          \sigma' &\subseteq \sigma \label{es1:compl:7}
+        \end{align}
+        Configuration \eqref{es1:compl:6} can be the premise of
+        pattern\hyp{}matching rule \textsf{ELIM}
+        (figure~\ref{es1_match_def}), whose conclusion is then
+        \begin{gather}
+          \smj{\cons{l}{f'}}{\cons{l}{{p}'}}{\sigma'} 
+          \label{es1:compl:8}  
+        \end{gather}
+        By \eqref{es1:compl:3} and \eqref{es1:compl:4},
+        \eqref{es1:compl:8} is equivalent to
+        \begin{gather}
+          \smj{f}{{p}}{\sigma'} \label{es1:compl:9}
+        \end{gather}
+        As a conclusion, the induction hypothesis and
+        \eqref{es1:compl:1} imply \eqref{es1:compl:9} and
+        \eqref{es1:compl:7}, i.e., \(\ind{W}(\cons{l}{{p}'},
+        \cons{l}{f'}, \sigma, \sigma')\) holds.
+
+      \item Case where \(h_1 = t_1 \in {\cal T}\).\\
+        Definition \eqref{es1:compl:2} and definition \((\eqn{2})\) of
+        the substitutions imply that there exists a meta\hyp{}parsed
+        pattern \({p}'\) and a meta\hyp{}variable \(x\) such
+        that
+        \begin{align}
+          {p} &=
+          \cons{\meta{x}}{{p}'} \label{es1:compl:10}\\
+          \close{p} &= \subst{{p}'}{\sigma}\notag\\
+          t_1 &= \sigma(x) \label{es1:compl:12}
+        \end{align}
+        So \(\Delta\) has the refined shape
+        \begin{mathpar}
+          \inferrule*[right={\text{\sf EQ}}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\subst{{p}'}{\sigma} \sqsubseteq f'}}
+            {\subst{\cons{\meta{x}}{{p}'}}{\sigma} \sqsubseteq
+              \cons{t_1}{f'}}
+        \end{mathpar}
+        Let us now consider all the sub\hyp{}cases for \(f'\).
+        \begin{enumerate}
+
+          \item Case \(f' = \el\).\\ In this case, the premise of
+            \textsf{EQ} is simplified into
+            \(\subst{{p}'}{\sigma} \sqsubseteq \el\), which
+            can only be an instance of the axiom \textsf{EMP} (see
+            figure~\ref{es1_tree_matching_def}), therefore
+            \(\subst{{p}'}{\sigma} = \el\). Equation
+            \((\eqn{1})\) at figure~\ref{es1_subst_def} implies then
+            that
+            \begin{gather}
+              {p}' = \el \label{es1:compl:16}
+            \end{gather}
+            (the substitutions are injective by definition). Equations
+            \eqref{es1:compl:10} and \eqref{es1:compl:16} imply
+            \begin{gather}
+              {p} = [\meta{x}] \label{es1:compl:17}
+            \end{gather}
+            Equations \(f' = \el\), \eqref{es1:compl:3},
+            \eqref{es1:compl:17} and axiom \textsf{BIND}\(_3\) at
+            figure~\ref{es1_match_def} imply
+            \begin{gather}
+              \smj{f}{{p}}{\{x \mapsto t_1\}} \label{es1:compl:18}
+            \end{gather}
+            The definition \eqref{model:incl} of substitution
+            inclusions trivially establishes that
+            \begin{gather}
+              \{x \mapsto t_1\} \subseteq \sigma \label{es1:compl:19}
+            \end{gather}
+            because of \eqref{es1:compl:12}. As conclusion, the
+            induction hypothesis and \eqref{es1:compl:1} imply
+            \eqref{es1:compl:18} and \eqref{es1:compl:19}, i.e.,
+            \(\ind{W}([\meta{x}], [t_1], \sigma, \{x \mapsto t_1\})\)
+            holds.
+
+          \item \label{es1:compl:26} Case \(f' = \cons{l}{f''}\), with
+            \(l \in {\cal L}\).\\ Then the premise of \textsf{EQ} is
+            refined into \(\subst{{p}'}{\sigma} \sqsubseteq
+            \cons{l}{f''}\). It can only be the conclusion of another
+            instance of the same rule \textsf{EQ}, so there exists a
+            meta\hyp{}parsed pattern \({p}''\) such that
+            \({p}' = \cons{l}{{p}''}\) and the
+            derivation \(\Delta\) is actually
+            \begin{mathpar}
+              \inferrule*[right={\text{\sf EQ}}]
+                {\inferrule*[right={\text{\sf EQ}},leftskip=1em]
+                   {\inferrule*[leftskip=1em]
+                     {\inferrule*[vdots=1.5em]{}{(\Delta')}}
+                     {\subst{{p}''}{\sigma} \sqsubseteq f''}}
+                   {\subst{\cons{l}{{p}''}}{\sigma}
+                     \sqsubseteq \cons{l}{f''}}}
+                {\subst{\cons{\meta{x},l}{{p}''}}{\sigma}
+                  \sqsubseteq \cons{t_1,l}{f''}}
+            \end{mathpar}
+            and
+            \begin{gather}
+              {p} = \cons{\meta{x},l}{{p}''}
+              \label{es1:compl:20}
+            \end{gather}
+            Since \(\Delta'\) is a sub\hyp{}derivation of \(\Delta\),
+            the induction hypothesis applies to its conclusion, i.e.,
+            there exists a substitution \(\sigma'\) such that
+            \begin{align}
+              \smat{f''}{{p}''} &\twoheadrightarrow
+              \sigma' \label{es1:compl:21}\\
+              \sigma' &\subseteq \sigma \label{es1:compl:22}
+            \end{align}
+            We need a short lemma about the substitution \(\sigma'\)
+            before we analyse \(\Delta\) further. Let us consider
+            \begin{itemize}
+
+              \item \(x \not\in \dom{\sigma'}\).\\ Then, by definition
+                of inclusions of substitutions \eqref{model:incl} 
+                implies
+                \begin{gather*}
+                  \sigma' \subseteq \sigma' \oplus x \mapsto t_1
+                \end{gather*}
+
+              \item \(x \in \dom{\sigma'}\).\\ The definition of
+                inclusions \eqref{model:incl} applied to
+                \eqref{es1:compl:22} imply that \(\sigma'(x) =
+                \sigma(x)\), thus, by \eqref{es1:compl:12}, we have
+                \(\sigma'(x) = t_1\). So \(\sigma' \subseteq \sigma'
+                \oplus x \mapsto t_1\), since, by definition
+                \eqref{model:oplus}, \((\sigma' \oplus x \mapsto t)(x)
+                \triangleq t_1 = \sigma'(x)\).
+
+            \end{itemize}
+            In both cases, we proved that
+            \begin{gather}
+              \sigma' \subseteq \sigma' \oplus x \mapsto t_1
+              \label{es1:compl:23}
+            \end{gather}
+            Relations \eqref{es1:compl:21} and \eqref{es1:compl:23}
+            can be the premise of an instance of rule
+            \textsf{BIND}\(_1\):
+            \begin{mathpar}
+              \inferrule
+                {\smj{f''}{{p}''\!}{\!\sigma'}
+                 \and
+                 \sigma' \subseteq \sigma' \oplus x \mapsto t_1}
+                {\smj{\cons{t_1, l\!}{\!f''}}%
+                     {\cons{\meta{x}, l\!}{\!{p}''}}%
+                     {\sigma' \!\oplus\! x \!\mapsto\! t_1}}
+            \end{mathpar}
+            In other words, by \eqref{es1:compl:20} and the definition
+            of \(f\), the following holds:
+            \begin{gather}
+              \smj{f}{{p}}{\sigma' \oplus x \mapsto
+                t_1} \label{es1:compl:24}
+            \end{gather}
+            For all \(y \in \dom{\sigma' \oplus x \mapsto t_1}\),
+            there are two cases:
+            \begin{itemize}
+
+              \item \(y = x\).\\ By definition \eqref{model:oplus} and
+                \eqref{es1:compl:12} we have \((\sigma' \oplus x
+                \mapsto t_1)(y) \triangleq t_1 = \sigma(x) =
+                \sigma(y)\).
+
+              \item \(y \neq x\).\\Then, by definition
+                \eqref{model:oplus}, \((\sigma' \oplus x \mapsto
+                t_1)(y) = \sigma'(y)\).  Besides, \eqref{es1:compl:22}
+                is equivalent, by definition \eqref{model:incl} to
+                \begin{gather*}
+                  \forall y \in \dom{\sigma'}.(\sigma'(y) =
+                  \sigma(y))
+                \end{gather*}
+                So \((\sigma' \oplus x \mapsto t_1)(y) = \sigma(y)\).
+
+            \end{itemize}
+            In both cases, we established that
+            \begin{gather}
+              \sigma' \oplus x \mapsto t_1 \subseteq
+              \sigma \label{es1:compl:25}
+            \end{gather}
+            due to definition of inclusion \eqref{model:incl}. As a
+            conclusion, the induction hypothesis and
+            \eqref{es1:compl:1} imply \eqref{es1:compl:24} and
+            \eqref{es1:compl:25}, i.e.,
+            \(\ind{W}(\cons{\meta{x},l}{{p}''},
+            \cons{t_1,l}{f''}, \sigma, \sigma' \oplus x \mapsto t_1)\)
+            holds.
+
+          \item \(f' = \cons{t_2}{f''}\).\\ Then the premise of
+            \textsf{EQ} is refined into
+            \(\subst{{p}'}{\sigma} \sqsubseteq
+            \cons{t_2}{f''}\). Let us assume that the induction
+            hypothesis holds for it, i.e., there exists a substitution
+            \(\sigma'\) such that
+            \begin{align}
+              \smat{\cons{t_2}{f''}}{{p}'} &\twoheadrightarrow
+              \sigma' \label{es1:compl:13}\\
+              \sigma' &\subseteq \sigma\notag
+            \end{align}
+            Just as in the case~\ref{es1:compl:26}, we can prove
+            \begin{align}
+              \sigma' &\subseteq \sigma' \oplus x \mapsto t_1
+              \label{es1:compl:15}\\
+              \sigma' \oplus x \mapsto t_1 &\subseteq \sigma
+              \label{es1:compl:27}
+            \end{align}
+            Relations~\eqref{es1:compl:13} and \eqref{es1:compl:15}
+            can be the premises of an instance of the rule
+            \textsf{BIND}\(_2\):
+            \begin{mathpar}
+              \inferrule
+                {\smj{\cons{t_2}{f''}}{{p}'}{\sigma'}
+                 \and
+                 \sigma' \subseteq \sigma' \oplus x \mapsto t_1}
+                {\smj{\cons{t_1, t_2\!}{\!f''}}%
+                     {\cons{\meta{x}\!}{\!{p}'}}%
+                     {\sigma' \oplus x \mapsto t_1}}
+            \end{mathpar}
+            In other words
+            \begin{gather}
+              \smj{f}{{p}}{\sigma' \oplus x \mapsto
+                t_1} \label{es1:compl:28}
+            \end{gather}
+            As a conclusion, the induction hypothesis and
+            \eqref{es1:compl:1} imply \eqref{es1:compl:28} and
+            \eqref{es1:compl:27}, i.e.,
+            \(\ind{W}(\cons{\meta{x}}{{p}'},
+            \cons{t_1,t_2}{f''}, \sigma, \sigma' \oplus x \mapsto
+            t_1)\) holds.
+        \end{enumerate}
+
+    \end{enumerate}
+
+  \item Case where \(\Delta\) ends by \textsf{PAT}.\\ Then there
+    exists two closed patterns \(\close{p}_1\) and \(\close{p}_2\) as
+    well as a constructor \(c\) and a two forests \(f_1\) and \(f_2\)
+    such that
+    \begin{align}
+         \subst{{p}}{\sigma} 
+      &= \cons{\pat{\close{p}_1}}{\close{p}_2} \label{es1:compl:29}\\
+         f 
+      &= \cons{c(f_1)}{f_2} \label{es1:compl:30}
+    \end{align}
+    Equations \eqref{es1:compl:29} and \((\eqn{4})\) at
+    figure~\ref{es1_subst_def} imply that there exists two unparsed
+    patterns \({p}_1\) and \({p}_2\) such that
+    \begin{align*}
+         \subst{{p}_1}{\sigma}
+      &= \close{p}_1\\
+         \subst{{p}_2}{\sigma}
+      &= \close{p}_2\\
+         {p}
+      &= \cons{\pat{{p}_1}}{{p}_2}
+    \end{align*}
+    Thus the premises of \textsf{PAT} are refined into
+    \begin{align*}
+      \subst{{p}_1}{\sigma} &\sqsubseteq f_1\\
+      \subst{{p}_2}{\sigma} &\sqsubseteq f_2
+    \end{align*}
+    Let us assume that the induction hypothesis holds for them, i.e.,
+    there exists two substitutions \(\sigma_1\) and \(\sigma_2\) such
+    that
+    \begin{align}
+       \smat{f_1}{{p}_1} &\twoheadrightarrow
+       \sigma_1 \label{es1:compl:31}\\
+       \sigma_1 &\subseteq \sigma \label{es1:compl:32}\\
+       \smat{f_2}{{p}_2} &\twoheadrightarrow
+       \sigma_2 \label{es1:compl:33}\\
+       \sigma_2 &\subseteq \sigma \label{es1:compl:34}
+    \end{align}
+    By definition \eqref{model:incl} of inclusion,
+    \eqref{es1:compl:32} and \eqref{es1:compl:34} imply
+    \begin{gather}
+      \forall x \in \dom{\sigma_1} \cap \dom{\sigma_2}.(\sigma_1(x) =
+      \sigma_2(x))
+    \end{gather}
+    which, in turn, implies
+    \begin{gather}
+      \sigma_1 \subseteq \sigma_1 \oplus \sigma_2 \label{es1:compl:35}
+    \end{gather}
+    Judgements \eqref{es1:compl:31}, \eqref{es1:compl:33} and
+    \eqref{es1:compl:35} can serve as premises to an instance of rule
+    \textsf{UNPAR}\(_1\), whose conclusion is then
+    \begin{gather}
+      \smj{\cons{c(f_1)\!}{\!f_2}}%
+          {\cons{\pat{{p}_1}}{\!{p}_2}}%
+          {\sigma_1 \oplus \sigma_2} \label{es1:compl:36}
+    \end{gather}
+    Besides, by definition \eqref{model:incl} of inclusion, definition
+    \eqref{model:oplus} of updates, \eqref{es1:compl:32} and
+    \eqref{es1:compl:34} imply
+    \begin{gather}
+      \forall x \in \dom{\sigma_1} \cup \dom{\sigma_2}.((\sigma_1
+      \oplus \sigma_2)(x) = \sigma(x)) \label{es1:compl:37}
+    \end{gather}
+    Since we trivially have
+    \begin{gather*}
+      \dom{\sigma_1 \oplus \sigma_2} = \dom{\sigma_1} \cup
+      \dom{\sigma_2}
+    \end{gather*}
+    then \eqref{es1:compl:37} is equivalent to
+    \begin{gather}
+      \sigma_1 \oplus \sigma_2 \subseteq \sigma \label{es1:compl:38}
+    \end{gather}
+    As a conclusion, the induction hypothesis and \eqref{es1:compl:1}
+    imply \eqref{es1:compl:36} and \eqref{es1:compl:38}, i.e.,
+    \(\ind{W}(\cons{\pat{{p}_1}}{\!{p}_2},
+    \cons{c(f_1)\!}{\!f_2}, \sigma, \sigma_1 \oplus \sigma_2)\) holds.
+
+  \item Case where \(\Delta\) ends by \textsf{SUB}.\\ Then there
+    exists a constructor \(c\) and two forests \(f_1\) and \(f_2\)
+    such that
+    \begin{gather}
+      f = \cons{c(f_1)}{f_2} \label{es1:compl:39}
+    \end{gather}
+    and, because the system defining \((\sqsubseteq)\) is partially
+    ordered and \textsf{SUB} is the last rule, it is implied that
+    there are no closed patterns \(\close{p}_1\) and \(\close{p}_2\) such
+    that \(\subst{{p}}{\sigma} = \cons{c(f_1)}{\close{p}_1}\)
+    or \(\subst{{p}}{\sigma} =
+    \cons{\pat{\close{p}_1}}{\close{p}_2}\) (which would lead to the
+    conclusions of \textsf{EQ} or \textsf{PAT}). In other words, for
+    all \(\close{p}_1\) and \(\close{p}_2\),
+    \begin{align*}
+      \subst{{p}}{\sigma}
+      &\neq\cons{c(f_1)}{\close{p}_1}\\
+      \subst{{p}}{\sigma} &\neq
+    \cons{\pat{\close{p}_1}}{\close{p}_2}
+    \end{align*}
+    Equivalently, for all \(x\), \({p}_1\) and \({p}_2\),
+    \begin{align}
+        {p} &\neq \cons{\meta{x}}{{p}_1}
+      & \text{with} \,\; \sigma(x) = c(f_1) \label{es1:compl:43}\\
+        {p} &\neq
+        \cons{\pat{{p}_1}}{{p}_2} \label{es1:compl:44}
+    \end{align}
+    The derivation \(\Delta\) has thus the shape
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf SUB}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{ }}
+           {\subst{{p}}{\sigma} \sqsubseteq f_1 \cdot f_2}}
+         {\subst{{p}}{\sigma} \sqsubseteq \cons{c(f_1)}{f_2}}
+    \end{mathpar}
+    Let us assume that the induction hypothesis holds for the premise
+    of \textsf{SUB}, i.e.,
+    \begin{align}
+        \smat{f_1 \cdot f_2}{{p}} 
+      &\twoheadrightarrow \sigma' \label{es1:compl:40}\\
+      \sigma' &\subseteq \sigma \label{es1:compl:41}
+    \end{align}
+    Let us turn over to the system defining the pattern matching at
+    figure~\ref{es1_match_def} and check whether \eqref{es1:compl:40}
+    can either be an instance of a premise or an instance of a
+    conclusion.
+    \begin{itemize}
+
+      \item Conditions \eqref{es1:compl:39}, \eqref{es1:compl:43} and
+        \eqref{es1:compl:44} imply that \eqref{es1:compl:40} cannot be
+        a conclusion of any rule except \textsf{UNPAR}\(_2\). Since
+        the rules are partially ordered, \eqref{es1:compl:40} cannot
+        be the conclusion of rules before \textsf{UNPAR}\(_2\) and
+        \(f_1\) must start with a tree not reduced to a lexeme. Even
+        so, no judgement in the derivation ending with
+        \eqref{es1:compl:40} can contain the configuration
+        \(\smat{f}{{p}}\) because the forest of the premises
+        are always smaller than the forest in the conclusion, in terms
+        of number of nodes (constructors). So this case is impossible.
+
+      \item The judgement \eqref{es1:compl:40} can be the instance of
+        the premise of rule \textsf{UNPAR}\(_2\), which leads to the
+        conclusion
+        \begin{align}
+          \smat{\cons{c(f_1)}{f_2}}{{p}} &\twoheadrightarrow
+          \sigma'\notag
+          \intertext{which, by \eqref{es1:compl:39}, is simply}
+          \smat{f}{{p}} &\twoheadrightarrow
+          \sigma'\label{es1:compl:42}
+        \end{align}
+        under the conditions of rule \textsf{UNPAR}\(_2\) being
+          ordered last. More precisely, if a derivation ends with
+          \textsf{UNPAR}\(_2\), then its conclusion has the shape
+          \(\smj{\cons{c(f_1)\!}{\!f_2}}{{p}}{\sigma}\) \emph{and it
+          is implied that all the following holds:}
+        \begin{itemize}
+
+        \item there exists no variable \(x\), no lexeme \(l\), no
+          meta\-parsed pattern \({p}'\) and no forest \(f\) such that
+          \({p} = \cons{\meta{x},l}{{p}'}\) and \(f_2 = \cons{l}{f}\)
+          (conclusion of \textsf{BIND}\(_1\));
+
+        \item there exists no variable \(x\), no meta\-parsed pattern
+          \({p}'\), no tree \(t\) and no forest \(f\) such that \({p}
+          = \cons{\meta{x}}{{p}'}\) and \(f_2 = \cons{t}{f}\)
+          (conclusion of \textsf{BIND}\(_2\));
+
+        \item \(f_2 \neq \el\) and there exists no variable \(x\) such
+          that \({p} = [\meta{x}]\) (conclusion of
+          \textsf{BIND}\(_3\));
+
+        \item there exists no meta\-parsed patterns \({p}_1\) and
+          \({p}_2\) such that \({p} = \cons{\pat{{p}_1}}{{p}_2}\)
+          (conclusion of \textsf{UNPAR}\(_1\)).
+
+      \end{itemize}
+          These conditions express that the conclusion
+          \eqref{es1:compl:42} cannot be the conclusion of rules
+          before \textsf{UNPAR}\(_2\). Therefore, assuming this
+          constraints hold, we can conclude that the induction
+          hypothesis and \eqref{es1:compl:1} imply
+          \eqref{es1:compl:42} and \eqref{es1:compl:41}, i.e.,
+          \(\ind{W}({p}, f, \sigma, \sigma')\) holds. Otherwise, we
+          must envisage that \eqref{es1:compl:40} is the premise of
+          \textsf{BIND}\(_1\) or \textsf{BIND}\(_2\), or is an
+          instance of axiom \textsf{BIND}\(_3\). None of these cases
+          allow us to deduce the configuration \(\smat{f}{{p}}\)
+          because all these rules increase the length of the pattern,
+          from premise to conclusion. In this case, the theorem is
+          false.
+
+    \end{itemize}
+
+
+\end{enumerate}

@@ -1,0 +1,506 @@
+\section{Merge Sort}
+
+In general, merge sort consists in splitting a series in two series of
+\emph{equal or almost equal} lengths, which are in turn recursively
+sorted, except for the singleton, and merged. The number of
+comparisons \(\C{}{n}\) hence satisfies
+\begin{equation}
+\C{}{0} = \C{}{1} = 0,\quad
+\C{}{n} = \C{}{\floor{n/2}}
++ \C{}{\ceiling{n/2}}
++ \C{\Join}{\floor{n/2},\ceiling{n/2}},
+\label{eq:Ctop}
+\end{equation}
+where \(\floor{x}\) (\textsl{floor of~\(x\)}) is the greatest integer
+less than or equal to~\(x\), and \(\ceiling{x}\) (\textsl{ceiling
+  of~\(x\)}) is the least integer greater than or equal to~\(x\). So
+we have \(n = \floor{n/2} + \ceiling{n/2}\).
+
+\paragraph{Minimum cost}
+
+We have \(\B{}{n} = \B{}{\floor{n/2}} + \B{}{\ceiling{n/2}} +
+\floor{n/2}\) from equations \eqref{eq:best_merge} and
+\eqref{eq:Ctop}. Let \(\Delta_n := \B{}{n+1} - \B{}{n}\) and find some
+constraints on it. Because of the floor and ceiling functions
+of~\(n/2\), we consider two complementary cases.
+\begin{wrapfigure}[22]{r}[0pt]{0pt}
+\centering
+\includegraphics[bb=71 435 160 741]{bits}
+\caption{\label{fig:bits}}
+%\caption{Binary numbers from \(1\) to \(n\)\label{fig:bits}}
+\end{wrapfigure}
+\begin{itemize}
+
+  \item If \(n = 2p\), then \(\B{}{2p} = 2 \cdot \B{}{p} + p\)
+    and \(\B{}{2p+1} = \B{}{p} + \B{}{p+1} +
+    p\). Therefore, \(\Delta_{2p} = \Delta_{p}\). Also \(\Delta_0 =
+    0\).
+
+  \item If \(n = 2p+1\), then \(\B{}{2p+2} = 2 \cdot \B{}{p+1}
+    + p + 1\). Thus, \(\Delta_{2p+1} = \Delta_{p} + 1\).
+
+\end{itemize}
+If we think in terms of binary representations, \(\Delta_n\)~is the
+number of \(1\)-bits or, equivalently, the sum of the bits
+of~\(n\). It is usually noted~\(\nu_n\) and called \emph{bit sum}. So
+\(\B{}{n+1} = \B{}{n} + \nu_n\), therefore
+\begin{equation}
+\B{}{n} = \sum_{k=0}^{n-1}{\nu_k}.\label{eq:OB_tms}
+\end{equation}
+Equation~\eqref{eq:best_power} is \(\B{}{2^p} = \frac{1}{2}p2^p\),
+that is, \(\B{}{n} = \frac{1}{2}n\log_2 n\) when \(n=2^p\). This should
+prompt us to look, like McIlroy~\cite{McIlroy:1974}, for an additional
+linear term in the general case, that is, the greatest real
+constants~\(a\) and~\(b\) such that, for \(n \geqslant 2\),
+\begin{equation}
+\pred{L}{n} \colon \tfrac{1}{2}n\log_2 n + an + b \leqslant \B{}{n},
+\label{ineq:McIlroy}
+\end{equation}
+where \(\log_2 n\)~is the binary logarithm of~\(n\). The base case is
+simply \(\pred{L}{2} \colon 2a + b \leqslant 0\). The most obvious way
+to structure the inductive argument is to follow the definition of
+\(\B{}{n}\) when \(n=2p\) and \(n=2p+1\), but a bound on
+\(\B{}{2p+1}\) would rely on bounds on \(\B{}{p}\) and \(\B{}{p+1}\),
+compounding imprecision. Instead, if we could have at least one exact
+value from which to inductively build the bound, we would gain
+accuracy. Therefore, we may expect a better bound if we can find a
+decomposition of \(\B{}{2^p+i}\), where \(0 < i \leqslant 2^p\), in
+terms of \(\B{}{2^p}\) (exact) and \(\B{}{i}\). This is easy if we
+count the bits in \fig~\ref{fig:Btms_table},
+\begin{figure}[b]
+\centering
+\includegraphics[bb=71 595 210 721]{Btms_table}
+\caption{$\protect\B{}{2^p+i} = \protect\B{}{2^p}
+  + \protect\B{}{i} + i$\label{fig:Btms_table}}
+\end{figure}
+which is the same as the table in \fig~\ref{fig:bits}, where
+\(n=2^p+i\). (Keep in mind that \(\B{}{n}\) is the sum of the bits up
+to \(n-1\), as seen in equation~\eqref{eq:OB_tms}.) We find:
+\begin{equation*}
+\B{}{2^p+i} = \B{}{2^p} + \B{}{i} + i.
+%\label{eq:OBtms_2m_i}
+\end{equation*}
+(The term~\(i\) is the sum of the leftmost bits.) Therefore, let us
+assume \(\pred{L}{n}\), for all \(1 \leqslant n \leqslant 2^p\), and
+prove \(\pred{L}{2^p+i}\), for all \(0 < i \leqslant 2^p\). The
+induction principle entails then that \(\pred{L}{n}\) holds for
+all~\(n \geqslant 2\). The inductive step \(\pred{L}{2^p+i}\) should
+give us the opportunity to maximise the constants~\(a\) and~\(b\). Let
+\(m=2^p\). Using \(\B{}{2^p} = \tfrac{1}{2}p2^p\) from
+equation~\eqref{eq:best_power} and the inductive hypothesis
+\(\pred{L}{i}\), we have
+\begin{equation}
+\tfrac{1}{2}m\log_2 m + (\tfrac{1}{2}i\log_2 i + ai + b) + i
+\leqslant 
+\B{}{m} + \B{}{i} + i = \B{}{m+i}.
+\label{ineq:Btms_n_i}
+\end{equation}
+We need now to find \(a\)~and~\(b\) such that the inductive step
+\(\pred{L}{m+i}\) holds as well, that is,
+\(\tfrac{1}{2}(m+i)\log_2(m+i) + a(m+i) + b \leqslant \B{}{m+i}\).
+Using~\eqref{ineq:Btms_n_i}, this is implied by
+\begin{equation*}
+\tfrac{1}{2}(m+i)\log_2(m+i) + a(m+i) + b
+\leqslant
+\tfrac{1}{2}m\log_2 m + (\tfrac{1}{2}i\log_2 i + ai + b) + i.
+\end{equation*}
+We can already notice that this inequality is equivalent to
+\begin{equation}
+\tfrac{1}{2}m\log_2(m+i) + \tfrac{1}{2}i\log_2(m+i) + am
+\leqslant \tfrac{1}{2}m\log_2 m + \tfrac{1}{2}i\log_2 i + i.
+\label{ineq:Btms_n_i_details}
+\end{equation}
+But \(\tfrac{1}{2}m\log_2(m+i) > \tfrac{1}{2}m\log_2 m\) and
+\(\tfrac{1}{2}i\log_2(m+i) > \tfrac{1}{2}i\log_2 i\), therefore the
+constant~\(a\) we are seeking must satisfy \(am \leqslant i\) for all
+\(0 < i < m\), hence \(a < 0\).
+
+We extend~\(i\) over the real numbers by defining \(i=x2^p=xm\), where
+\(x\)~is a real number such that \(0 < x \leqslant 1\). By replacing
+\(i\)~by~\(xm\) in inequality~\eqref{ineq:Btms_n_i_details}, we obtain
+\begin{equation*}
+\tfrac{1}{2}(1+x)\log_2(1+x) + a \leqslant \tfrac{1}{2}x\log_2 x + x.
+\end{equation*}
+Let \(\Phi(x) := \tfrac{1}{2}x\log_2 x - \tfrac{1}{2}(1+x)\log_2(1+x)
++ x\). Then, this is equivalent to \(a \leqslant \Phi(x)\).
+
+The function~\(\Phi\) can be continuously extended at~\(0\), as
+\(\lim_{x \to 0} x\log_2 x = 0\), and it is differentiable on the
+interval \(]0,1]\):
+\begin{equation}
+\frac{d\Phi}{dx} = \frac{1}{2}\log_2\frac{4x}{x+1}.
+\label{eq:der_Phi}
+\end{equation}
+The root of \(d\Phi/dx = 0\) is \myfrac{1}/{3}, and the derivative
+is negative before, and positive after. Therefore, \(a_{\max} :=
+\min_{0 < x \leqslant 1}\Phi(x) = \Phi(\tfrac{1}{3}) =
+-\tfrac{1}{2}\log_2\tfrac{4}{3}\). The base case was \(b \leqslant -2a\),
+therefore \(b_{\max} := -2a_{\max} = \log_2\tfrac{4}{3}\). Finally,
+\begin{equation}
+  \tfrac{1}{2}n\log_2 n - \left(\tfrac{1}{2}\log_2\tfrac{4}{3}\right)n + \log_2\tfrac{4}{3}
+  \leqslant \B{}{n},
+\label{ineq:lower_Btms}
+\end{equation}
+where \(\tfrac{1}{2}\log_2\tfrac{4}{3} \simeq 0.2075\) and
+\(\log_2\tfrac{4}{3} \simeq 0.415\). Importantly, the lower bound is
+tight if \(x=\myfrac{1}/{3}\), that is, when
+\(2^p+i=2^p+x2^p=(1+1/3)2^p=2^{p+2}\!/3\), or, in general,
+\(2^k\!/3\). The nearest integers are \(\floor{2^k\!/3}\) and
+\(\ceiling{2^k\!/3}\), so we should find out which one minimises
+\(\B{}{n} - \tfrac{1}{2}n\log_2(\tfrac{3}{4}n)\), because we have
+\(\tfrac{1}{2}n\log_2 n - \left(\tfrac{1}{2}\log_2\tfrac{4}{3}\right)n =
+\tfrac{1}{2}n\log_2(\tfrac{3}{4}n)\). It is tedious to prove that the
+lower bound is tight if \(n=2\) (from the base case) and is otherwise
+the sharpest when \(n=(1010\dots01)_2\) or \(n=(1010\dots1011)_2\). As
+a whole, these values constitute the \emph{Jacobsthal sequence},
+defined as
+\begin{equation*}
+J_0 = 0; \; J_1=1; \; J_{n+2} = J_{n+1} + 2J_{n},\; \text{for \(n
+  \geqslant 0\).}
+\end{equation*}
+
+Let us use now the same inductive approach to find a good upper bound
+to \(\B{}{n}\), that is, we want to minimise the real constants
+\(a'\)~and~\(b'\) such that, for \(n \geqslant 2\),
+\begin{equation*}
+\B{}{n} \leqslant \tfrac{1}{2}n\log_2 n + a'n + b'.
+\end{equation*}
+The only difference with the search for the lower bound is that
+inequalities are reversed, so we want
+\begin{equation*}
+\Phi(x) \leqslant a', \;\text{where \(\Phi(x) := \tfrac{1}{2}x\log_2 x - \tfrac{1}{2}(1+x)\log_2(1+x) + x\)}.
+\end{equation*}
+Here, we need to find the maximum of~\(\Phi\) on the closed interval
+\([0,1]\). The two positive roots of~\(\Phi\) are \(0\)~and~\(1\), and
+\(\Phi\)~is negative between them (see
+equation~\eqref{eq:der_Phi}). Therefore \(a'_{\min} := \max_{0 < x
+  \leqslant 1}\Phi(x) = \Phi(1) = 0\). From the base case, we deduce
+\(b'_{\min} = -2a_{\min} = 0\). Therefore, we have the bounds
+\begin{equation}
+\tfrac{1}{2}n\log_2 n - \left(\tfrac{1}{2}\log_2\tfrac{4}{3}\right)n + \log_2\tfrac{4}{3}
+\leqslant \B{}{n} \leqslant
+\tfrac{1}{2}n\log_2 n.
+\label{ineq:bounds_Btms}
+\end{equation}
+The upper bound is clearly tight when \(n=2^p\) because of
+equation~\eqref{eq:best_power}. Obviously, \(\B{}{n} \sim
+\frac{1}{2}n\log_2 n\), where \(f(x) \sim g(x)\) means \(\lim_{x\to
+  \infty}f(x)/g(x) = 1\), but if we were only interested in this
+asymptotic result, Bush~\cite{Bush:1940} gave a simpler counting
+argument on the bits in \fig~\ref{fig:bits}.
+Delange~\cite{Delange:1975} investigated \(\B{}{n}\) by means of
+advanced real analysis and showed that \(\B{}{n} = \tfrac{1}{2}n\log_2
+n + F_0(\log_2 n) \cdot n\), where \(F_0\)~is a continuous, nowhere
+differentiable function of period~\(1\), and whose Fourier series
+shows the mean value to be about \(-0.145599\).
+
+\paragraph{Maximum cost}
+
+The maximum number of comparisons satisfies
+\begin{equation*}
+\W{}{0} = \W{}{1} = 0,
+\qquad
+\W{}{n} = \W{}{\floor{n/2}}
++ \W{}{\ceiling{n/2}}
++ \W{\Join}{\floor{n/2},\ceiling{n/2}}.
+\end{equation*}
+Equations \eqref{eq:worst_merge} and~\eqref{eq:Ctop} yield
+\(\W{}{n} = \W{}{\floor{n/2}} +
+\W{}{\ceiling{n/2}} + n - 1\) and
+\begin{equation*}
+\W{}{0} = \W{}{1} = 0;\quad
+\W{}{2p} = 2\W{}{p} + 2p - 1,\quad
+\W{}{2p+1} = \W{}{p} + \W{}{p+1} + 2p.
+\end{equation*}
+Let the difference of two successive terms be \(\Delta_n :=
+\smash[t]{\W{}{n+1}} - \W{}{n}\). If we know \(\Delta_n\), we know
+\(\W{}{n}\) because \(\sum_{k=1}^{n-1}\Delta_k =
+\sum_{k=1}^{n-1}\W{}{k+1} - \sum_{k=1}^{n-1}\W{}{k} = \W{}{n} -
+\W{}{1} = \W{}{n}\). We remark that
+\begin{itemize}
+
+  \item if \(n=2p\), then \(\Delta_{2p} = \Delta_{p} + 1\),
+
+  \item otherwise \(n=2p+1\) and \(\W{}{2p+2} = 2 \cdot \W{}{p+1} + 2p
+    + 1\), so \(\Delta_{2p+1} = \Delta_{p} + 1\).
+
+\end{itemize}
+In summary, \(\Delta_0 = 0\) and \(\Delta_n = \Delta_{\floor{n/2}} +
+1\). If we start unravelling the recurrence, we get \(\Delta_n =
+\Delta_{\floor{\floor{n/2}/2}} + 2 = \Delta_{\floor{n/2^2}} +
+2\). (See~\cite[Exercise 1.2.4.35]{Knuth:1997}.)  By iteration, we
+deduce \(\Delta_n = m\), with \(m\)~being the largest natural number
+such that \(\floor{n/2^m} = 0\). In other words, \(m\)~is the number
+of bits in the binary notation of~\(n\). That number is found by
+setting \(n := \sum_{i=0}^{m-1}{b_i2^i}\), where the~\(b_i \in
+\{0,1\}\) are the bits and \(b_{m-1}=1\). Then
+\begin{equation}
+2^{m-1} \leqslant n < 2^m \Rightarrow m - 1 \leqslant \log_2 n
+< m \Rightarrow m = \floor{\log_2 n} + 1 = \Delta_n.
+\label{eq:num_of_bits}
+\end{equation}
+We already know that \(\W{}{n} = \sum_{k=1}^{n-1}\Delta_k\),
+therefore, with~\eqref{eq:num_of_bits}, we conclude that
+\begin{equation}
+\W{}{n} = \sum_{k=1}^{n-1}(\floor{\log_2 k}+1).
+\label{eq:tms_n_tmp}
+\end{equation}
+Whilst the minimum cost is the number of \(1\)-bits up to \(n-1\), we
+find now that the maximum cost is the total number of bits up to
+\(n-1\). Informally, this leads us to bet that \(\W{}{n} \sim 2 \cdot
+\B{}{n} \sim n\log_2 n\), since we would expect the number of \(0\)-bits
+and \(1\)-bits to be the same in average. Consider again the bit table
+in \fig~\ref{fig:bits}. The greatest power of~\(2\) smaller than~\(n\)
+is~\(2^{\floor{\log_2 n}}\) because it is the binary number
+\((10\dots0)_2\) having the same number of bits as~\(n\); it thus
+appears in the same section of the table as~\(n\). The trick consists
+in counting the bits in \emph{columns}, from top to bottom, and
+leftwards. In the rightmost column, we find \(n\)~bits. In the second
+column, from the right, we find \(n-2^1+1\) bits. The third from the
+right contains \(n-2^2+1\) bits etc. until the leftmost column
+containing \(n-2^{\floor{\log_2 n}}+1\) bits. The total number of bits in
+the table is
+\begin{equation*}
+\abovedisplayskip=2pt
+\belowdisplayskip=2pt
+\sum_{k=1}^{n}{\!(\floor{\log_2 k}+1)}
+   = \sum_{k=0}^{\floor{\log_2 n}}{\!(n-2^k+1)}
+   = (n + 1)(\floor{\log_2 n} + 1) - 2^{\floor{\log_2 n}+1} + 1.
+\end{equation*}
+Let \(n := (b_{m-1}\dots b_0)_2\), then \(2^{m-1} \leqslant n
+\leqslant 2^m - 1\) and \(2^{m-1} < 2^{m-1} + 1 \leqslant n + 1
+\leqslant 2^m\), so \(m-1 < \log_2(n+1) \leqslant m\), that is, \(m =
+\ceiling{\log_2(n+1)}\). Using eq.~\eqref{eq:num_of_bits}, we deduce \(1
++ \floor{\log_2 n} = \ceiling{\log_2(n+1)}\). As a consequence,
+equation~\eqref{eq:tms_n_tmp} can be rewritten as
+\begin{equation}
+%\abovedisplayskip=4pt
+%\belowdisplayskip=4pt
+\W{}{0} = \W{}{1} = 0,
+\qquad
+\W{}{n} = n\ceiling{\log_2 n} - 2^{\ceiling{\log_2 n}} + 1.
+\label{eq:top}
+\end{equation}
+This equation is subtler than it seems, due to the periodicity hidden
+in \(2^{\ceiling{\log_2 n}}\). Depending on whether \(n = 2^p\) or not,
+two cases arise:
+\begin{itemize}
+
+  \item if~\(n=2^p\), then \(\W{}{n} = n\log_2 n - n +
+    1\);
+
+  \item otherwise, we have \(\ceiling{\log_2 n} = \floor{\log_2 n} + 1 = \log_2
+    n - \{\log_2 n\} + 1\) and \(\W{}{n} = n\log_2 n + \theta(1 - \{\log_2 n\})
+    \cdot n + 1\), with \(\theta(x) := x - 2^x\) and \(\{x\} := x -
+    \floor{x}\) is the \emph{fractional part} of the real~\(x\). In
+    particular, we have \(0 \leqslant \{x\} < 1\). The derivative is
+    \(\theta'(x) = 1 - 2^x\log 2\); it has one root \(\theta'(x_0) = 0
+    \Leftrightarrow x_0 = -\log_2\log 2\) and it is positive
+    before~\(x_0\), and negative after. Accordingly, \(\theta(x)\)
+    reaches its maximum at~\(x_0\): \(\max_{0<x\leqslant 1}\theta(x) =
+    \theta(x_0) = -(1+\log\log{2})/\!\log{2} \simeq -0.9139\), and
+    \(\min_{0<x\leqslant 1}\theta(x) = \theta(1) = -1\). By
+    injectivity, \(\theta(1) = \theta(1-\{\log_2 n\})\) implies \(\{\log_2
+    n\} = 0\), that is, \(n=2^p\) (first case).
+\end{itemize}
+Hence \(\W{}{n} = n\log_2 n + A(\log_2 n) \cdot n + 1\), where \(A(x) := 1 -
+\{x\} - 2^{1 - \{x\}}\) is a periodic function, since \(A(x) =
+A(\{x\})\), such that \(-1 \leqslant A(x) < -0.91\). Further analysis
+of~\(A(x)\) requires Fourier series or complex analysis; its mean
+value is about \(-0.942695\).
+\begin{equation}
+n\log_2 n - n + 1 \leqslant \W{}{n} <
+n\log_2 n - 0.91 n + 1.\label{ineq:OWtms}
+\end{equation}
+The lower bound is attained when \(n=2^p\). The upper bound is most
+accurate when \(\{\log_2 n\} = 1 + \log_2\log 2\), that is, when \(n\)~is the
+nearest integer to \(2^p\log 2\) (take the binary expansion of \(\log
+2\), shift the point \(p\)~times to the right and round). \(\W{}{n}
+\sim n\log_2 n\).
+
+\paragraph{Average cost}
+
+Let \(\M{}{n}\) be the average number of comparisons to sort
+\(n\)~keys top\hyp{}down. All permutations of the input series being
+equally likely, equation~\eqref{eq:Ctop} becomes
+\begin{equation*}
+\M{}{0} = \M{}{1} = 0,\qquad
+\M{}{n} = \M{}{\floor{n/2}} +
+\M{}{\ceiling{n/2}} +
+\M{\Join}{\floor{n/2},\ceiling{n/2}},
+\end{equation*} 
+which, with equation~\eqref{eq:mean_merge}, in turn implies
+\begin{equation}
+\M{}{n} = \M{}{\floor{n/2}} +
+\M{}{\ceiling{n/2}} + n -
+\frac{\floor{n/2}}{\ceiling{n/2}+1} 
+- \frac{\ceiling{n/2}}{\floor{n/2}+1}.
+\label{eq:Mn}
+\end{equation}
+Difference equations are not helpful here, so we should try an
+inductive approach instead, as we did for finding bounds on
+\(\B{}{n}\). Inequalities~\eqref{ineq:M_join} are equivalent to \(n\log_2
+n - \alpha n + \alpha < \M{}{n} < n\log_2 n - \alpha n + 2\) where \(n =
+2^p\), and this suggests us to also look for bounds of the form \(n\log_2
+n + an + b\) when \(n \neq 2^p\).
+
+Let us start with the lower bound and set to maximise the
+real constants \(a\)~and~\(b\) in
+\begin{equation*}
+\abovedisplayskip=0pt
+\belowdisplayskip=2pt
+\pred{H}{n} \colon n\log_2 n + an + b \leqslant \M{}{n},
+\; \text{for \(n \geqslant 2\).}
+\end{equation*}
+Since \(\pred{H}{2p}\) depends on \(\pred{H}{p}\), and
+\(\pred{H}{2p\!+\!1}\) depends on \(\pred{H}{p}\) and
+\(\pred{H}{p\!+\!1}\), the property \(\pred{H}{n}\), for any \(n>1\),
+transitively depends on \(\pred{H}{2}\) alone, because we are
+iterating divisions by~\(2\). \(\pred{H}{2}\) is equivalent to
+\begin{equation}
+2a + b + 1 \leqslant 0.
+\label{ineq:base_lower_Atms}
+\end{equation}
+Because the definition of \(\M{}{n}\) depends on the parity of~\(n\),
+the inductive step will be twofold. Let us assume \(\pred{H}{m}\) for
+\(m < 2p\), in particular, we suppose \(\pred{H}{p}\), which, with the
+expression of \(\M{}{2p}\) from equation~\eqref{eq:Mn}, entails
+\begin{equation*}
+\abovedisplayskip=2pt
+\belowdisplayskip=2pt
+ (2p\log_2 p + 2ap + 2b) + 2p - 2 + \frac{2}{p+1} \leqslant \M{}{2p}.
+\end{equation*}
+We want \(\pred{H}{2p} \colon 2p\log_2(2p) + 2ap + b
+= 2p\log_2 p + 2ap + 2p + b \leqslant \M{}{2p}\), which holds
+if the following condition does:
+\begin{equation*}
+\abovedisplayskip=0pt
+\belowdisplayskip=2pt
+2p\log_2 p + 2ap + 2p + b \leqslant 2p\log_2 p + 2ap + 2b + 2p - 2 + \frac{2}{p+1},
+\end{equation*}
+which is equivalent to
+\begin{equation*}
+\abovedisplayskip=0pt
+\belowdisplayskip=2pt
+2 - \frac{2}{p+1} = \frac{2p}{p+1} \leqslant b.
+\end{equation*}
+Let \(\Phi(p) := 2p/(p+1)\). This function is strictly increasing for
+\(p > 0\) and \(\Phi(p) \to 2^{-}\), as \(p \to +\infty\).
+
+The other inductive step deals with the odd values of~\(n\). We assume
+\(\pred{H}{m}\) for all \(m < 2p+1\), in particular, we suppose
+\(\pred{H}{p}\) and \(\pred{H}{p+1}\), which, with the expression of
+\(\M{}{2p+1}\) from equation~\eqref{eq:Mn}, implies
+\begin{equation*}
+%\abovedisplayskip=0pt
+%\belowdisplayskip=2pt
+(p\log_2 p + ap + b) + ((p+1)\log_2(p+1) + a(p+1) + b) + 2p - 1 +
+\frac{2}{p+2} \leqslant \M{}{2p+1},
+\end{equation*} 
+which may be simplified slightly into
+\begin{equation*}
+%\abovedisplayskip=0pt
+%\belowdisplayskip=2pt
+p\log_2 p + (p+1)\log_2(p+1) + a(2p+1) + 2b + 2p - 1 + \frac{2}{p+2}
+\leqslant \M{}{2p+1}.
+\end{equation*} 
+We want to prove \(\pred{H}{2p+1} \colon (2p+1)\log_2(2p+1) +
+a(2p+1) + b \leqslant \M{}{2p+1}\), which is thus implied by 
+\begin{equation}
+%\abovedisplayskip=0pt
+%\belowdisplayskip=2pt
+  (2p+1)\log_2(2p+1) \leqslant
+  p\log_2 p + (p+1)\log_2(p+1) + b + 2p - 1 + \frac{2}{p+2}.
+\label{ineq:Psi_temp}
+\end{equation} 
+Let \(\Psi(p) := (2p+1)\log_2(2p+1) - (p+1)\log_2(p+1) - p\log_2 p -
+2p + 1 - 2/(p+2)\). Then~\eqref{ineq:Psi_temp} is equivalent to
+\(\Psi(p) \leqslant b\). Furthermore,
+\begin{equation*}
+\frac{d\Psi}{dp}(p) = \frac{2}{(p+2)^2} 
++ \log_2\frac{4p^2 + 4p + 1}{p^2 + p} - 2
+= \frac{2}{(p+2)^2} + \log_2\left(1+\frac{1}{4p(p+1)}\right).
+\end{equation*}
+Clearly, \(d\Psi/dp > 0\), for all \(p > 0\), so \(\Psi(p)\)~is
+strictly increasing for \(p > 0\). Let us find \(\lim_{p \to
+  +\infty}\Psi(p)\) by rewriting \(\Psi(p)\) as follows:
+\begin{align*}
+\Psi(p)
+  &= 2 - \frac{2}{p+2} + (2p+1)\log_2(p+\tfrac{1}{2}) - (p+1)\log_2(p+1)
+     - p\log_2 p\\
+  &= 2 - \frac{2}{p+2} + p\left(\log_2(p+\tfrac{1}{2})^2 - \log_2(p+1)
+   - \log_2 p\right) + \log_2(p+\tfrac{1}{2})\\
+  &\phantom{=} \quad - \log_2(p+1)\\
+  &= 2 - \frac{2}{p+2} + p\log_2\left(1 + \frac{1}{4p(p+1)}\right) +
+  \log_2\frac{p + \myfrac{1}/{2}}{p+1}.
+\end{align*}
+The limit of \(x\log(1+1/x^2)\) as \(x \to +\infty\) can be found by
+changing \(x\)~into \(1/y\) and considering the limit as \(y \to
+0^{+}\), which is shown by l'H\^{o}pital's rule to be~\(0\). This
+result can be extended to apply to the large term in \(\Psi(p)\) and,
+since all the other variable terms converge to~\(0\), we can conclude
+that \(\Psi(p) \to 2^{-}\), as \(p \to +\infty\).
+
+Because we need to satisfy the conditions \(\Psi(p) \leqslant b\) and
+\(\Phi(p) \leqslant b\) for both inductive steps to hold, we have to
+compare \(\Psi(p)\)~and~\(\Phi(p)\), when \(p\)~is a natural number:
+we have \(\Phi(1) < \Psi(1)\) and \(\Phi(2) < \Psi(2)\), but \(\Psi(p)
+< \Phi(p)\) if \(p \geqslant 3\). Therefore, for~\(b\) not to depend
+on~\(p\), we need it to be greater than~\(2\), the smallest upper
+bound of~\(\Phi\)
+and~\(\Psi\). Inequality~\eqref{ineq:base_lower_Atms} means that we
+need to minimise~\(b\) in order to maximise~\(a\) (which is the
+priority), so we settle for the limit: \(b_{\min} = 2\), and the same
+inequality entails \(a \leqslant -3/2\), hence \(a_{\max} =
+-3/2\). The principle of complete induction finally establishes that,
+for \(n \geqslant 2\),
+\begin{equation}
+  n\log_2 n - \frac{3}{2} n + 2 < \M{}{n}.
+\label{ineq:lower_Atms}
+\end{equation}
+This bound is not excellent, but it was not too hard to obtain. We may
+recall the lower bound when \(n=2^p\), in~\eqref{ineq:M_join}: \(n\log_2
+n - \alpha n + \alpha < \M{}{n}\), where \(\alpha \simeq
+1.264499\). In fact, Flajolet and Golin~\cite{FlajoletGolin:1994}
+proved
+\begin{equation}
+n\log_2 n - \alpha n < \M{}{n}.
+\label{ineq:best_lower_Atms}
+\end{equation}
+Asymptotically, that bound is, up to the linear term, the same as for
+the case \(n=2^p\). Our inductive method cannot reach this nice result
+because it yields sufficient conditions that are too strong, in
+particular, we found no obvious way to get the decomposition
+\(\M{}{2^p+i} = \M{}{2^p} + \M{}{i} + \dots\)
+
+Now, let us find the smallest real constants \(a'\)~and~\(b'\) such
+that for \(n \geqslant 2\), \(\M{}{n} \leqslant n\log_2 n + a'n +
+b'\). The base case of \(\pred{H}{n}\) in~\eqref{ineq:base_lower_Atms}
+is here reversed: \(2a' + b' + 1 \geqslant 0\). Hence, in order to
+minimise~\(a'\), we need to maximise~\(b'\). Furthermore, the
+conditions on~\(b'\) from the inductive steps are reversed as well
+with respect to~\(b\): \(b' \leqslant \Phi(p)\) and \(b' \leqslant
+\Psi(p)\). The base case is \(\pred{H}{2}\), that is, \(p=1\), and we
+saw earlier that \(\Phi(1) \leqslant \Psi(1)\), thus we must have
+\(b'\leqslant \Phi(1) = 1\). The maximum value is thus \(b'_{\max} =
+1\). Finally, this implies that \(a'\geqslant -1\), thus \(a'_{\min} =
+-1\).
+
+Gathering the bounds, we hence established that
+\begin{equation*}
+n\log_2 n - \frac{3}{2}n + 2 < \M{}{n} < n\log_2 n - n + 1.
+\end{equation*}
+Trivially, we have \(\M{}{n} \sim n\log_2 n \sim \W{}{n} \sim 2 \cdot
+\B{}{n}\).  Flajolet and Golin~\cite{FlajoletGolin:1994} proved, using
+complex analysis the following very strong result:
+\begin{equation*}
+\M{}{n} = n\log_2 n + B(\log_2 n) \cdot n + O(1),
+\end{equation*}
+where \(B\)~is continuous, non\hyp{}differentiable, periodic with
+period~\(1\), of mean value \(-1.2481520\). The notation \(O(1)\) is
+an instance of Bachmann's notation for an unknown positive
+constant. The maximum of~\(B(x)\) is approximately \(-1.24075\), so
+\begin{equation*}
+\belowdisplayskip=0pt
+\M{}{n} = n\log_2 n - (1.25 \pm 0.01) \cdot n + O(1).
+\end{equation*}

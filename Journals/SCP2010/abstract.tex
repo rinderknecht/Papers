@@ -1,0 +1,29 @@
+%%-*-latex-*-
+
+\begin{abstract}
+Several software development tools support the matching of
+concrete\hyp{}syntax user\hyp{}supplied patterns against the
+application source code, allowing the detection of invalid, risky,
+inefficient or forbidden constructs. When applied to compilers, this
+approach is called \emph{meta\-compilation}. These patterns are
+traditionally parsed into tree patterns, i.e., fragments of
+abstract\hyp{}syntax trees with meta\-variables, which are then
+matched against the abstract\hyp{}syntax tree corresponding to the
+parsing of the source code. Parsing the patterns requires extending
+the grammar of the application programming language with
+meta\-variables, which can be difficult, especially in the case of
+legacy tools. Instead, we propose a novel matching algorithm which is
+independent of the programming language because the patterns are not
+parsed and, as such, are called \emph{unparsed patterns}. It is as
+efficient as the classic pattern matching while being easier to
+implement. By giving up the possibility of static checks that parsed
+patterns usually enable, it can be integrated within any existing
+utility based on abstract\hyp{}syntax trees at a low cost. We present
+an in\hyp{}depth coverage of the practical and theoretical aspects of
+this new technique by describing a working minimal patch for the GNU
+\Clang compiler, together with a small standalone prototype punned
+\Matchbox, and by lying out a complete formalisation, including
+mathematical proofs of key algorithmic properties, like correctness
+and equivalence to the classic matching.
+\end{abstract} 
+

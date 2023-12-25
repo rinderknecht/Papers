@@ -1,0 +1,67 @@
+%%-*-latex-*-
+
+mathematical sets of constant set expressions, with no variable. We
+give here the formul{\ae} that construct all of them by increasing
+depth (the subscripts correspond to the depth of terms in the current
+set):
+
+\noindent
+Let
+$\left\{ \begin{array}{l}
+           \LIST_{0} = \varnothing \ \textnormal{and} \
+           \LIST_{1} = \{ \Nil \} \\
+           \forall i \geqslant 1.\LIST_{i+1} = \{ \Cons
+             \, (\ocamlvaluename{t}, \ocamlvaluename{l}) 
+             \, \mid \, \ocamlvaluename{t} \in \Herbrand_{i},
+             \ocamlvaluename{l} \in \LIST_{i} \} 
+         \end{array}
+\right.$
+
+\noindent
+and
+$\left\{ \begin{array}{l}
+           \textnormal{M}_{0} = \varnothing \ \textnormal{and} \
+           \textnormal{M}_{1} = \{ \Nil \} \\
+           \forall i \geqslant 1.\textnormal{M}_{i+1} = \{ \Bind
+             \, (\ocamlvaluename{s}, \ocamlvaluename{t},
+             \ocamlvaluename{m}) \, \mid \, \ocamlvaluename{s} :
+             \ocamltypename{identifier}, \ocamlvaluename{t} \in
+             \Herbrand_{i}, \ocamlvaluename{m} \in \textnormal{M}_{i} \}
+         \end{array}
+\right.$
+
+\noindent
+and
+$\left\{ \begin{array}{l}
+           \NEWTERMS_{0} = \varnothing \ \textnormal{and} \
+           \NEWTERMS_{1} = \{ \Nil \} \\
+           \forall i \geqslant 1. \NEWTERMS_{i+1} = \LIST_{i+1} \cup
+             \textnormal{M}_{i+1} 
+             \cup \{ \ocamlvaluename{l}\/ \pmb{:}
+                    \ocamlvaluename{t} \, \mid \, 
+                    \ocamlvaluename{l} : \ocamltypename{label},
+                    \ocamlvaluename{t} \in \Herbrand_{i} \}
+         \end{array}
+\right.$
+
+\noindent
+in
+$\left\{ \begin{array}{l}
+           \Herbrand_{0} = \varnothing \ \textnormal{and} \
+           \Herbrand_{1} = \{ \ocamlvaluename{v} \, \mid \,
+              \ocamlvaluename{v} : \ocamltypename{k}_{1} \}
+              \cup \NEWTERMS_{1} \\
+           \Herbrand_{2} = \Herbrand_{1} \cup \{ \ocamlvaluename{v} \,
+           \mid \, \ocamlvaluename{v} : \ocamltypename{k}_{2} \}
+           \cup \NEWTERMS_{2}\\
+           \Herbrand_{3} = \Herbrand_{2} \cup \NEWTERMS_{3} \cup \{
+           \ocamlvaluename{v} \, \mid \, \ocamlvaluename{v} :
+           \ocamltypename{real\_interval} \,\, \text{or} \,\,
+           \ocamlvaluename{v} :
+           \ocamltypename{closed\_int\_interval}\} \\ 
+           \forall i \geqslant 3.\Herbrand_{i+1} = 
+           \Herbrand_{i} \cup \NEWTERMS_{i+1}
+         \end{array}
+\right.$
+
+

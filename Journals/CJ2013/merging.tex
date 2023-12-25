@@ -1,0 +1,40 @@
+\section{Merging}
+
+Merging consists in combining two ordered series of keys into one
+ordered series. Without loss of generality, we shall be only
+interested in sorting keys in increasing order. One way to achieve
+this consists in comparing the two smallest keys, output the smallest
+and repeat the procedure until one of the series becomes empty, in
+which case the other is wholly appended. By definition, the cost of
+merging is the number of comparisons performed. The following
+results are well known~\cite{Knuth:1998}.
+
+\paragraph{Minimum cost}
+\label{merge:best_case}
+
+The minimum cost is achieved when the shortest series comes first in
+the result, so the minimum cost \(\B{\Join}{m,n}\) when merging series
+of length \(m\)~and~\(n\) is
+\begin{equation}
+\B{\Join}{m,n} = \min\{m,n\}.\label{eq:best_merge}
+\end{equation}
+
+\paragraph{Maximum cost}
+
+The maximum number of comparisons occurs when the last two keys of the
+result come from two series. The maximum cost \(\W{\Join}{m,n}\) when
+merging series of length \(m\) and~\(n\) is
+\begin{equation}
+\W{\Join}{m,n} = m + n - 1.\label{eq:worst_merge}
+\end{equation}
+
+\paragraph{Average cost}
+
+The average cost of obtaining a given sorted series by merging two
+sub-series is the average of the costs of merging all pairs of
+sub-series, assuming that keys are not repeated. The average cost
+\(\M{\Join}{m,n}\) when merging series of size \(m\) and~\(n\) is
+\begin{equation}
+\M{\Join}{m,n} = m + n - \frac{m}{n+1} - \frac{n}{m+1}.
+\label{eq:mean_merge}
+\end{equation}

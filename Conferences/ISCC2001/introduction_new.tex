@@ -1,0 +1,81 @@
+%%-*-latex-*-
+
+\section{Introduction}
+
+The telecommunication operators are facing the dramatic growth of new
+services that utilize the telephonic network but also mix voice
+transmission with image and sound transmission. The inherent
+difficulty of this kind of services lies on their fast and reliable
+integration, in order to satisfy the users' requirements.
+
+The Intelligent Network (IN) has been the first attempt to solve this
+sort of problems and, in the meanwhile, some others architectures have
+been proposed, like TINA, in order to cope efficiently with the design
+and the implementation of new services. These latter must meet the
+users' expectations and be definitely reliable. With this aim, after
+the design phase, the services should be validated and tested in order
+to guarantee that the proposed implementations comply with the
+requirements. Moreover, because of modularity and reusability
+constraints, these services are to be defined from base components
+which may further be combined and reused.
+%\begin{figure}[!ht]
+%\begin{center}
+%\begin{bigbox}
+%\epsfxsize=8cm
+%\epsfbox{test_process.eps}
+%\end{bigbox}
+%\caption{Process of test production}
+%\label{test_process}
+%\end{center}
+%\end{figure}
+
+In this paper we present a method for service-component testing and a
+Corba test architecture. To illustrate the application of the method we
+present a case study: a \audio service. 
+%The general architecture of this test environment is shown at
+%figure~\ref{test_process}. 
+Our input is an SDL
+model of the service we want to test. Starting from this model, we
+generate a test sequence by using the component test algorithm,
+Hit-or-Jump. This sequence is built from the SDL model and is
+thus expressed in terms of SDL entities. The values associated to
+the exchanged signals have types represented within SDL. In order to
+step forward the test execution on a CORBA environment, this sequence
+must be transformed to be defined in terms of CORBA objects, and hence
+mapped to the IDL language. Last, an execution environment on
+a CORBA architecture is proposed.
+
+The contribution of this work lies on the methods definition for the
+service-component testing and the test execution architecture on a
+CORBA environment. At the CFIP99~\cite{cfip99}, we have presented yet
+a method for the embedded testing, but this method was based upon the
+generation of the whole accessibility graph of the system under test.
+The method presented here is new, it is based on the production of
+partial accessibility graphs and in this way avoids the combinatorial
+explosion of the state number of the global system.
+
+We also present in this work the test execution architecture on a
+distributed CORBA environment. We give the principles allowing the
+test of a CORBA implementation by combining interactive and purely
+observational techniques (also called \emph{passive testing}). This
+approach is innovative since, to our knowledge, there exists very few
+works on validation and test execution for CORBA environments.
+
+This work was achieved in the CASTOR RNRT French
+project~\cite{castor}. The specification of the \audio service was
+provided by France Telecom R\&D.
+
+This article is organized as follows. In
+section~\ref{generation_de_tests} we give a short overview of the
+algorithm used for the derivation of the service-components
+tests. Section~\ref{descriptif_specification} presents the case study,
+the \audio and its components. Moreover, in this section we 
+present the results of the experiments we have made. Then
+section~\ref{CORBA} presents a description of the CORBA environment
+devoted to test execution, and explains the principles which guided
+its design. Last, section~\ref{conclusion} gives the conclusions of
+this work.
+
+
+
+

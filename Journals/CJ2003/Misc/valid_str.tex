@@ -1,0 +1,30 @@
+%%-*-latex-*-
+
+        $\ocamlkwd{and} \,\, \ocamlvaluename{valid\_str} \,\, ((v_0,
+        b_0), (b_1, v_1)) =$\\
+        \hspace*{3mm}
+        $\ocamlkwd{match} \,\, ((v_0, b_0), (b_1, v_1)) \,\, \ocamlkwd{with}$ \\ 
+        \hspace*{6mm}
+        \begin{tabular}{rl}
+             & $((\kwdMIN, \wild), ub) \PAarrow \,
+               \ocamlvaluename{valid\_str} \, ((\MinInfStr, b_0), up)$\\
+           $\mid$
+             & $(lb, (\wild, \kwdMAX)) \PAarrow \,
+               \ocamlvaluename{valid\_str} \, (ub, (b_1, \MaxInfStr))$\\
+           $\mid$
+             & $((\MinInfStr, \wild), (\wild, \MaxInfStr \mid \String \,
+                \wild)) \PAarrow$\\
+             & $\mu(v_0) \, b_0 \,
+                \asnkwdconstr{..} \, b_1 \, \mu(v_1)$\\
+           $\mid$
+             & $((\String \, s_0, \pmb{\leqslant}), (\pmb{\leqslant},
+                \String \, s_1)) \,\, \ocamlkwd{when} \,\, s_0
+                \leqslant s_1 \PAarrow$\\
+             & $\mu(v_0) \, b_0 \,
+                \asnkwdconstr{..} \, b_1 \, \mu(v_1)$\\
+           $\mid$
+             & $((\String \, s_0, \wild), (\wild, \String \, s_1))
+                \,\, \ocamlkwd{when} \,\, s_0 < s_1 \PAarrow$\\
+             & $\mu(v_0) \, b_0 \,
+                \asnkwdconstr{..} \, b_1 \, \mu(v_1)$
+        \end{tabular}\\

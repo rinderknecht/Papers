@@ -1,0 +1,219 @@
+%%-*-latex-*-
+
+\subsection{Completeness of the backtracking algorithm}
+\label{backtracking:completeness_proof}
+
+\begin{thm}[Completeness]\hfill
+\begin{center}
+If   \(\subst{\overline{p}}{\sigma} \sqsubseteq h\)
+then \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\) 
+and  \(\sigma' \subseteq \sigma\).
+\end{center}
+\end{thm}
+
+\noindent\textsc{Proof~\ref{backtracking:completeness_proof}}
+(Completeness).\\
+\noindent Let \(\ind{W}(\overline{p}, f, \sigma, \sigma')\) be the
+proposition:
+\begin{center}
+\emph{If}   \(\subst{\overline{p}}{\sigma} \sqsubseteq f\)
+\emph{then} \(\smj{f}{\overline{p}}{\sigma'}\)
+\emph{and} \(\sigma' \subseteq \sigma\).
+\end{center}
+The completeness is equivalent to \(\ind{W}(\overline{p}, [h], \sigma,
+\sigma')\). First, let us assume that
+\begin{align}
+  \subst{\overline{p}}{\sigma} \sqsubseteq f \label{x:compl:1}
+\end{align}
+(otherwise the theorem would be trivially true). This means that there
+exists a derivation \(\Delta\) in the inference system
+(Figure~\ref{x_tree_matching_def}) defining \((\sqsubseteq)\) whose
+conclusion is \(\subst{\overline{p}}{\sigma} \sqsubseteq f\). This
+derivation is a list, which makes it possible to reckon by induction
+on its structure, i.e., we assume that \(\ind{W}\) holds for the
+premise of the last rule in \(\Delta\) (the \emph{induction
+hypothesis}) and then prove that \(\ind{W}\) holds for
+\(\subst{\overline{p}}{\sigma} \sqsubseteq f\). We proceed case by
+case on the kind of rule that can end the derivation.
+\begin{enumerate}
+
+  \item Case where \(\Delta\) ends with \textsf{EMP}.\\ We have \(f =
+    \el\) and \(\subst{\overline{p}}{\sigma} = \el \eqn{1}
+    \subst{\el}{\sigma}\). Therefore \(\overline{p} = \el\) (the
+    substitution is injective by construction), which leads to
+    \(\smat{f}{\overline{p}} = \smj{\el}{\el}{\sigma_\varnothing}\) by
+    means of the axiom \textsf{END} (Figure~\ref{x_match_def}). And we
+    trivially have \(\sigma_\varnothing \subseteq \sigma\). We
+    conclude that \(\ind{W}(\el, \el, \sigma, \sigma_\varnothing)\)
+    holds.
+
+  \item Case where \(\Delta\) ends by \textsf{EQ}.\\ Then, for all
+    parse tree \(h\) (perhaps reduced to a single lexeme), there
+    exist two forests \(f_1\) and \(f_2\) such that
+    \begin{align}
+      \subst{\overline{p}}{\sigma}
+        &\triangleq \cons{h}{f_1} \label{x:compl:5}\\
+      f &\triangleq \cons{h}{f_2} \label{x:compl:6}
+    \end{align}
+    and \(\Delta\) has the shape
+    \begin{mathpar}
+      \inferrule*[right={\text{\sf EQ}}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{ }}
+           {f_1 \sqsubseteq f_2}}
+        {\cons{h}{f_1} \sqsubseteq \cons{h}{f_2}}
+    \end{mathpar}
+    By examining the definition of substitutions in
+    Figure~\ref{x_subst_def}, we deduce that we have two exclusive
+    options for \(h\):
+    \begin{enumerate}
+ 
+      \item Case where \(h = l \in {\cal L}\).\\ Definition
+        \eqref{x:compl:5} and definition \((\eqn{3})\) of the
+        substitutions imply that there exists an unparsed pattern
+        \(\overline{p}'\) such that
+        \begin{align}
+             \overline{p}
+          &= \cons{l}{\overline{p}'}\label{x:compl:8}\\
+             f_1
+          &= \subst{\overline{p}'}{\sigma}.\notag
+        \end{align}
+        So \(\Delta\) has the refined shape
+        \begin{mathpar}
+          \inferrule*[right={\text{\sf EQ}}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\subst{\overline{p}'}{\sigma} \sqsubseteq f_2}}
+            {\subst{\overline{p}}{\sigma} \sqsubseteq f}
+        \end{mathpar}
+        Let us assume that the induction hypothesis holds for the
+        premise of \textsf{EQ}, i.e.,
+        \begin{align}
+            \smat{f_2}{\overline{p}'}
+          &\twoheadrightarrow \sigma' \label{x:compl:2}\\
+            \sigma'
+          &\subseteq \sigma. \label{x:compl:3}
+        \end{align}
+        Configuration \eqref{x:compl:2} can be the premise of
+        pattern\hyp{}matching rule \textsf{ELIM}
+        (Figure~\ref{x_match_def}), whose conclusion is then
+        \begin{gather}
+          \smj{\cons{l}{f_2}}{\cons{l}{\overline{p}'}}{\sigma'}.
+          \label{x:compl:10}
+        \end{gather}
+        By \eqref{x:compl:6} and \eqref{x:compl:8}, \eqref{x:compl:10}
+        is equivalent to
+        \begin{gather}
+          \smj{f}{\overline{p}}{\sigma'}. \label{x:compl:7}        
+        \end{gather}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:compl:1} imply \eqref{x:compl:7} and
+        \eqref{x:compl:3}, i.e., \(\ind{W}(\cons{l}{\overline{p}'},
+        \cons{l}{f'}, \sigma, \sigma')\) holds.
+
+      \item Case where \(h = t \in {\cal T}\).\\ Definition
+        \eqref{x:compl:5} and definition \((\eqn{2})\) of the
+        substitutions (Figure~\ref{x_subst_def}) imply that there
+        exists an unparsed pattern \(\overline{p}'\) and a
+        meta\-variable \(x\) such that
+        \begin{align}
+          \overline{p} &= \cons{\meta{x}}{\overline{p}'} \label{x:compl:11}\\
+          f_1 &= \subst{\overline{p}'}{\sigma}\notag\\
+          t &= \sigma(x). \label{x:compl:12}
+        \end{align}
+        So \(\Delta\) has the refined shape
+        \begin{mathpar}
+          \inferrule*[right={\text{\sf EQ}}]
+            {\inferrule*
+               {\inferrule*[vdots=1.5em]{}{ }}
+               {\subst{\overline{p}'}{\sigma} \sqsubseteq f'}}
+            {\subst{\overline{p}}{\sigma} \sqsubseteq f}
+        \end{mathpar}
+        Let us assume that the induction hypothesis holds for the
+        premise of \textsf{EQ}, i.e.,
+        \(\subst{\overline{p}'}{\sigma} \sqsubseteq f'\) of
+        \textsf{EQ}, i.e.,
+        \begin{align}
+          \smat{f'}{\overline{p}'} &\twoheadrightarrow \sigma'
+          \label{x:compl:14}\\
+          \sigma' &\subseteq \sigma. \label{x:compl:15}
+        \end{align}
+        Let us consider two cases now:
+        \begin{enumerate}
+
+          \item \(x \not\in \dom{\rho'}\).\\ Then, by definition of
+            inclusions of substitutions \eqref{model:incl} implies
+            \begin{gather*}
+              \sigma' \subseteq \sigma' \oplus x \mapsto t.
+            \end{gather*}
+
+          \item \(x \in \dom{\rho'}\).\\ The definition of inclusions
+            \eqref{model:incl} applied to \eqref{x:compl:15} implies
+            that \(\sigma'(x) = \sigma(x)\), thus, by
+            \eqref{x:compl:12}, we have \(\sigma'(x) = t\). So
+            \(\sigma' \subseteq \sigma' \oplus x \mapsto t\), since,
+            by definition \eqref{model:oplus}, \((\sigma' \oplus x
+            \mapsto t)(x) \triangleq t = \sigma'(x)\).
+
+        \end{enumerate}
+        In both cases, we proved that
+        \begin{gather}
+          \sigma' \subseteq \sigma' \oplus x \mapsto t.
+          \label{x:compl:16}
+        \end{gather}
+        Configuration \eqref{x:compl:14} and property
+        \eqref{x:compl:16} can be the premises to the
+        pattern\hyp{}matching rule \textsf{BIND}, which leads to the
+        conclusion
+        \begin{gather}
+          \smj{\cons{t}{f'}}{\cons{\meta{x}}{\overline{p}'}}{\sigma'
+            \oplus x \mapsto t}. \label{x:compl:17}
+        \end{gather}
+        By \eqref{x:compl:11} and \eqref{x:compl:6},
+        \eqref{x:compl:17} is equivalent to
+        \begin{gather}
+          \smj{f}{\overline{p}}{\sigma' \oplus x \mapsto
+          t}. \label{x:compl:18}
+        \end{gather}
+        As a conclusion, the induction hypothesis and
+        \eqref{x:compl:1} imply \eqref{x:compl:18} and
+        \eqref{x:compl:16}, i.e.,
+        \(\ind{W}(\cons{\meta{x}}{\overline{p}'}, \cons{t}{f'},
+        \sigma' \oplus x \mapsto t, \sigma')\).
+
+    \end{enumerate}
+
+  \item Case where \(\Delta\) ends by \textsf{SUB}.\\ Then there
+    exist two forests \(f_1\) and \(f_2\) and a constructor \(c \in
+    {\cal C}\) such that
+    \begin{align}
+      f \triangleq \cons{c(f_1)}{f_2}. \label{x:compl:19}
+    \end{align}
+    The derivation \(\Delta\) has thus the shape
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf SUB}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{ }}
+           {\subst{\overline{p}}{\sigma} \sqsubseteq f_1 \cdot f_2}}
+        {\subst{\overline{p}}{\sigma} \sqsubseteq \cons{c(f_1)}{f_2}}
+    \end{mathpar}
+    Let us assume that the induction hypothesis holds for the premise
+    of \textsf{SUB}, i.e.,
+    \begin{align}
+      \smat{f_1 \cdot f_2}{\overline{p}} &\twoheadrightarrow \sigma'
+      \label{x:compl:20}\\ 
+      \sigma' &\subseteq \sigma. \label{x:compl:21}
+    \end{align}
+    The configuration \eqref{x:compl:20} can be the premise of the
+    pattern\hyp{}matching rule \textsf{UNPAR}, which leads to the
+    conclusion
+    \begin{gather}
+      \smj{\cons{c(f_1)}{f_2}}{\overline{p}}{\sigma'}. \label{x:compl:22}
+    \end{gather}
+    As a conclusion, the induction hypothesis and \eqref{x:compl:1}
+    imply \eqref{x:compl:22} and \eqref{x:compl:21}, i.e.,
+    \(\ind{W}(\overline{p}, \cons{c(f_1)}{f_2}, \sigma,
+    \sigma')\).\hfill \(\Box\)
+
+\end{enumerate}
+

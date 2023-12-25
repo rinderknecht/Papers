@@ -1,0 +1,38 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\newcommand\pcdata[1]{\Tr{\psframebox{\rule{0pt}{7pt}\texttt{#1}}}}
+\newcommand\element[1]{\Tr{#1}}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[treemode=D,levelsep=8mm,nodesep=2pt,treesep=8pt,framearc=.4]{\element{fun}}{
+  \pstree{\element{out}}{
+    \psset{nodesepB=0pt}
+    \pcdata{int}
+  }
+  \pstree{\element{sig}}{
+    \pstree{\element{name}}{
+     \psset{nodesepB=0pt}
+     \pcdata{f}
+    }
+    \pstree{\element{arg}}{
+      \psset{nodesepB=0pt}
+      \pcdata{(}
+      \pcdata{a}
+      \pcdata{)}
+    }
+  }
+  \pstree{\element{body}}{
+    \psset{nodesepB=0pt}
+    \pcdata{\{}
+    \pcdata{\}}
+  }
+}
+\endTeXtoEPS
+
+\end{document}

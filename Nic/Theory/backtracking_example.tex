@@ -1,0 +1,46 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[treemode=U,levelsep=0.75cm,nodesep=2pt,dash=3pt 3pt,treesep=8pt,framearc=.4]{\TR{\(\cdot\)}}{
+  {\psset{linestyle=dashed}\TR{\textsf{BIND}}}
+  \pstree{\TR{\textsf{\textbf{UNPAR}}}}{
+    {\psset{linestyle=dashed}\TR{\textsf{UNPAR}}}
+    \pstree{\TR{\textsf{\textbf{BIND}}}}{
+      \pstree{\TR{\textsf{\textbf{ELIM}}}}{
+        \pstree{\TR{\textsf{\textbf{UNPAR}}}}{
+          \pstree{\TR{\textsf{\textbf{BIND}}}}{
+            \pstree{\TR{\textsf{\textbf{ELIM}}}}{
+              {\psset{linestyle=dashed}\TR{\textsf{UNPAR}}}
+              \pstree{\TR{\textsf{\textbf{BIND}}}}{
+                \TR{\textsf{\textbf{END}}}
+              }
+            }
+          }
+          {\psset{linestyle=dashed}
+           \pstree{\TR{\textsf{UNPAR}}}{
+             \TR{\textsf{UNPAR}}
+             \pstree{\TR{\textsf{BIND}}}{
+               \pstree{\TR{\textsf{ELIM}}}{
+                 \pstree{\TR{\textsf{UNPAR}}}{
+                   \TR{\textsf{BIND}}
+                   \TR{\textsf{UNPAR}}
+                 }
+                 \TR{\textsf{BIND}}
+               }
+             }
+           }}
+        }
+        {\psset{linestyle=dashed}\TR{\textsf{BIND}}}
+      }
+    }
+  }
+}
+\endTeXtoEPS
+
+\end{document}

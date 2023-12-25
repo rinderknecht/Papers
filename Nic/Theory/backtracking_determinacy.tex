@@ -1,0 +1,373 @@
+%%-*-latex-*-
+
+\subsection{Determinacy of the backtracking algorithm}
+\label{backtracking:determinacy}
+
+\begin{theorem}[Determinacy]\hfill
+\begin{center}
+If \(\smj{h}{\overline{p}}{\sigma}\)
+and \(\smj{h}{\overline{p}}{\sigma'}\)
+then \(\sigma = \sigma'\).
+\end{center}
+\end{theorem}
+\noindent In other words, the fact that the system is not
+syntax\hyp{}directed, hence, that the implementation needs a
+backtracking strategy, does not impede that there is none the less
+only one result to the pattern matching of a forest.
+
+\begin{proof}[Theorem~\ref{backtracking:determinacy}] Let
+  \(\ind{S}(\overline{p}, f, \sigma, \sigma')\) be the proposition
+\begin{center}
+\emph{If} \(\smj{f}{\overline{p}}{\sigma}\) 
+\emph{and} \(\smj{f}{\overline{p}}{\sigma'}\)
+\emph{then} \(\sigma = \sigma'\).
+\end{center}
+In particular, \(\ind{S}(\overline{p}, [h], \sigma, \sigma')\) is
+equivalent to the determinacy. Firstly, let us assume that
+\begin{gather}
+\smj{f}{\overline{p}}{\sigma} \label{x:deter:delta}\\
+\smj{f}{\overline{p}}{\sigma'} \label{x:deter:delta'}
+\end{gather}
+are true (otherwise the theorem is trivially true). This means that
+there exists a pattern\hyp{}matching derivation \(\Delta\) whose
+conclusion is \(\smj{f}{\overline{p}}{\sigma}\) and another derivation
+\(\Delta'\) whose conclusion is
+\(\smj{f}{\overline{p}}{\sigma'}\). These derivations are trees
+(actually, lists), so we can reason by general induction on them,
+i.e., we assume that \(\ind{S}\) holds for (the conclusions of) any
+pair of sub\hyp{}derivations, one from \(\Delta\) and the other from
+\(\Delta'\), and then prove that \(\ind{S}\) holds for the conclusions
+of \(\Delta\) and \(\Delta'\) as well ---~that is to say,
+\(\ind{S}(\overline{p}, f, \sigma, \sigma')\) is true. (This induction
+schema implies that the configurations must be the same in the
+judgements of the sub\hyp{}derivations considered as an hypothesis.)
+We proceed case by case on the kinds of rule that may end the
+derivations. Since \(\overline{p}\) and \(f\) must be the same in the
+conclusions of \(\Delta\) and \(\Delta'\), some pairs of ending rules
+for the derivations are impossible. For example, if \textsf{ELIM} ends
+one derivation, then \textsf{BIND} cannot end the other because the
+former mandates that \(\overline{p} = \cons{l}{\overline{p}'}\), with
+\(l \in {\cal L}\), whilst the latter requires that \(\overline{p} =
+\cons{\meta{x}}{\overline{p}'}\) and \(l \neq \meta{x}\). In the
+following, we only give the possible combinations. Also, if \(\Delta\)
+can end with a rule \(X\) and \(\Delta'\) with another rule \(Y\), we
+do not give the case where \(\Delta\) ends with rule \(Y\) and
+\(\Delta'\) with rule \(X\) (symmetric case).
+\begin{enumerate}
+
+  \item Case where \(\Delta\) and \(\Delta'\) end by \textsf{END}.\\
+    Then \(\overline{p} = \el\), \(f = \el\), \(\sigma =
+    \sigma_\varnothing\) and \(\sigma' = \sigma_\varnothing\). As a
+    consequence, \(\sigma = \sigma'\), that is, \(\ind{S}(\el, \el,
+    \sigma_\varnothing, \sigma_\varnothing)\) holds.
+
+  \item Case where \(\Delta\) and \(\Delta'\) end by \textsf{ELIM}.
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf ELIM}]
+         {\inferrule
+            {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+            {\smj{f'}{\overline{p}'}{\sigma}}}
+         {\smj{\cons{l}{\!f'}}{\cons{l}{\overline{p}'}}{\sigma}}
+
+       \inferrule*[right=\text{\sf ELIM}]
+         {\inferrule
+            {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+            {\smj{f'}{\overline{p}'}{\sigma'}}}
+         {\smj{\cons{l}{\!f'}}{\cons{l}{\overline{p}'}}{\sigma'}}
+    \end{mathpar}
+    where, since we assumed \eqref{x:deter:delta} and
+    \eqref{x:deter:delta'},
+    \begin{enumerate}
+
+      \item \label{x:deter:1} \(l \in {\cal L}\),
+
+      \item \label{x:deter:3} \(\overline{p} \triangleq
+        \cons{l}{\overline{p}'}\),
+
+      \item \label{x:deter:2} \(f \triangleq \cons{l}{f'}\).
+
+    \end{enumerate}
+    Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+    \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+    assume that the induction hypothesis holds for their conclusions,
+    i.e., \(\ind{S}(\overline{p}', f', \sigma, \sigma')\)
+    holds. Therefore
+    \begin{equation}
+      \sigma = \sigma' \label{x:deter:4}.
+    \end{equation}
+    Finally, the induction hypothesis, \eqref{x:deter:delta} and
+    \eqref{x:deter:delta'} imply \eqref{x:deter:4}, that is to say,
+    \(\ind{S}(\cons{l}{\overline{p}'}, \cons{l}{f'}, \sigma,
+    \sigma')\).
+
+  \item Case where \(\Delta\) and \(\Delta'\) both end by
+  \textsf{BIND}.
+    \begin{mathpar}
+      \inferrule[\text{\sf BIND}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+           {\smj{f'}{\overline{p}'}{\sigma_1}}\\
+         \sigma_1 \subseteq \sigma_1 \oplus x \mapsto t}
+        {\smj{\cons{t}{f'}}%
+             {\cons{\meta{x}}{\overline{p}'}}%
+             {\sigma_1 \oplus x \mapsto t}}
+
+      \inferrule[\text{\sf BIND}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+              {\smj{f'}{\overline{p}'}{\sigma_2}}\\
+            \sigma_2 \subseteq \sigma_2 \oplus x \mapsto t}
+           {\smj{\cons{t}{f'}}%
+                {\cons{\meta{x}}{\overline{p}'}}%
+                {\sigma_2 \oplus x \mapsto t}}
+    \end{mathpar}
+    where, since we assumed \eqref{x:deter:delta} and
+    \eqref{x:deter:delta'},
+    \begin{enumerate}
+
+       \item \label{x:deter:8} \(\overline{p} \triangleq
+         \cons{\meta{x}}{\overline{p}'}\),
+
+       \item \label{x:deter:7} \(f \triangleq \cons{t}{f'}\), with \(t
+         \in {\cal T}\),
+
+       \item \label{x:deter:9} \(\sigma \triangleq \sigma_1 \oplus x
+         \mapsto t\),
+
+       \item \label{x:deter:10} \(\sigma' \triangleq \sigma_2 \oplus x
+         \mapsto t\).
+
+     \end{enumerate}
+     Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+     \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+     assume that the induction hypothesis holds for their conclusions,
+     i.e., \(\ind{S}(\overline{p}', f', \sigma_1,
+     \sigma_2)\). Therefore
+     \begin{align}
+           \sigma_1 
+        &= \sigma_2\notag\\
+           \sigma_1 \oplus x \mapsto t 
+        &= \sigma_2 \oplus x \mapsto t\notag\\
+           \sigma
+        &= \sigma'
+        &\text{by} \,\; \text{\ref{x:deter:9}} \,\; \text{and} \,\;
+          \text{\ref{x:deter:10}}. \label{x:deter:12}
+     \end{align}
+     Finally, the induction hypothesis, \eqref{x:deter:delta} and
+     \eqref{x:deter:delta'} imply \eqref{x:deter:12}, that is to say,
+     \(\ind{S}(\cons{\meta{x}}{\overline{p}'}, f, \sigma, \sigma')\).
+
+  \item \label{unpar2_bis} Case where both \(\Delta\) and \(\Delta'\)
+    end by \textsf{UNPAR}.
+    \begin{mathpar}
+      \inferrule*[right=\text{\sf UNPAR}]        
+        {\inferrule
+           {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+           {\smj{f_1 \!\cdot\! f_2}{\overline{p}}{\sigma}}}
+        {\smj{\cons{c(f_1)\!}{\!f_2}}{\overline{p}}{\sigma}}
+
+      \inferrule*[right=\text{\sf UNPAR}]        
+        {\inferrule
+           {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+              {\smj{f_1 \!\cdot\! f_2}{\overline{p}}{\sigma'}}}
+        {\smj{\cons{c(f_1)\!}{\!f_2}}{\overline{p}}{\sigma'}}
+    \end{mathpar}
+    where, since we assumed \eqref{x:deter:delta} and
+    \eqref{x:deter:delta'},
+    \begin{enumerate}
+
+       \item \label{x:deter:5} \(f \triangleq \cons{c(f_1)}{f_2}\).
+
+    \end{enumerate}
+    Since \(\Delta_1\) is a sub\hyp{}derivation of \(\Delta\) and
+    \(\Delta'_1\) is a sub\hyp{}derivation of \(\Delta'\), let us
+    assume that the induction hypothesis holds for their conclusions,
+    that is, \(\ind{S}(\overline{p}, f_1 \cdot f_2, \sigma, \sigma')\)
+    holds:
+    \begin{equation}
+      \sigma = \sigma'. \label{x:deter:6}
+    \end{equation}
+    Finally, the induction hypothesis, \eqref{x:deter:delta} and
+    \eqref{x:deter:delta'} imply \eqref{x:deter:6}, that is to say,
+    \(\ind{S}(\overline{p}, \cons{c(f_1)}{f_2}, \sigma, \sigma')\).
+
+  \item \label{bind_unpar_bis} Case where \(\Delta\) ends by
+    \textsf{UNPAR} and \(\Delta'\) ends by \textsf{BIND}.
+    \begin{mathpar}
+      \inferrule[\text{\sf UNPAR}]
+        {\inferrule*
+           {\inferrule*[vdots=1.5em]{}{(\Delta_1)}}
+           {\smj{f_1 \cdot f'}%
+                {\cons{\meta{x}}{\overline{p}'}}%
+                {\sigma}}}
+        {\smj{\cons{c(f_1)}{f'}}%
+             {\cons{\meta{x}}{\overline{p}'}}%
+             {\sigma}}
+
+      \inferrule[\text{\sf BIND}]
+        {\inferrule*
+            {\inferrule*[vdots=1.5em]{}{(\Delta'_1)}}
+            {\smj{f'}{\overline{p}'}{\sigma''}}\\
+            \sigma'' \subseteq \sigma'' \oplus x \mapsto t}
+        {\smj{\cons{t}{f'}}%
+             {\cons{\meta{x}}{\overline{p}'}}%
+             {\sigma'' \oplus x \mapsto t}}
+     \end{mathpar}
+     where, since we assumed \eqref{x:deter:delta} and
+     \eqref{x:deter:delta'},
+     \begin{enumerate}
+
+        \item \(\overline{p} \triangleq
+        \cons{\meta{x}}{\overline{p}'}\), \label{x:deter:14}
+
+        \item \(t \triangleq c(f_1)\), \label{x:deter:13}
+
+        \item \(\sigma' \triangleq \sigma'' \oplus x \mapsto
+          t\). \label{x:deter:15}
+
+     \end{enumerate}
+     The premise of \textsf{UNPAR} can only be itself the conclusion
+     of the inference rule \textsf{UNPAR} or \textsf{BIND}. If
+     \textsf{UNPAR} again, the same is true about its premise. So, the
+     two cases can be merged into one, i.e., the shape of \(\Delta\)
+     is (by writing only the pattern\hyp{}matching judgements)
+     \begin{mathpar}
+       \inferrule*[right=\text{\sf UNPAR}]
+         {\inferrule*[right=\text{\sf UNPAR},rightskip=3em]
+            {\inferrule*[right=\text{\sf UNPAR},rightskip=3em]
+               {\inferrule*[right=\text{\sf BIND},vdots=1.5em,rightskip=3em]
+                 {\inferrule*
+                    {\inferrule*[vdots=1.5em]{}{(\Delta_2)}}
+                    {\smj{g \cdot f'}{\overline{p}'}{\sigma_1}}}
+                 {\smj{\cons{t}{g \cdot f'}}%
+                      {\cons{\meta{x}}{\overline{p}'}}%
+                      {\sigma_1 \oplus x \mapsto t}}}
+               {\vdots}}
+            {\smj{f_1 \cdot f_2}%
+                 {\cons{\meta{x}}{\overline{p}'}}%
+                 {\sigma_1 \oplus x \mapsto t}}}
+         {\smj{\cons{c(f_1)}{f_2}}%
+              {\cons{\meta{x}}{\overline{p}'}}%
+              {\sigma_1 \oplus x \mapsto t}}
+     \end{mathpar}
+     where all the rules, if any, below \textsf{BIND} are
+     \textsf{UNPAR} rules and
+     \begin{equation}
+       \sigma = \sigma_1 \oplus x \mapsto t. \label{x:deter:16}
+     \end{equation}
+     (Because the derivation is finite, the rule \textsf{BIND} must
+     appear at one point up.) The number of unparsing steps can be
+     \(0\), in which case \textsf{UNPAR} is followed inductively by
+     \textsf{BIND}. Note that the list \(g\) may be empty if \(A(c) =
+     1\) for each tree \(c(\dots)\) unparsed. Let us consider the two
+     possible cases for \(g\).
+     \begin{enumerate}
+
+       \item Case \(g = \el\).\\ In this case, \(\smj{g \cdot
+         f'}{\overline{p}'}{\sigma_1}\) is actually
+         \(\smj{f'}{\overline{p}'}{\sigma_1}\). Since \(\Delta_2\) is
+         a sub\hyp{}derivation of \(\Delta_1\), which is, in turn, a
+         sub\hyp{}derivation of \(\Delta\), then \(\Delta_2\) is a
+         sub\hyp{}derivation of \(\Delta\). Since \(\Delta'_1\) is a
+         sub\hyp{}derivation of \(\Delta'\), the induction hypothesis
+         holds for both the conclusions of \(\Delta_2\) and
+         \(\Delta'_1\), so
+         \begin{align}
+           \sigma_1 &= \sigma''\notag\\
+           \sigma_1 \oplus x \mapsto t &= \sigma'' \oplus x \mapsto
+           t\notag\\
+           \sigma &= \sigma'' \oplus \mapsto t
+           & \text{by} \,\; \eqref{x:deter:16}\notag\\
+           \sigma &= \sigma'
+           & \text{by} \,\; \text{\ref{x:deter:15}}\notag\\
+           \sigma &= \sigma' \label{x:deter:17}
+         \end{align}
+         Finally, the induction hypothesis, \eqref{x:deter:delta} and
+         \eqref{x:deter:delta'} imply \eqref{x:deter:17} in this case,
+         i.e., \(\ind{S}(\cons{\meta{x}}{\overline{p}'}, f, \sigma,
+         \sigma')\) holds.
+
+       \item Case \(g \neq \el\).\\ Now let us establish that the
+         conjunction of the following judgements is contradictory,
+         i.e., the derivation of one of them implies that the other
+         cannot be derived.
+         \begin{align}
+             \smat{g \cdot f'}{\overline{p}'} 
+           &\twoheadrightarrow \sigma_1 \label{x:deter:18} 
+           & \text{where} \; g \neq \el\\
+             \smat{f'}{\overline{p}'}
+           &\twoheadrightarrow \sigma'' \label{x:deter:19}
+         \end{align}
+         The rules \textsf{ELIM} and \textsf{BIND}, read deductively
+         (i.e., the premises before the conclusion), increment the
+         length of the pattern whilst rule \textsf{UNPAR} keeps it
+         unchanged. The derivations are lists starting with the same
+         axiom \textsf{END}. Because of that and since
+         \eqref{x:deter:18} and \eqref{x:deter:19} share the same
+         pattern \(\overline{p}'\), it is sufficient to prove that
+         \eqref{x:deter:18} cannot derive \eqref{x:deter:19} and,
+         reciprocally, that \eqref{x:deter:19} cannot derive
+         \eqref{x:deter:18}. Moreover, we only need to consider
+         derivations by means of \textsf{UNPAR}, since it is the sole
+         rule which keeps the pattern invariant.
+         \begin{enumerate}
+
+           \item \label{short_long} The \emph{length} \(\len{f}\) of a
+             forest \(f\) is defined as
+             \begin{align*}
+                \len{\el} &= 0\\
+                \len{\cons{t}{f}} &= 1 + \len{f}
+             \end{align*}
+             The rule \textsf{UNPAR}, read deductively (i.e, premise
+             first, conclusion next), shortens the length of the
+             forest or keeps it invariant (if \(A(c) = 1\)), since we
+             have
+             \begin{align*}
+                   \len{f_1 \cdot f_2} &= \len{f_1} +
+                    \len{f_2} \triangleq A(c) + \len{f_2}\\
+                   \len{\cons{c(f_1)}{f_2}} &= 1 + \len{f_2}
+             \end{align*}
+             Therefore \eqref{x:deter:19} cannot derive
+             \eqref{x:deter:18}, because \(g \neq \el\), so \(g \cdot
+             f_2\) is strictly longer than \(f_2\), i.e., \(\len{f_2}
+             \, < \len{g \cdot f_2}\).
+
+           \item Let us consider now the derivation from
+             \eqref{x:deter:18} by applying, perhaps repeatedly, the
+             inference rule \textsf{UNPAR}. The effect of the
+             deduction on the forest consists in replacing a prefix of
+             at least one tree of \(f_1 \cdot f_2\) by a single tree
+             of root \(c\), i.e., \(\cons{c(f_1)}{f_2}\). In
+             particular, one tree can be replaced by one tree, but at
+             one point at least two trees must be rewritten into one,
+             because the derivation must try to reach
+             \eqref{x:deter:19}, which contains a forest strictly
+             shorter. Thus, the start of the derivation has the
+             following shape
+             \begin{mathpar}
+               \inferrule*[Right=\text{\sf UNPAR}]
+                  {\inferrule*[Right=\text{\sf UNPAR}]
+                     {\smj{g \cdot f_2}{\overline{p}'}{\sigma_1}}
+                     {\vdots}}
+                  {\smj{\cons{t_1}{f_2}}{\overline{p}'}{\sigma_1}}
+             \end{mathpar}
+             The prefix \(g\) has been rewritten into a single tree
+             \(t_1\) (by the way, this process is called
+             \emph{parsing}). Let us assume that one more usage of the
+             rule \textsf{UNPAR} rewrites at least \emph{two} more
+             trees from \(\cons{t_1}{f_2}\) into one. (If not, it
+             means that the size of the forest would remain constant,
+             i.e., \(A(c) = 1\), and strictly greater than \(f_2\), as
+             mentioned above.) But this shortening means that the
+             resulting forest differs from \(f_2\) by, at least, the
+             first tree. Therefore \eqref{x:deter:18} cannot derive
+             \eqref{x:deter:19}.
+
+         \end{enumerate}
+         This achieves to prove that the sub\hyp{}case \(g \neq \el\)
+         is impossible.
+
+    \end{enumerate}
+
+\end{enumerate}
+\end{proof}

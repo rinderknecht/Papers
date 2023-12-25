@@ -1,0 +1,248 @@
+\section{Functional Queues}
+
+A functional queue is a linear data structure that is used in
+\emph{functional languages}, whose semantics force the programmer to
+model a \emph{queue} with two \emph{stacks}. Items can be added to a
+stack, or \emph{pushed}, on only one of its ends, called the
+\emph{top}. They can be removed, or \emph{popped}, only at the top:
+\[
+\begin{array}{@{}l@{}r@{\;}cc|c|c|c|c|c|cc@{\;}l@{}}
+\cline{4-9}
+& \text{Push, Pop (top)} & \leftrightsquigarrow & & a & b & c & d & e &&&\\
+\cline{4-9}
+\end{array}
+\]
+A queue is like a stack where items are added, or \emph{enqueued}, at
+one end, called \emph{rear}, but taken out, or \emph{dequeued}, at the
+other end, called \emph{front}:
+\[
+\begin{array}{@{}l@{}r@{\;}cc|c|c|c|c|c|cc@{\;}l@{}}
+\cline{4-10}
+& \text{Enqueue (rear end)} 
+                & \rightsquigarrow & & a & b & c & d & e &
+& \rightsquigarrow & \text{Dequeue (front end).}\\
+\cline{4-10}
+\end{array}
+\]
+Let us implement a queue with two stacks: one for enqueuing, called
+the \emph{rear stack}, and one for dequeuing, called the \emph{front
+  stack}. The previous queue is equivalent to
+\[
+\begin{array}{r@{\;}cc|c|c|c|c|c|c|cc@{\;}l}
+  \cline{3-6}\cline{8-10}
+  \text{Enqueue (rear stack)} & \rightsquigarrow & & a & b & c & & d & e & &
+  \rightsquigarrow & \text{Dequeue (front stack).}\\
+  \cline{3-6}\cline{8-10}
+\end{array}
+\]
+Enqueuing is now pushing on the rear stack and dequeuing is popping on
+the front stack. In the latter case, if the front stack is empty and
+the rear stack is not, we swap the stacks and reverse the (new) front
+stack. Graphically, dequeuing in the configuration 
+\(\begin{array}{c|c|c|c|c|c}
+  \cline{1-4}\cline{6-6}
+  & a & b & c & &\\
+  \cline{1-4}\cline{6-6}
+\end{array}\)
+requires first to make
+\(\begin{array}{c|c|c|c|c|c}
+  \cline{1-1}\cline{3-6}
+  & & a & b & c &\\
+  \cline{1-1}\cline{3-6}
+\end{array}\)
+and then dequeue \(c\).
+
+As a side note, although our presentation is independent of any
+programming language, programmers using
+\textsf{Erlang}~\cite{Armstrong:2007,Armstrong:2010} may implement
+enqueuings and dequeuings as in \fig~\ref{fig:erlang}. As a measure of
+the input, we shall say that the queue has size~\(n\) if the total
+number of items in both stacks is~\(n\). As a measure of time, we
+shall count as one unit one item movement. Therefore, the cost of
+enqueuing is \(\C{\texttt{enq}}{n} = 1\). The minimum cost for
+dequeuing is \(\B{\texttt{deq}}{n} = 1\), when the front is not empty,
+so exactly one item moves (out). The maximum cost is
+\(\W{\texttt{deq}}{n} = n+1\), when the front stack is empty and the
+rear contains \(n\) items: these move frontward and then the top moves
+out.
+\begin{figure}[!t]
+\centering
+\small
+\begin{verbatim}
+enqueue(Item,{Rear,Front}) -> {[Item|Rear],Front}.
+
+dequeue({[Item|Rear],[]})    -> dequeue({[],rcat(Rear,[Item])});
+dequeue({Rear,[Item|Front]}) -> {{Rear,Front},Item}.
+
+rcat(         [],To) -> To;
+rcat([Item|From],To) -> rcat(From,[Item|To]).
+\end{verbatim}
+\caption{Enqueuing and dequeuing in \textsf{Erlang}\label{fig:erlang}}
+\end{figure}
+
+Let \(\C{}{n}\) be the cost of a sequence of \(n\)~updates on a
+functional queue originally empty. A first attempt at
+assessing~\(\C{}{n}\) consists in ignoring any dependence on previous
+operations and take the maximum cost individually. Since
+\(\C{\texttt{enq}}{k} \leqslant \C{\texttt{deq}}{k}\), we consider a
+series of \(n\)~dequeuings in their worst case, that is, with all the
+items located in the rear stack. Besides, after \(k\)~updates, there
+may be \(k\)~items in the queue, so we draw
+\[
+\C{}{n} \leqslant \sum_{k=1}^{n-1}{\W{\texttt{deq}}{k}} =
+\frac{1}{2}{(n-1)(n+2)} \mathrel{\sim} \frac{1}{2}{n^2}.
+\]
+Actually, this is overly pessimistic and even unrealistic. First, one
+cannot dequeue on an empty queue, therefore, at any time, the number
+of enqueuings since the beginning is always greater or equal than the
+number of dequeuings and the series must start with one
+enqueuing. Second, when dequeuing with the front being empty, the rear
+stack is reversed onto the front stack, so its items cannot be
+reversed again during the next dequeuing, whose cost will
+be~\(1\). Moreover, as remarked above, \(\C{\texttt{enq}}{k} \leqslant
+\C{\texttt{deq}}{k}\), so the worst case for a series of
+\(n\)~operations occurs when the number of dequeuings is maximum, that
+is, when it is \(\lfloor{n/2}\rfloor\). If we denote by~\(e\) the
+number of enqueuings and by~\(d\) the number of dequeuings, we have
+the relationship \(n = e + d\) and the two requisites for a worst case
+become \(e=d\) (\(n\)~even) or \(e=d+1\) (\(n\)~odd).
+\begin{figure}
+\centering
+\subfloat[Enqueue\label{fig:enqueue}]{%
+  \includegraphics[bb=71 662 130 721,scale=0.75]{enqueue}
+}
+\qquad
+\subfloat[Dequeue\label{fig:dequeue}]{%
+  \includegraphics[bb=71 662 130 721,scale=0.75]{dequeue}
+}
+\caption{Graphical representations of operations on queues\label{fig:enq_deq}}
+\end{figure}
+
+\medskip
+
+\mypar{Dyck Path (\(\boldsymbol{e=d}\))} Let us represent graphically
+the updates as in \fig~\ref{fig:enq_deq}.  Textually, we represent an
+enqueuing as an opening parenthesis and a dequeuing as a closing
+parenthesis. For example, \texttt{((()()(()))())} can be represented
+in \fig~\ref{fig:dyck_path} as a \emph{Dyck path}, named in the honor
+of the logician Walther (von) Dyck
+(\oldstylenums{1856}--\oldstylenums{1934}).
+For a broken line to qualify as a Dyck path of length~\(n\), it has to
+start at the origin \((0,0)\) and end at coordinates \((n,0)\).  In
+terms of a \emph{Dyck language}, an enqueuing is called a \emph{rise}
+and a dequeuing is called a \emph{fall}. A rise followed by a fall,
+that is, \texttt{()}, is called a \emph{peak}. For instance, in
+\fig~\ref{fig:dyck_path}, there are four peaks. The number near each
+rise or fall is the cost incurred by the corresponding operation. The
+abscissa axis bears the ordinal of each operation.
+\begin{figure}[h]
+\centering
+\includegraphics[bb=78 570 510 725,scale=0.75]{dyck_path}
+\caption{Dyck path modeling queue operations (cost \(21\))
+\label{fig:dyck_path}}
+\end{figure}
+
+When \(e=d\), the graphics is a Dyck path of length \(n=2e=2d\). In
+order to deduce the total cost in this case, we must find a
+\emph{decomposition} of the path, by which we mean to identify
+patterns whose costs are easy to compute and which make up any path,
+or to associate any path to another path whose cost is the same but
+easy to find. \Fig~\ref{fig:dyck_eq1}
+\begin{figure}[b]
+\centering
+\includegraphics[bb=78 570 510 725,scale=0.75]{dyck_eq1}
+\caption{Dyck path equivalent to \fig~\ref{fig:dyck_path}
+\label{fig:dyck_eq1}}
+\end{figure}
+shows how the previous path is mapped to an equivalent path only made
+of a series of isosceles triangles whose bases belong to the abscissa
+axis. Let us call them \emph{mountains} and their series a
+\emph{range}. The mapping is simple: after the first fall, if we are
+back to the abscissa axis, we have a mountain and we proceed with the
+rest of the path. Otherwise, the next operation is a rise and we
+exchange it with the first fall after it. This brings us down by~\(1\)
+and the process resumes until the bottom line is reached. We call this
+process \emph{rescheduling} because it amounts, in operational terms,
+to reordering subsequences of operations a posteriori. For instance,
+\fig~\ref{fig:rescheduling} displays the rescheduling of
+\fig~\ref{fig:dyck_path}.
+\begin{figure}
+\centering
+\subfloat[Initial\label{fig:initial}]{%
+  \includegraphics[scale=0.75]{mountain0}
+}
+\qquad
+\subfloat[Swapping \(4\nearrow 5\) and \(5\searrow 6\)]{%
+  \includegraphics[scale=0.75]{mountain1}
+}
+\qquad
+\subfloat[Swapping \(5\nearrow 6\) and \(8 \searrow
+  9\)\label{fig:valley}]{%
+  \includegraphics[scale=0.75]{mountain4}
+}
+\qquad
+\subfloat[Last one]{%
+  \includegraphics[bb=13 647 180 782,scale=0.75]{mountain5}
+}
+\caption{Rescheduling of \fig~\ref{fig:dyck_path} into
+  \fig~\ref{fig:dyck_eq1}\label{fig:rescheduling}}
+\end{figure}
+Note that two different paths can be rescheduled into the same
+path. What makes \fig~\ref{fig:valley} equivalent to
+\fig~\ref{fig:initial} is the invariance of the cost because all
+operations have cost~\(1\). This always holds because enqueuings
+always have cost~\(1\) and the dequeuings involved in a rescheduling
+have cost~\(1\), because they found the front stack non\hyp{}empty
+after a peak. We proved that all paths are equivalent to a range with
+the same cost. Therefore, the maximum cost can be found on ranges
+alone. Let us note \(e_1, e_2, \dots, e_k\) the maximal subsequences
+of rises; for example, in \fig~\ref{fig:dyck_eq1}, we have \(e_1=3\),
+\(e_2 = 3\) and \(e_3 = 1\). Of course, \(e = e_1 + e_2 + \dots +
+e_k\). The fall making up the \(i\)th peak incurs the cost
+\(\W{\texttt{deq}}{e_i} = e_i + 1\), due to the front being empty
+because we started the rises from the abscissa axis. The next
+\(e_i-1\) falls have all cost~\(1\), because the front is not
+empty. For the \(i\)th mountain, the cost is thus
+\(e_i+(e_i+1)+(e_i-1) = 3e_i\). Then \(\C{}{n} = \sum_{i=1}^{k}{3e_i}
+= 3e = \frac{3}{2}n\), since \(n=e+d=2e\).
+
+\medskip
+
+\mypar{Dyck Meander (\(\boldsymbol{e=d+1}\))} The other possibility
+for a worst case is that \(e = d + 1\) and the graphics is then a
+\emph{Dyck meander} whose extremity ends at ordinate \(e-d=1\). An
+example is given in \fig~\ref{fig:dyck_meander1}, where the last
+operation is a dequeuing.
+\begin{figure}[t]
+\centering
+\includegraphics[bb=76 570 480 725,scale=0.75]{dyck_meander1}
+\caption{Dyck meander modeling queue operations (total cost
+  \(19\))\label{fig:dyck_meander1}}
+\end{figure}
+The dotted line delineates the result of applying the rescheduling we
+used on Dyck paths. Here, the last operation becomes an
+enqueuing. Another possibility is shown in
+\fig~\ref{fig:dyck_meander2},
+\begin{figure}[b]
+\centering
+\includegraphics[bb=76 570 480 725,scale=0.75]{dyck_meander2}
+\caption{Dyck meander modeling queue operations (total cost
+  \(20\))\label{fig:dyck_meander2}}
+\end{figure}
+where the last operation is left unchanged. The difference between the
+two examples lies in the fact that the original last dequeuing has, in
+the former case, a cost of~\(1\) (thus is changed) and, in the latter
+case, a cost greater than~\(1\) (thus is invariant). The third kind of
+Dyck meander is one ending with an enqueuing, but because this
+enqueuing must start from the abscissa axis, this is the same
+situation as the result of rescheduling a meander ending with a
+dequeuing with cost~\(1\) (see dotted line in
+\fig~\ref{fig:dyck_meander1} again). Therefore, we are left to compare
+the results of rescheduling meanders ending with a dequeuing, that is,
+we envisage two cases: either a range of \(n-1\)~operations followed
+by an enqueuing or a range of \(n-3\)~operations followed by two rises
+and one fall (of cost~\(5\)). In the former case, the total cost is
+\(\C{}{n}=\C{}{n-1}+1=(3n-1)/2\), because \(n=e+d=2e-1\). In the
+latter case, the cost is \(\C{}{n}=\C{}{n-3}+5=(3n+1)/2\), which is
+slightly greater than all the previous costs, so it is the absolute
+maximum cost.

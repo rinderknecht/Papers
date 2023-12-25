@@ -1,0 +1,25 @@
+%%-*-latex-*-
+
+\documentclass[11pt]{article}
+
+\usepackage{pstcol,pst-eps}
+
+\begin{document}
+
+\newpsobject{showgrid}{psgrid}{subgriddiv=1,griddots=10,gridlabels=6pt}
+\newpsstyle{gray}{fillstyle=solid,fillcolor=lightgray}
+ 
+\TeXtoEPS
+\begin{pspicture}(0,0)(6,5)%\showgrid
+\pstriangle[style=gray](1,0)(2,1.66)
+\rput(1,0.6){\huge \(a\)}
+\pstriangle[style=gray](3,0)(2,3)
+\rput(3,1){\huge \(b\)}
+\pstriangle[style=gray](5,0)(2,1.66)
+\rput(5,0.6){\huge \(c\)}
+\pstriangle(3,0)(6,5)
+\rput(3,3.7){\huge \(h\)}
+\end{pspicture}
+\endTeXtoEPS
+
+\end{document}

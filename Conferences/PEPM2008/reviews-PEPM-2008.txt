@@ -1,0 +1,557 @@
+From: Nic Volanschi <nic.volanschi@free.fr>
+Date: 15 November 2007 3:33:44 GMT+09:00
+To: Christian Rinderknecht <rinderkn@konkuk.ac.kr>
+Subject: Fwd: PEPM 2008 notification
+
+
+voila, tout ca me donne pas mal de boulot pour faire la version finale, hum...
+
+----------  Forwarded Message  ----------
+
+Subject: PEPM 2008 notification
+Date: Sunday 11 November 2007 22:01
+From: pepm2008@easychair.org
+To: nic.volanschi@free.fr
+
+Dear Authors,
+
+We are very pleased to inform you that your paper was accepted for inclusion
+in the proceedings and for presentation at PEPM 2008. All papers went
+through a rigorous reviewing process and were discussed at the program
+committee meeting. Of 74 submissions (the largest number since PEPM 1991),
+only 20 could be accepted.
+
+The comments from the reviewers are attached.
+
+The camera-ready version of research papers should not exceed *11 pages*
+(tool demo papers *5* pages) in SIGPLAN proceedings style and is due by
+
+  *Wed, November 28th 2007*.
+
+This is a FIRM deadline for the production of the proceedings. We will be
+sending soon another email containing more detailed author instructions.
+Please note that we have very limited time to get the proceedings ready.
+
+At least one of the authors of your paper must attend PEPM to present the
+ paper. We hope, of course, that all authors of accepted papers will attend.
+
+Please forward this email to your co-authors, if applicable. Please
+ acknowledge the receipt of this email (short reply to
+ pepm2008@easychair.org).
+Thank you.
+
+Again, congratulations on having your paper accepted!
+We are looking forward to seeing you in San Francisco in January!
+
+Sincerely yours,
+
+Robert Glück and Oege de Moor
+Program chairs PEPM 2008
+
+PEPM 2008: http://www.program-transformation.org/PEPM08
+
+
+---------------------------------------------
+
+Paper: 29
+Title: Unparsed Patterns: Easy User-Extensibility of Program Manipulation
+ Tools
+
+
+-------------------- review 1 --------------------
+
+OVERALL RATING: 2 (accept)
+REVIEWER'S CONFIDENCE: 4 (expert)
+----------------------- REVIEW --------------------
+
+This paper describes unparsed patterns, a novel technique of pattern
+matching in concrete syntax that does not require a concrete syntax
+pattern parser. It is argued that this technique provides an easy,
+efficient way to quickly implement program manipulation tools in
+existing parser-based software tools. The techniques described in this
+paper were first introduced in an earlier paper by the authors, which
+did not contain details of the implementation, or theoretical aspects of
+the technique.
+
+The paper is mostly well written, and the techniques described are
+interesting from a theoretical and practical point of view. The main
+problem that I have with the paper is that I'm not entirely convinced
+by how easy the authors claim the technique is to implement and use.
+
+Regarding the implementation, it is argued that it is "much simpler
+[than parsed patterns], almost no investment is needed. In particular,
+existing tools do not need to be ported to different parsing
+technologies." This is only true if we assume that the parser based
+tool being extended is open, and can produce an AST that can be easily
+unparsed. However, it is possible that a proprietary AST format is
+used, or that the AST cannot be output at all. In such cases I don't
+believe that the implementation effort will be as simple as is claimed,
+and I can imagine that the maintainability of the implementation will
+be a problem.
+
+Regarding the ease of use of the technique, I believe that writing the
+patterns with the correct parentheses will be more difficult than the
+authors admit. Although the conflict-solving parentheses only need to
+be introduced in very specific places of the pattern, and the
+parenthesis predictor function provides the user with a minimally
+parenthesised pattern, it will not be straight-forward to know how the
+pattern will match different program fragments.
+
+Further to the points mentioned above, I am unsure about two more parts
+in the paper. I don't understand why the "meta-parentheses will not be
+confused anymore with the parentheses in the language." (page 4).  I
+don't see what has changed. And if special meta-parentheses do not need
+to be used any more, then why are they used in the other algorithms?
+
+Also, in the incompleteness section on page 6 it is said that the
+unparser cannot return an empty tree. "Therefore, LST(t1) cannot start
+with a token (because by definition of matching we do not allow
+variables to match tokens), and it cannot be empty either (by
+definition of unparsing)". What happens if t1 derives epsilon though?
+Is that not possible?  I read the proofs in the appendix and trust the
+results, but I did not go over them in detail.
+
+Below are a list of relatively small changes I would like to be made to
+the paper.
+
+pg 1, col 1, para 2:
+Replace the first closed quotation mark with an open one.
+
+pg 1, col 2, para 1:
+The following sentence needs to be reworded. "This allows to write also
+tree patterns in standardized languages such as XPath/XQuery, and thus
+reuse existing tree pattern matchers.".
+
+p2, col 1, para 3:
+"or to local ambiguities due to a specific parsing algorithm with
+limited lookahead." Local ambiguities is incorrect. Conflicts in the
+parser caused by limited lookahead will not result in ambiguity. The
+parser will be non-deterministic though.
+
+p2, col 1, para 5:
+SDF and StrategoXT are not "cubical time implementations of GLR", but
+they can display unbounded polynomial time and space complexity in the
+worst case\cite{Johnson91}. I am only aware of one cubic GLR-style
+algorithm and implementation\cite{Scott07}, but I don't think it is
+publicly available yet.
+
+p2, col 1, para 5:
+Replace "portions of a grammar that are not LALR(1)-ambiguous" with
+"portions of a grammar that are LALR(1)".
+
+p3, col 1, para 6:
+"we can write the above condition simpler as". This needs to be
+reworded. "simpler as" is grammatically incorrect.
+
+p4, col 1, para 4:
+The following sentence is too long and not precise enough. "Lazy
+unparsed pattern matching first parses the expression using the usual
+program parser down to the same AST in Figure 1(a), pushes the AST on
+an empty stack, and considers the textual code pattern ?(%x = (%y -
+%z))? as a stream of characters and metavariables." I suggest rewording
+it in the following way: "Lazy unparsed pattern matching first parses
+the expression using the usual program parser to construct the same AST
+as shown in Figure 1(a). It then pushes the AST onto an empty stack,
+and considers the textual code pattern ?(%x = (%y - %z))? as a stream
+of characters and metavariables."
+
+p4, col 2, para 3:
+The following sentence also needs to be reworded. "In terms of
+usability, we can maybe assume that lazy unparsed patterns can be
+considered by some programmers as usable enough in practice for many
+applications."
+
+p5, col 1, para 5:
+Change "From this point on, all the tokens are BE consumed..." to "From
+this point on, all the tokens are consumed...".
+
+p5, col 2, para 7:
+Change "...so that it BE possible to bind a meta-variable ?%x? to a
+variable...." to "...so that it IS possible to bind a meta-variable ?%x?
+to a variable...".
+
+p6, col 1, para 6:
+Change "even if an unparse could have LEAD to a success." to "even if
+an unparse could have LED to a success.".
+
+p6, col 2, para 5:
+Reword "if we assume that the C grammar is so that the whole definition
+unparses" to "if we assume that the C grammar is defined so that the
+whole definition unparses".
+
+p7, col 1, para 4:
+Change "is split IN two rules" to "is split INTO two rules".
+
+p8, col 1, para 1:
+Reword "It is important to note that even IF three different..." to "It
+is important to note that even THOUGH three different...".
+
+p8, col 1, para 1:
+The following sentence doesn't really make sense and needs rewording.
+"As a proof for that, the patched compiler was initially tested only on
+C code, as reported in [19], but since that publication, we also could
+check C++ and Ada programs by just recompiling the package with those
+front-ends enabled."
+
+p8, col 1, para 1:
+Change "and the dumper for different languages shared THUS a common
+infrastructure that we BE modified JUSTE once." to "and the dumper for
+different languages shared a common infrastructure that we modified
+just once."
+
+p8, col 1, para 2:
+Change "rules application" to "rules applied".
+
+p8, col 1, para 2:
+Change "evolve IN a standalone library" to "evolve INTO a standalone
+library".
+
+p8, col 1, para 2:
+Change "for unparsed pattern matching, TO be linked in any parser-based
+tool." to "for unparsed pattern matching, THAT CAN be linked in any
+parser-based tool."
+
+p9, col 1, para 2:
+I think the paper you wanted to cite was [32] not [19].
+
+p9, col 2, para 2:
+Change "inconvenient" to "inconvenience".
+
+p9, col 2, para 3:
+Change "application in which USER may add their own program checks" to
+"application in which USERS may add their own program checks".
+
+p10, col 1, para 1:
+Change "In terms of expressiveness, pattern variables could be typed
+and match also tokens" to "In terms of expressiveness, pattern
+variables could be typed and could also match tokens".
+
+p10, col 1, para 1:
+The following sentence is hard to follow and should be reworded. "In
+terms of execution time, it is an open question whether the subtree
+matching problem can be solved more efficiently than matching each
+subtree with the pattern, without parsing the pattern."
+
+p10, col 2, para 1:
+Change "The algorithms" to "The algorithm".
+
+p11, col 1, para 8:
+Change "For this kind of PATTERNS" to "For this kind of PATTERN".
+
+@incollection{Johnson91,
+  AUTHOR = {M. Johnson},
+  TITLE = {The Computational Complexity of GLR Parsing},
+  YEAR = 1991,
+  BOOKTITLE = {Generalized LR Parsing},
+  EDITOR = {M. Tomita},
+  PUBLISHER = {Kluwer},
+  ADDRESS = {Boston},
+  PAGES = {35-42},
+  KEYWORDS = {}}
+
+@article{Scott07,
+ author = {Elizabeth Scott and Adrian Johnstone and Rob Economopoulos},
+ title = {BRNGLR: a cubic Tomita-style GLR parsing algorithm},
+ journal = {Acta Inf.},
+ volume = {44},
+ number = {6},
+ year = {2007},
+ issn = {0001-5903},
+ pages = {427--461},
+ doi = {http://dx.doi.org/10.1007/s00236-007-0054-z},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {Secaucus, NJ, USA},
+ }
+
+
+-------------------- review 2 --------------------
+
+OVERALL RATING: 1 (weak accept)
+REVIEWER'S CONFIDENCE: 4 (expert)
+----------------------- REVIEW --------------------
+
+Summary
+=======
+
+The authors present a method for matching parse trees against patterns
+written in the concrete syntax of a programming languages. The method
+is based on unparsing the parse tree, while simultaneously matching
+the tree against the pattern. This is opposed to the method of parsed
+patterns (concrete object syntax), where the patterns are first parsed
+statically to a parse tree pattern according to the grammar of the
+object language, after which the parse trees can be matched using
+normal pattern matching. The unparsed patterns approach does not
+require a grammar for the object language and does impose requirements
+on the parsing technique used by the compiler of the meta
+language. Unfortunately, the method of unparsed patterns requires the
+user to indicate the intended syntactic structure of the pattern in
+some places using meta-parentheses. The authors extensively discuss
+this issue.
+
+General Comments
+================
+
+The paper is well written with only a few minor spelling errors. I
+appreciate the extensive discussion of the issue of
+meta-parentheses. The paper also has good coverage of related work.
+
+The topic of the paper is important topic in the context of PEPM. It
+is attractive to use the concrete syntax of an object language in
+program manipulation tools, so techniques for the implementation of
+concrete syntax patterns are relevant to PEPM.
+
+Obviously, the main issue with unparsed patterns is the need for
+meta-parentheses. Though the issue is discussed in detail, it is
+really quite a serious problem, since for many patterns quite a few
+meta-parentheses are necessary to guarantee that the structure of the
+pattern is interpreted correctly. The big question is, how is the user
+supposed to know where to meta-parentheses are necessary? There is
+method for generating the required parentheses from a parse tree
+pattern, but this results in many meta-parentheses and quite
+unreadable patterns, which defeats the purpose of concrete syntax.
+
+The authors suggests a method for generating a pattern that uses
+sufficient parentheses from a parse tree pattern, but this requires
+the user to know and write down the parse tree pattern after all,
+which again defeats the purpose of concrete object syntax. Really what
+is needed is a tool that is able to determine this from the *unparsed*
+pattern. Ideally, the pattern matching engine itself should also
+signal conflicts (i.e. the need for parentheses).
+
+The paper would be much stronger if it was backed up by more case
+studies involving more languages, for example patterns for matching
+Java source code.
+
+It's quite obvious that the algorithms are correct as long as
+sufficient meta-parentheses are used, so I'm not too convinced that
+the correctness proofs are very useful. The big issue is the need for
+meta-parentheses, not the correctness of the algorithm given that
+patterns have sufficient metaparentheses.
+
+Finally, an issue with the method is that it cannot be used to
+instantiate a pattern. Hence, it can only be used for matching, not
+for code generation or transformation.
+
+The method has quite some issues, but these issues are discussed in
+enough detail to consider it for publication. If the issues raised in
+this review are resolved, I would be happy to see a publication on
+this topic.
+
+Motivation and Performance
+--------------------------
+
+In the introduction, you spend quite some time on discussing the
+performance disadvantage of the related work on parsed
+patterns. However, I would suggest to focus your argument on the
+minimal effort required to introduce unparsed patterns (i.e. the
+porting issue mentioned in the last paragraph before 'our
+solution'). The need for a full grammar and the need to switch to a
+generalized parser is indeed a limitation of much of the related
+work. On the other hand, your argument against the performance of the
+other approaches is speculative and not substantiated by concrete
+evidence. An extended pattern grammar is only highly ambiguous at the
+quotations and anti-quotations, i.e. not inside the quoted fragments
+and not in the portions of the meta language. Hence, it would be good
+to give some less speculative insight in the performance effects of
+these ambiguities.
+
+I would suggest to rephrase the point about the exponential
+performance of mainstream GLR parsers, in particular Bison. If a
+parsing algorithm is exponential, then it is not an implementation of
+the GLR algorithm at all. There are quite a few better
+implementations, so I do not see the point in raising the poor
+performance of Bison as an argument against the use of GLR.
+
+Finally, about the same performance section in the introduction: the
+parsed pattern approaches require a *generalized* parser (i.e. parsing
+the entire class of context-free grammars), which does not necessarily
+imply GLR. It would be good to mention the Earley algorithm, which
+performs better than GLR on highly ambiguous grammars. If ambiguities
+are indeed a big performance issues in GLR-based related work, then
+Earley might be better for parsing metaprograms with concrete syntax
+patterns.
+
+Injections and Optional Syntax
+------------------------------
+
+You claim that adding the pattern matching algorithm is complete if
+sufficient meta-parentheses are added to a pattern. Unfortunately, I
+don't think this claim is valid.
+
+To introduce an example that does not work, first consider the
+following grammar:
+
+    Statement ::= Identifier '=' Expression
+    Expression ::= Identifier
+
+                 | Expression '+' Expression
+
+Notice the injection from Identifier to an Expression. Because of this
+injection a parse tree for "a = a" might be
+
+    (('a') '=' (('a')))
+
+to make the structure more clear, let me include constructor names:
+
+    (Assign (Id 'a') "=" (Var (Id 'a')))
+
+Unfortunately, this does not make the pattern "%x = %x":
+
+    $ ./match "(('a') '=' (('a')))" "%x = %x"
+    no.
+
+So meta-parentheses are necessary:
+
+    $ ./match -t "(('a') '=' (('a')))" "%x = %(%x%)"
+    yes, sigma = { x<-( 'a' ) }.
+
+Next, consider
+
+  Statement ::= Type? Identifier '=' Expression
+  Type ::= 'int' | 'bool'
+  Expression ::= Identifier
+
+               | Expression '+' Expression
+
+Notice the optional Type. "a = a" might now be represented by the
+parse tree
+
+    ((() ('a')) '=' (('a')))
+
+Or, with constructor names:
+
+    (Declare (Type? ) (Id 'a') "=" (Var (Id 'a')))
+
+Obviously, the following match does not work:
+
+    ./match "((() ('a')) '=' (('a')))" "%x = %x"
+    no.
+
+This works:
+
+    $ ./match -t "((() ('a')) '=' (('a')))" "%x = %y"
+    yes, sigma = { x<-( () ( 'a' ) ) y<-( ( 'a' ) ) }
+
+But I'm not able to find a version with meta parentheses that matches
+"%x = %x" pattern without introducing a meta-variable for the optional
+type (which I don't want to do).  The option to automatically
+determine meta-parentheses does not work for this case either:
+
+    $ ./match "((() x) '=' y)"
+    trans(t)="%(%( %x%) = %y%)".
+
+So, it seems that adding sufficient meta-parentheses is not enough:
+actually you also need to use sufficient meta-variables. These
+examples seem to indicate that patterns need to have meta-variables
+for all their optional parts. This can be a great burden in languages
+like Java, where method declarations have many optional language
+constructs.
+
+Curiously, matching does work on this case:
+
+    $  ./match "(('f') '(' ()  ')' )" "%f()"
+    yes, sigma = { f<-( 'f' ) }.
+
+Another issue is that it is not possible to indicate if a pattern is
+supposed to match a single argument or the entire list:
+
+    $ ./match "(('f') '(' ('1')  ')' )" "%f(%e)"
+    yes, sigma = { e<-( '1' ) f<-( 'f' ) }
+
+The problem in all these cases is that you don't really know where the
+user wants to bind a meta-variable to if injections or optional
+language constructs are involved. The only way to make this clear is
+by introducing meta-parentheses or meta-variables. Of course, this is
+an inherent problem: with parsed patterns, this is not clear
+either. In systems based on parsed patterns, this is usually solved by
+indicating the type of the meta-variable (either by a naming
+convention or by declaring its type separately). If a generalized
+parser is used, then the parser will produce all the alternative
+patterns, and the system can select one of them based on the type of
+the meta-variable.
+
+This issue needs to be discussed, and in this discussion you should
+refer to the work on Meta-AspectJ (Zook, Huang, Smaragdakis, GPCE'04)
+and type-based disambiguation (Bravenboer, Vermaas, Vinju, Visser,
+GPCE'05).
+
+Unparsed String
+---------------
+
+At page 3 you define that an 'unparsed string' has no redundant
+parentheses. However, for many languages it is far from trivial to
+determine where parentheses are necessary according to the precedence
+rules of a language. So I wonder how you expect to deal with this.
+
+Whitespace
+----------
+
+I wonder if you have any ideas on dealing with whitespace in unparsed
+patterns. For example, consider the pattern "aabb" and the tree "aa
+bb" (without any metavariables)
+
+    $ ./match "(('aa') ('bb'))" "aabb"
+    yes, sigma = { }.
+
+So this matches, while this actually depends on the programming
+language. For most programming languages, you probably don't want this
+to match, but others actually allow keywords and identifiers to be
+combined without any whitespace in between. As far as I can see,
+meta-parentheses cannot be used to avoid this match. Meta-parentheses
+can only be used in cases like this:
+
+
+    $ ./match "('=' ('aa') ('bb'))" "= %(aabb%)"
+    no.
+
+Of course, it's undesirable to have to put every literal identifier or
+keyword between meta-parentheses, that's not much of a concrete syntax
+anymore.
+
+Details
+=======
+
+* Introduction, page 2: bison -> Bison
+
+* Introduction, page 2: "severely restricting the patters" -> patterns
+
+* Section 3.3, third paragraph: I do not understand why lazy unparsing
+  indeed no longer confuses the meta parentheses with the parentheses
+  in the language. It would be good to explain that in a bit more
+  detail.
+
+* Related work, first paragraph: citation 19 is not a paper.
+
+* Related work, final paragraph: "The main inconvenient" ->
+  inconvenience
+
+
+-------------------- review 3 --------------------
+
+OVERALL RATING: 0 (borderline paper)
+REVIEWER'S CONFIDENCE: 0 (null)
+----------------------- REVIEW --------------------
+
+The paper presents a new approach to the problem of extending
+the syntax of programming languages: "unparsed patterns".
+
+The approach is interesting and the presentation is clear and
+well-structured. So, per se, the paper is good and deserves being
+published somewhere.
+
+Unfortunately, the relevance of the paper to "partial evaluation" and
+"program manipulation" is only marginal. Certainly, from the purely
+formal point of view, any manipulation over an abstract/concret
+syntax tree could be considered to be a "program manipulation".
+Accordingly, any compiler of macroprocessor could be considered to
+be a "program manipulation system". But, such an interpretation
+of the term "program manipulation" is, evidently, against
+the traditions and the spirit of PEPM.
+
+Hence, the paper actually closer to such fields as "programming
+language design", "extendable programming languages", "embedded
+languages", "macroprocessors", than to "program manipulation".
+
+-------------------------------------------------------
+
+

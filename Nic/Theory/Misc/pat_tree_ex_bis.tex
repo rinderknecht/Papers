@@ -1,0 +1,23 @@
+%%-*-latex-*-
+
+%% bb=71 680 125 721
+
+\documentclass{article}
+
+\usepackage{pstricks,pst-tree,pst-eps}
+
+\newcommand\pcdata[1]{\Tr{\psframebox{\rule{0pt}{7pt}\texttt{#1}}}}
+\newcommand\element[1]{\Tr{#1}}
+
+\begin{document}
+
+\TeXtoEPS
+\pstree[levelsep=1cm,nodesep=2pt,treesep=8pt,framearc=.4]{\element{sub}}{
+  \Tr{\textsf{{\small \%}x}}
+  {\psset{nodesepB=0pt}
+   \pcdata{-}}
+   \Tr{\textsf{{\small \%}y}}
+  }
+\endTeXtoEPS
+
+\end{document}

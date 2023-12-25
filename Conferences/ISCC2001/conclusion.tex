@@ -1,0 +1,37 @@
+%%-*-latex-*-
+
+\section{Conclusion\label{conclusion}}
+
+In this paper we have presented a global test architecture for  
+distributed services including the generation of test sequences for
+service components. Our approach was validated by a case study: a
+France Telecom \audio service.
+
+The full service was described using the SDL language, and the running
+of the Hit-or-Jump algorithm showed no deadlocks and produced the test
+sequences for all the components of the studied service.
+
+For sake of simplicity, we have selected a component of the \audio service
+that is at the very heart of the service, the conference bridge, and
+which coordinates the other components and illustrates clearly what
+one imagines a \audio service is. The other components were generic
+components that can be present in other kind of telecommunication
+services, and for which we also generated the corresponding tests. We
+have produced the tests for the bridge component in its context, and
+we translated them in the TTCN and MSC formats.
+
+We have also defined an architecture for the tester, which combines an
+active part (based on a stimulation of the implementation) and a
+passive one (based on the observation of the exchanges between the
+CORBA objects). 
+
+The results we got show that the use of formal methods considerably
+eases the task of the service designers and developers, and that they
+are usable for real services. Since the design phase to the
+implementation and test phases, we used formal description techniques
+(SDL, TTCN, MSC) and a formal test methodology. Moreover, we showed it
+is possible to test the service components in the context of the
+others (and not artificially in isolation). We think this is a notable
+step towards the validation and the design of reusable
+service-components.
+
