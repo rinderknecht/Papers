@@ -5,11 +5,12 @@
 \noindent The \XPath expression \texttt{\small a//b[//c]} is
 interpreted as ``\texttt{\small a//b} and \texttt{\small a//c}'', if
 we omit the unique target semantics, according to which \XPath
-expressions evaluate to a 
+expressions evaluate to a
 \begin{wrapfigure}[6]{l}{40pt}
 \centering
 \includegraphics[bb=71 694 100 721]{binary_query}
-\caption{\textsf{\small a//b[//c]}\label{fig:binary_query}}
+\caption{\textsf{\small a//b[//c]}}
+\label{fig:binary_query}
 \end{wrapfigure}
 sequence of nodes with same tag, here~\texttt{\small b}. Many research
 papers~\cite{Cooper:2001,Li:2001,Zhang:2001} are devoted to matching
@@ -56,7 +57,8 @@ As an illustration, consider in \fig{fig:mathml}
 \qquad
 \subfloat[Pattern with variables \(a\)~and~\(b\). \label{fig:mathml_query}]%
          {\includegraphics[bb=63 632 187 721]{mathml_query}}
-\caption{Two \MathML trees and a query.\label{fig:mathml}}
+\caption{Two \MathML trees and a query.}
+\label{fig:mathml}
 \end{figure}
 the \MathML trees corresponding to the expressions \(\cos x - \sin y\)
 and \(\cos(\sin x) - y\). These trees have very different

@@ -88,7 +88,8 @@ c_2 & \mathbf{a_1b_1c_2}, a_1c_2 & \varnothing\\
 \bottomrule
 \end{array}
 \)
-\caption{Stack after adding~\(c_2\)\label{fig:stack_after_c2}}
+\caption{Stack after adding~\(c_2\)}
+\label{fig:stack_after_c2}
 \end{wrapfigure}
 The (complete) matches are obtained by reading element~\(\varepsilon\)
 from the input stream and combining it with previous partial matches,
@@ -120,10 +121,10 @@ stack as inherited attributes.
           \label{insert:li:not_matches}
 \RComment No match yet.
 \End
-\li \((\varepsilon_1, \iota_1, \sigma_1), \id{S_1} 
-      \gets \proc{Pop}(\id{S})\) 
+\li \((\varepsilon_1, \iota_1, \sigma_1), \id{S_1}
+      \gets \proc{Pop}(\id{S})\)
     \label{insert:li:first_pop}
-\RComment Let us destructure the top of stack \(\id{S}\). 
+\RComment Let us destructure the top of stack \(\id{S}\).
 \li \If \(\varepsilon \sqsubset \varepsilon_1\)
     \label{insert:li:containment_in_top}
 \RComment Does the top~\(\varepsilon_1\) of the stack contain \(\varepsilon\)?
@@ -131,7 +132,7 @@ stack as inherited attributes.
     \label{insert:li:complete_stack}
 \RComment New partial and complete matches.
 \li \Return \({\cal C}, \proc{Push} ((\varepsilon, {\cal P},
-                                          \varnothing), 
+                                          \varnothing),
                                          \id{S})\)
     \label{insert:li:extension}
 \RComment Matches and rightmost extension.
@@ -141,10 +142,10 @@ stack as inherited attributes.
      \label{insert:li:second_pop}
 \RComment Destructure one more layer of stack \(\id{S}\).
 \li \Return \(\proc{Insert}
-  (\varepsilon, 
+  (\varepsilon,
    \proc{Push} ((\varepsilon_2,
                  \iota_2,
-                 \sigma_2 \cup \proc{Filter}(\varepsilon_1, 
+                 \sigma_2 \cup \proc{Filter}(\varepsilon_1,
                                              \iota_1 \cup \sigma_1),
                 \id{S_2}))\)
      \label{insert:li:expansion}
@@ -421,7 +422,7 @@ further.
 \li	\(\mu_q, \sigma' \gets \proc{Choose} (\sigma)\)
 \label{combine:li:arbitrary_selection}
 \RComment Pick a partial match~\(\mu_q\); the remaining ones are \(\sigma'\).
-\li \({\cal C}, {\cal P} \gets 
+\li \({\cal C}, {\cal P} \gets
       \proc{Combine} (\varepsilon, \sigma')\)
 \label{combine:li:recursion}
 \RComment Combine \(\varepsilon\) with the remaining partial matches.
@@ -437,7 +438,7 @@ i.e., \(\varepsilon\) matches \(\kappa_i\),
 \label{combine:li:make_complete_match}
 \RComment we make a complete match,
           \End
-\li       \Return \({\cal C}, 
+\li       \Return \({\cal C},
                      {\cal P} \cup \{\mu_q \oplus i \mapsto
                      \varepsilon\}\)
 \label{combine:li:make_partial_match}
