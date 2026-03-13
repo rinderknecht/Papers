@@ -37,11 +37,11 @@
 \title{\LARGE \bf LeVinQam: A Question Answering Mining platform}
 
 \author{
-\large Patrick Duval, Agathe Merceron, Christian Rinderknecht, Michel Scholl \\ 
-\normalsize ESILV - G\'enie Informatique\\ 
-\normalsize P\^ole Universitaire L\'eonard de Vinci\\ 
+\large Patrick Duval, Agathe Merceron, Christian Rinderknecht, Michel Scholl \\
+\normalsize ESILV - G\'enie Informatique\\
+\normalsize P\^ole Universitaire L\'eonard de Vinci\\
 \normalsize F-92916 Paris La D\'efense - Cedex \\
-\normalsize FRANCE \\ 
+\normalsize FRANCE \\
 \normalsize {\it \{patrick.duval, agathe.merceron, christian.rinderknecht, michel.scholl\}@devinci.fr}
 }
 
@@ -91,12 +91,12 @@
 
    \newif\ifnolabelindentfactor \nolabelindentfactorfalse
 
-   % in V1.4 of IEEEtran.cls 
+   % in V1.4 of IEEEtran.cls
    \newif\ifcenterfigcaptions
    \centerfigcaptionsfalse
 
-   % we need to provide the old IED environments 
-   % with a bogus optional argument 
+   % we need to provide the old IED environments
+   % with a bogus optional argument
    \let\OLDitemize\itemize
    \let\OLDenumerate\enumerate \let\OLDdescription\description
 
@@ -111,23 +111,23 @@
 
    % V1.1 change: use \let instead of \providecommand % This prevents
    %LaTeX from hanging if the user ever % tried to redefine \PARstart
-   %in terms of \CMPARstart 
+   %in terms of \CMPARstart
    \let\CMPARstart\PARstart
 
    \let\OLDappendix\appendix
    \renewcommand{\appendix}[1][\relax]{\OLDappendix}
 
-   \newif\ifuseRomanappendices 
+   \newif\ifuseRomanappendices
    \useRomanappendicestrue
 
    % V1.2 change: handle the optional biography environment argument %
    %(the photo specifier) provided by IEEEtran V1.5 and later.  % This
    %is tricky because, under the new biography, the SECOND % argument
   % is the non-optional one (the biography text).
-   \let\OLDbiography\biography 
+   \let\OLDbiography\biography
    \let\OLDendbiography\endbiography
    \renewcommand{\biography}[2][\relax]{\OLDbiography{#2}}
-   \renewcommand{\endbiography}{\OLDendbiography} 
+   \renewcommand{\endbiography}{\OLDendbiography}
    % **** BACKWARD COMPATIBILITY CODE BLOCK END ****
 
     % alter the header to show we are using the older class
@@ -170,7 +170,7 @@
 
 
 %\begin{abstract}
- 
+
 \input{abstractSub.tex}
 
 % no need for this single page document
@@ -189,21 +189,20 @@
 \label{model}
 \input{model}
 
-
 \section{Platform design} %PD and CR
 \label{architecture}
 \input{architecture}
 
 
-\section{Visualisation and Mining} %AM 
+\section{Visualisation and Mining} %AM
 \label{visualisation}
 \input{visualisation}
 
-%\section{Case studies} %AM 
+%\section{Case studies} %AM
 %\label{caseS}
 %\input{caseS.tex}
 
-%\section{Conclusion} % 
+%\section{Conclusion} %
 %\label{concl}
 %\input{conclusion.tex}
 
@@ -216,8 +215,8 @@
 %\end{thebibliography}
 \bibitem{logicT1}
 D.~Abraham, L.~Crawford, L.~Lesta, A.~Merceron  and K.~Yacef,
-``The Logic Tutor: A Multimedia Presentation'', {\em Interactive 
-Multimedia Electronic Journal of Computer-Enhanced learning}, Vol.~3, 
+``The Logic Tutor: A Multimedia Presentation'', {\em Interactive
+Multimedia Electronic Journal of Computer-Enhanced learning}, Vol.~3,
 Nb.~2, Nov. 2001.
 
 
@@ -241,10 +240,10 @@ Special Issue on Intelligent Systems and Teleteaching,  4, 19-25, 1999
 
 %\bibitem{Laos}
 %A.I.~Cristea and A.~de~Mooij,
-%``LAOS: Layered WWW AHS Authoring Model and their corresponding 
+%``LAOS: Layered WWW AHS Authoring Model and their corresponding
 Algebraic Operators'',
-%{\em Proceedings of the track Education, 12th International World Wide 
-Web Conference WWW2003}, www2003.org, Budapest, Hungary, pp.185-194, May 
+%{\em Proceedings of the track Education, 12th International World Wide
+Web Conference WWW2003}, www2003.org, Budapest, Hungary, pp.185-194, May
 2003
 
 %\bibitem{druger00}
@@ -266,9 +265,9 @@ http://www.anemalab.org/ganesha/,
 Ganesha, a Learning Management System
 
 \bibitem{grandbastien03}
-M.~Grandbastien, L.~Oubahssi, G.~Claes, ``A process oriented approach 
-for modelling on line Learning Environments'', {\em Supplementary 
-Proceedings of Artificial Intelligence in Eudcation AIED2003}, 
+M.~Grandbastien, L.~Oubahssi, G.~Claes, ``A process oriented approach
+for modelling on line Learning Environments'', {\em Supplementary
+Proceedings of Artificial Intelligence in Eudcation AIED2003},
 University of Sydney, Australia, pp.~140-152, July 2003.
 
 
@@ -311,10 +310,10 @@ on Artificial Intelligence in Education}, Sydney, Australia, pp.201-208, 2003
 
 %\bibitem{SmartSpace}
 %B.~Simon, Z.~Miklos, W.~Neidl, M.~Sintek and J.~Salvachua,
-%``Smart Space ofr Learning: A Mediation Infrastructure for Learning 
+%``Smart Space ofr Learning: A Mediation Infrastructure for Learning
 %Services'',
-%{\em Proceedings of the track Education, 12th International World Wide 
-%Web Conference WWW2003},  www2003.org, Budapest, Hungary, pp. 97-101, 
+%{\em Proceedings of the track Education, 12th International World Wide
+%Web Conference WWW2003},  www2003.org, Budapest, Hungary, pp. 97-101,
 %May 2003
 
 

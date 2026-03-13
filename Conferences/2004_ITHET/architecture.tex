@@ -23,7 +23,7 @@ to reinvent the wheel. The way we are using XML is the
 following.
 
 \begin{figure}[htbp]
-{\includegraphics[width=9cm]{arch.eps}}
+\includegraphics[scale=0.5]{arch}
 \caption{The LeVinQuam platform architecture overview.}
 \label{arch}
 \end{figure}
@@ -32,7 +32,7 @@ following.
 The structure and contents of exercises, e-learning
 guided tours and answers  are described in XML in the platform ({\bf EGT} blocks in the synopsis of figure \ref{arch}).
 The use of a schema language for XML, as \textsc{Relax NG}, allows an
-automatic validation of the exercises descriptions submitted by 
+automatic validation of the exercises descriptions submitted by
 authors by matching these descriptions to an XML schema. The same
 process can apply to student answers, once translated into XML in the
 platform. The link between exercises and answers can also be made
@@ -67,7 +67,7 @@ in these tasks.
 In a first phase, authors, with the help of a simple
 validating XML editor,  fill XML templates describing their
 exercises and answers. A template library providing simple generic
-types of exercises is proposed to the authors for this purpose. 
+types of exercises is proposed to the authors for this purpose.
 %We think
 %that XML is simple enough to be quickly mastered by authors because it
 %focuses on structure and contents (by contrast, HTML mixes informal
@@ -91,7 +91,7 @@ Different levels of answer validation can be provided by the platform,
 according to the nature  of exercises, from syntactic validation,
 like checking whether an answer is a valid calendar date, to complex
 semantic validations, going through  simple semantic validation of
-closed questionnaires, e.g. checking whether 
+closed questionnaires, e.g. checking whether
 this date is the correct answer. If the question is to solve a
 mathematical equation, then a simple semantic validation can
 decide whether the solution is the one expected. However if we want to
@@ -110,7 +110,7 @@ available on the internet. Portability is also enhanced with Java, which is
 a main-stream programming language. Another reason is more
 technical: the ease of maintenance, compared with scripting languages,
 and the richness of web frameworks based on J2EE (e.g. the java projects at {\tt apache.org}).
-%MS références 
+%MS références
 %% We actually plan to run our platform by means of Java
 %% servlets with the support of Tomcat and build the web application with
 %% help of open source frameworks, like Struts and Cocoon. These
@@ -118,7 +118,7 @@ and the richness of web frameworks based on J2EE (e.g. the java projects at {\tt
 %% Model-View-Controller) and reach a wide audience among companies.
 
 %We previously mentionned an example with SQL and this lead us to
-%another aspect of the platform: data persistence. 
+%another aspect of the platform: data persistence.
 
 {\em Data persistence:}
 The last feature of the platform is data persistence. All answers as well as the log of the learner's
@@ -134,7 +134,7 @@ prototype \cite{wargon01} based on Ganesha \cite{ganesha}.
 
 %MS reference de Ganesha et de laurent Wargon
 %This enables further data mining to discover new informations
-%and gives some feedback to the teacher. 
+%and gives some feedback to the teacher.
 
 
 %% A trail is a path among the course or the exercises which is proposed
@@ -143,4 +143,3 @@ prototype \cite{wargon01} based on Ganesha \cite{ganesha}.
 %% learner to progress freely. These trails can be specified as an XML
 %% schema. In all cases, the interactions of the learner along his trail
 %% is recorded in the platform database for future mining.
-
