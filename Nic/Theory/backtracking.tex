@@ -89,7 +89,7 @@ and backtrack in case of failure.
     matched against the leftmost tree \(h\) of the forest. This can be
     achieved in two different situations:
     \begin{enumerate}
-    
+
       \item \textbf{Elimination.} If \(h\) and \(e\) are the same
         lexeme, then the remaining pattern is matched against the
         remaining forest, with the same substitution \(\sigma\).
@@ -139,7 +139,7 @@ patterns is inductively defined as the smallest set \(\overline{\cal
 
 \end{itemize}
 
-\paragraph{Substitutions and Closed Patterns.} 
+\paragraph{Substitutions and Closed Patterns.}
 
 Let us extend the substitutions defined in section~\ref{model}, in
 order to cope with unparsed patterns, not just meta\-variables. The
@@ -166,12 +166,12 @@ specifies that the substitutions always leave lexemes unchanged.
 \framebox[\columnwidth]{%
 \(
 \begin{aligned}
-\subst{\el}{\sigma} 
+\subst{\el}{\sigma}
 &\eqn{1} \el\\
 \subst{\cons{\meta{x}}{\overline{p}}}{\sigma}
 &\eqn{2} \cons{\sigma(x)}{\subst{\overline{p}}{\sigma}}\\
 \subst{\cons{l}{\overline{p}}}{\sigma}
-&\eqn{3} \cons{l}{\subst{\overline{p}}{\sigma}} 
+&\eqn{3} \cons{l}{\subst{\overline{p}}{\sigma}}
 \end{aligned}
 \)
 }
@@ -265,7 +265,7 @@ Some important questions raised by this formal definition are: Is it
 an algorithm? (i.e., does it terminate?) With respect to what is it
 sound and/or complete?
 
-\paragraph{Termination.} 
+\paragraph{Termination.}
 
 As said before, termination is entailed by the observation that either
 the pattern length (i.e., the number of lexemes and meta\-lexemes), or
@@ -292,7 +292,7 @@ any rule is applied to any given configuration.
 
 \paragraph{Closed\hyp{}Tree Matching.}
 
-Soundness and completeness are properties which suppose another level
+Soundness and completeness are properties that suppose another level
 of specification, usually more abstract, or at the same conceptual
 level. In any case, this other description should provide a concept of
 matching which is more `natural' or obvious than the one under
@@ -362,7 +362,7 @@ forest.
 Rule \textsf{EQ} specifies that if a non\hyp{}empty forest \(f_1\)
 matches another non\hyp{}empty forest (possibly the same), then the
 forest \(\cons{h}{f_1}\) matches the forest \(\cons{h}{f_2}\), where
-\(h\) is a tree (possibly a lexeme). 
+\(h\) is a tree (possibly a lexeme).
 
 Rule \textsf{SUB} states that if a forest \(f\) matches the catenation
 of forests \(f_1\) and \(f_2\), such that the constructor \(c\) can
@@ -420,7 +420,7 @@ matching. Formally, this can be expressed as follows.
 \label{backtracking:completeness}
 \begin{center}
 If   \(\subst{\overline{p}}{\sigma} \sqsubseteq h\),
-then \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\) 
+then \(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\)
 and  \(\sigma' \subseteq \sigma\).
 \end{center}
 \end{theorem}
@@ -440,7 +440,7 @@ the closed\hyp{}tree matching:
 \label{backtracking:compliance}
 \begin{center}
 \(\subst{\overline{p}}{\sigma} \sqsubseteq h\) if and only if
-\(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\) 
+\(\smat{h}{\overline{p}} \twoheadrightarrow \sigma'\)
 and  \(\sigma' \subseteq \sigma\).
 \end{center}
 \end{corollary}
@@ -474,13 +474,18 @@ example, we may use the pattern \texttt{\%(\%x = \%(\%(\%y\%) -
 unveil the structure because the language may already contain
 parentheses which may have a completely different meaning other than
 grouping. For instance, in the following \textsf{Korn shell}
-(\textsf{ksh}) pattern:
-\begin{verbatim} 
-case %x in [yY]) echo yes;; *) echo no;; esac
+(\textsf{ksh}) pattern
+{\small
+\begin{verbatim}
+case %x in \
+  [yY]) echo yes;; \
+     *) echo no;; \
+esac
 \end{verbatim}
-we must use meta\-parentheses to explicit the tree structure, because
-parentheses would not pair the way we want ---~in fact, they would not
-pair at all.
+}
+\noindent we must use meta\-parentheses to explicit the tree
+structure, because parentheses would not pair the way we want ---~in
+fact, they would not pair at all.
 
 Fully meta\-parenthesised patterns enable linear\hyp{}time pattern
 matching. However, the explicit structure comes at the price of
@@ -501,5 +506,4 @@ syntax\hyp{}directed.
 %% subtrees, which is a quite common case within parsing\hyp{}based
 %% tools.
 
-%% Secondly, 
-
+%% Secondly,

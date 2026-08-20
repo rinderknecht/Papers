@@ -45,8 +45,8 @@ model.
     always written with the tuple they distinguish (the constructor
     precedes the tuple).  For example \(c(1, d(n))\) is a term
     constructed with constructors \(c\) and \(d\). It is possible for
-    the tuple to be empty. 
-%% (In \Clang, this situation corresponds to enumerated values.)  
+    the tuple to be empty.
+%% (In \Clang, this situation corresponds to enumerated values.)
     For example, \(c(1, d())\) contains the
     constructor \(d\) applied to (that is, tagging) the empty tuple.
     Note that, in order to distinguish constructors from variables, we
@@ -127,7 +127,10 @@ grammar.
 Each non\hyp{}terminal symbol of the grammar corresponds to one or
 more constructors of the parse tree, depending on the number of
 productions with that symbol on the left\hyp{}hand side. For example,
-the productions \verb/Exp ::= Integer | Exp + Exp/ \verb/| Exp * Exp/
+the productions
+\begin{verbatim}
+  Exp ::= Integer | Exp + Exp | Exp * Exp
+\end{verbatim}
 lead to three constructors being associated to \verb|Exp|, of
 respective arity 1, 2 and 2. Let \({\cal C}\) be the set of
 constructors of parse trees, each constructor having a strictly
@@ -168,7 +171,8 @@ For instance, let \(a, b, c, d, e \in {\cal H}\) (that is to say,
 \(a\), \(b\), \(c\), \(d\) and \(e\) are variables denoting unknown
 trees). Then
 \begin{align*}
-[a,b,c] \cdot [d,e] &= \cons{a}{[b,c]} \cdot [d,e] = \cons{a}{[b,c]
+[a,b,c] \cdot [d,e]
+ &= \cons{a}{[b,c]} \cdot [d,e] = \cons{a}{[b,c]
   \cdot [d,e]}\\
  &= \cons{a}{\cons{b}{[c]} \cdot [d,e]} = \cons{a}{\cons{b}{[c] \cdot
     [d,e]}}\\
@@ -245,14 +249,14 @@ parse trees. The substitution \(\sigma \oplus x \mapsto t\) is the
 %% \end{align*}
 %% But updates are not set unions as shown by
 %% \begin{align*}
-%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{x}) 
+%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{x})
 %%   &= t'_1\\
-%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{y}) 
+%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{y})
 %%   &= \sigma(\textsf{y}) = t_2
 %% \end{align*}
 %% which is equivalent to the more readable
 %% \begin{equation*}
-%%   \sigma \oplus \textsf{x} \mapsto t'_1 
+%%   \sigma \oplus \textsf{x} \mapsto t'_1
 %%   = \{\textsf{x} \mapsto t'_1, \textsf{y} \mapsto t_2\}
 %% \end{equation*}
 Let us extend updates to substitutions as follows:
@@ -267,7 +271,7 @@ Let us extend updates to substitutions as follows:
 Let us define the inclusion between substitutions as
 \begin{align}
   \sigma_1 \subseteq \sigma_2
-&\Longleftrightarrow 
+&\Longleftrightarrow
   \forall x \in \dom{\sigma_1}.(\sigma_1(x) =
   \sigma_2(x)) \label{model:incl}
 \end{align}
@@ -300,10 +304,10 @@ applied.}
 \textsf{fact}(0) &\rightarrow 1\\
 \textsf{fact}(n) &\rightarrow n \times \textsf{fact}(n-1)
 \end{align*}
-Consider now a more sophisticated (unordered) system 
+Consider now a more sophisticated (unordered) system
 \begin{align*}
 \textsf{append}(\textsf{nil}(), s) &\rightarrow s\\
-\textsf{append}(\textsf{push}(h,t), s) &\rightarrow 
+\textsf{append}(\textsf{push}(h,t), s) &\rightarrow
 \textsf{push}(h, \textsf{append}(t, s))
 \end{align*}
 defining the function \textsf{append} which appends a stack to

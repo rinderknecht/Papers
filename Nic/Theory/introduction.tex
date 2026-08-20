@@ -55,14 +55,15 @@ compiler in order to recognise such initialisations and automatically
 implement them more efficiently using the \texttt{bzero()}
 function. Depending on the AST representation of the \Clang program
 in a particular tool, the tree pattern corresponding to the example
-above would typically be expressed as follows: 
+above would typically be expressed as follows:
 {\small
 \begin{verbatim}
-for_stmt(assign_expr(X,N),
-         less_expr(X,M),
-         preincr_expr(X),
-         expr_stmt(assign_expr(array_expr(Y,X),
-                               int_literal(0))))
+for_stmt(
+  assign_expr(X,N),
+  less_expr(X,M),
+  preincr_expr(X),
+  expr_stmt(assign_expr(array_expr(Y,X),
+                        int_literal(0))))
 \end{verbatim}
 }
 \noindent The name of the array, its bound and its index have been
@@ -79,7 +80,7 @@ pattern becomes even more verbose.
 
 \paragraph{Concrete\hyp{}Syntax Patterns.}
 
-In the second approach to source code matching, code patterns are
+In the second approach to matching source code, code patterns are
 expressed using the native syntax (i.e., the concrete syntax) of the
 subject programming language, augmented with meta\hyp{}variables. Then
 patterns are parsed to trees before being matched with the program
@@ -215,7 +216,7 @@ at a complete exposition of unparsed patterns.
 %% practical results are the same, but the present article differs on
 %% many points, amongst which the following.
 %% \begin{itemize}
-  
+
 %%   \item The approach is completely different. In the workshop paper,
 %%     several algorithms for matching unparsed patterns were presented
 %%     and compared to the classic (tree\hyp{}based) pattern

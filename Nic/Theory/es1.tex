@@ -8,14 +8,14 @@
 
 \paragraph{Parse Trees and Unparsed Patterns.}
 
-Let \mlp and \mrp be meta\-lexemes corresponding respectively to the
-opening and closing meta\-parentheses, whose concrete syntax is
-\texttt{\%(} and \texttt{\%)}. These meta\-parentheses are inserted by
-the user in order to guide matching the pattern against the parse tree
-by forcing the enclosed pattern to match one
-subtree. Meta\-parentheses can be present anywhere in the pattern as
-long as they are properly paired. Unparsed patterns are formally
-defined as the smallest set \(\overline{\cal P}\) such that
+Let \mlp and \mrp be meta\-lexemes corresponding to the opening and
+closing meta\-parentheses, whose concrete syntax is \texttt{\%(} and
+\texttt{\%)}. These meta\-parentheses are inserted by the user in
+order to guide matching the pattern against the parse tree by forcing
+the enclosed pattern to match one subtree. Meta\-parentheses can be
+present anywhere in the pattern as long as they are properly
+paired. Unparsed patterns are formally defined as the smallest set
+\(\overline{\cal P}\) such that
 \begin{itemize}
 
   \item \(\el \in \overline{\cal P}\);
@@ -29,7 +29,7 @@ defined as the smallest set \(\overline{\cal P}\) such that
 
   \item if \(\overline{p}_1, \overline{p}_2 \in \overline{\cal P}\)
     and \(\overline{p}_1 \neq \el\) then \([\mlp] \cdot \overline{p}_1
-    \cdot [\mrp] \cdot \overline{p}_2 \in \overline{\cal P}\). 
+    \cdot [\mrp] \cdot \overline{p}_2 \in \overline{\cal P}\).
 
 \end{itemize}
 
@@ -145,21 +145,22 @@ rewritten furthermore. A tiny example of meta\-parsing is given next.
   \textit{ES}(1) (ordered rules)\label{es1_metaparsing}}
 \end{figure}
 
-\smallskip
-
-\piccaption{A pattern tree\label{es1_pattern_tree}}
-\parpic[r]{\fbox{\includegraphics[bb=71 671 128 721]{pattern_tree}}}
-\noindent Pattern \(l_1 \; \texttt{\%(} \; l_2 \; l_3 \; \texttt{\%(}
+Pattern \(l_1 \; \texttt{\%(} \; l_2 \; l_3 \; \texttt{\%(}
 \; \texttt{\%x} \; l_4 \; \texttt{\%)} \; \texttt{\%)}\) is the
 simplified form of unparsed pattern \([l_1, \!\mlp, l_2, l_3, \!\mlp,
 \meta{\!x\!}, l_4, \mrp, \mrp].\) Its meta\-parsing by
 \textsf{meta\-parse} yields \([l_1, \!\pat{[l_2, \!l_3,
 \!\pat{[\meta{\!x\!}, l_4]}]}]\), which contains the pattern tree of
 figure~\ref{es1_pattern_tree}.
+\begin{figure}[b]
+  \centering
+  \includegraphics[bb=71 671 128 721]{pattern_tree}
+  \caption{A pattern tree}
+  \label{es1_pattern_tree}
+\end{figure}
 \begin{remark}
 Thereupon we write `pattern' instead of `meta\-parsed pattern'.
 \end{remark}
-
 
 \paragraph{Substitutions and Closed Patterns.}
 
@@ -190,7 +191,7 @@ substitutions is always a closed pattern.
 \framebox[\columnwidth]{%
 \(
 \begin{aligned}
-  \subst{\el}{\sigma} 
+  \subst{\el}{\sigma}
 &\eqn{1} \el\\
   \subst{\cons{\meta{x}}{p}}{\sigma}
 &\eqn{2} \cons{\sigma(x)}{\subst{p}{\sigma}}\\
@@ -263,10 +264,10 @@ conclusions of \textsf{EQ} or \textsf{PAT}).
 \,\TirName{\text{\sf ONE}}
 
 \inferrule*[right=\text{\sf PAT}]
-  {\close{p}_1 \sqsubseteq f_1 
+  {\close{p}_1 \sqsubseteq f_1
    \and
    \close{p}_2 \sqsubseteq f_2}
-  {\cons{\pat{\close{p}_1}}{\close{p}_2} \sqsubseteq 
+  {\cons{\pat{\close{p}_1}}{\close{p}_2} \sqsubseteq
    \cons{c(f_1)}{f_2}}
 \quad
 \inferrule*[right=\text{\sf SUB}]
@@ -318,7 +319,7 @@ unparsing operations.
 
     \end{itemize}
     The substitution \(\sigma\) resulting from the recursive call
-    (among the premises) must be compatible with the binding \(x
+    (among all the premises) must be compatible with the binding \(x
     \mapsto t\), i.e., \(\sigma \subseteq \sigma \oplus x \mapsto t\).
 
   \item \textbf{Unparsing.} The root of the first tree in the parse

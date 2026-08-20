@@ -91,7 +91,7 @@ lexemes are quoted.
 \begin{verbatim}
 ~$ match
      "assign(var('a') '='
-      sub(sub(var('a')'-'mul(var('b')'*'var('c'))) 
+      sub(sub(var('a')'-'mul(var('b')'*'var('c')))
       '-' var('d')))"
      "%x = %y - %z"
 ok, sigma={x<-var('a')
@@ -106,7 +106,7 @@ which the constructors were omitted:
 ~$ match
    "(('a')'='((('a')'-'(('b')'*'('c')))'-'('d')))"
    "%x = %y - %z"
-ok, sigma={x<-('a') 
+ok, sigma={x<-('a')
            y<-(('a')'-'(('b')'*'('c'))) z<-('d')}
 \end{verbatim}
 }
@@ -225,7 +225,7 @@ bool tree_match(tree t, const char *format)
 \end{verbatim}
 which takes an AST \texttt{t} and a pattern format with named
 pattern variables and returns true if the matching succeeded, and
-false otherwise. 
+false otherwise.
 
 The second interface implements unparsed patterns with unnamed pattern
 variables, represented by the \texttt{\%} escaping character followed
@@ -262,7 +262,7 @@ instance, the following command will issue a warning for all the read
 statements whose result is unused, but otherwise compile the file as
 usual:
 \begin{verbatim}
-gcc --tree-check="read(%x, %y, %z);" foo.c   
+gcc --tree-check="read(%x, %y, %z);" foo.c
 \end{verbatim}
 Indeed, because of the final semi\hyp{}colon, this pattern only
 matches complete statements and not simple expressions consisting of a
@@ -314,7 +314,7 @@ The limitations of unparsed patterns are as follows.
     serve only for matching code (on the left side of rewriting
     rules). However, trees can be built using conventional AST
     constructors out of the subtrees selected by the left\hyp{}hand
-    sides. 
+    sides.
 
 \end{itemize}
 Therefore, unparsed patterns are not meant to replace traditional,
