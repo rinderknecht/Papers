@@ -51,7 +51,7 @@ extra\hyp{}parenthesis found in the unparsed pattern are injected in
 the forest.
 
 
-\paragraph{Substitutions and Ground Patterns.} 
+\paragraph{Substitutions and Ground Patterns.}
 
 Let us extend substitutions to cope with patterns, not just
 meta\hyp{}variables. The effect of a substitution on a pattern is to
@@ -81,12 +81,12 @@ figure~\ref{f0_subst_def}.
 \framebox[\columnwidth]{%
 \(
 \begin{aligned}
-\subst{\el}{\sigma} 
+\subst{\el}{\sigma}
 &\eqn{1} \el\\
 \subst{\cons{\meta{x}}{p}}{\sigma}
 &\eqn{2} \cons{\sigma(x)}{\subst{p}{\sigma}}\\
 \subst{\cons{l}{p}}{\sigma}
-&\eqn{3} \cons{l}{\subst{p}{\sigma}} 
+&\eqn{3} \cons{l}{\subst{p}{\sigma}}
 \qquad \text{if} \; l \in {\cal L} \cup \{\lpar, \rpar\}
 \end{aligned}
 \)
@@ -149,7 +149,7 @@ forest \(f_2\).
 \caption{Tree matching \textit{F}(0)\label{f0_tree_matching_def}}
 \end{figure}
 
-\paragraph{Pattern Matching.} 
+\paragraph{Pattern Matching.}
 
 Pattern matching is defined by the rewrite system given in
 figure~\ref{f0_match_def}, where \(l \in {\cal L} \cup \{\rpar\}\),
@@ -158,10 +158,10 @@ figure~\ref{f0_match_def}, where \(l \in {\cal L} \cup \{\rpar\}\),
 \framebox[\columnwidth]{
 \(
 \begin{aligned}
-\match{\el}{\el}{\sigma} 
+\match{\el}{\el}{\sigma}
 & \rightarrow \sigma
 & \!\!\textsf{END}\\
-\match{\cons{l}{f}}{\cons{l}{p}}{\sigma} 
+\match{\cons{l}{f}}{\cons{l}{p}}{\sigma}
 & \rightarrow \match{f}{p}{\sigma}
 & \!\!\textsf{ELIM}\\
 \match{\cons{c(f_1)\!}{\!f_2}}{\cons{\lpar\!}{\!p}}{\sigma}
@@ -209,4 +209,3 @@ that it would have been more natural to define \textsf{UNPAR} as
 
 \subsection{Soundness}
 \input{f0_soundness}
-

@@ -229,36 +229,36 @@ parse trees. The substitution \(\sigma \oplus x \mapsto t\) is the
 \end{cases}
 \label{model:oplus}
 \end{equation}
-%% Let \(\sigma(\textsf{x}) = t_1\) and \(\sigma(\textsf{y}) = t_2\),
-%% where \textsf{x} and \textsf{y} are two different variables, \(t_1\)
-%% and \(t_2\) are parse trees. We have
-%% \begin{align*}
-%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{x})
-%%   &= \sigma(\textsf{x}) = t_1\\
-%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{y})
-%%   &= \sigma(\textsf{y}) = t_2\\
-%%      (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{z})
-%%   &= t_3
-%% \end{align*}
-%% which suggests that substitutions can be handily expressed as sets of
-%% bindings:
-%% \begin{align*}
-%%   \sigma &= \{\textsf{x} \mapsto t_1, \textsf{y} \mapsto t_2\}\\
-%%   \sigma \oplus \textsf{z} \mapsto t_3 &= \{\textsf{x} \mapsto t_1,
-%%   \textsf{y} \mapsto t_2, \textsf{z} \mapsto t_3\}\\
-%% \end{align*}
-%% But updates are not set unions as shown by
-%% \begin{align*}
-%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{x})
-%%   &= t'_1\\
-%%      (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{y})
-%%   &= \sigma(\textsf{y}) = t_2
-%% \end{align*}
-%% which is equivalent to the more readable
-%% \begin{equation*}
-%%   \sigma \oplus \textsf{x} \mapsto t'_1
-%%   = \{\textsf{x} \mapsto t'_1, \textsf{y} \mapsto t_2\}
-%% \end{equation*}
+Let \(\sigma(\textsf{x}) = t_1\) and \(\sigma(\textsf{y}) = t_2\),
+where \textsf{x} and \textsf{y} are two different variables, \(t_1\)
+and \(t_2\) are parse trees. We have
+\begin{align*}
+     (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{x})
+  &= \sigma(\textsf{x}) = t_1\\
+     (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{y})
+  &= \sigma(\textsf{y}) = t_2\\
+     (\sigma \oplus \textsf{z} \mapsto t_3)(\textsf{z})
+  &= t_3
+\end{align*}
+which suggests that substitutions can be handily expressed as sets of
+bindings:
+\begin{align*}
+  \sigma &= \{\textsf{x} \mapsto t_1, \textsf{y} \mapsto t_2\}\\
+  \sigma \oplus \textsf{z} \mapsto t_3 &= \{\textsf{x} \mapsto t_1,
+  \textsf{y} \mapsto t_2, \textsf{z} \mapsto t_3\}\\
+\end{align*}
+But updates are not set unions as shown by
+\begin{align*}
+     (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{x})
+  &= t'_1\\
+     (\sigma \oplus \textsf{x} \mapsto t'_1)(\textsf{y})
+  &= \sigma(\textsf{y}) = t_2
+\end{align*}
+which is equivalent to the more readable
+\begin{equation*}
+  \sigma \oplus \textsf{x} \mapsto t'_1
+  = \{\textsf{x} \mapsto t'_1, \textsf{y} \mapsto t_2\}
+\end{equation*}
 Let us extend updates to substitutions as follows:
 \begin{equation}
 (\sigma_1 \oplus \sigma_2)(y) \triangleq

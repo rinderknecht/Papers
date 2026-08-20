@@ -3,7 +3,7 @@
 \begin{theorem}[Soundness]\hfill
 \label{f0:soundness}
 \begin{center}
-If \(\smat{t}{p} \xrightarrow{+} \sigma\) 
+If \(\smat{t}{p} \xrightarrow{+} \sigma\)
 then \(\subst{p}{\sigma} \sqsubseteq t\).
 \end{center}
 \end{theorem}
@@ -39,8 +39,8 @@ definition of \((\rightarrow)\), we have
 \quad \Longrightarrow \quad
 \kappa' \xrightarrow{n+1} \sigma
 \]
-The complete\hyp{}induction principle implies then that \(\forall p,
-f, \sigma', n, \sigma.\ind{P}(\match{f}{p}{\sigma'}, n, \sigma)\),
+The complete induction principle implies then that \[\forall p,
+f, \sigma', n, \sigma.\ind{P}(\match{f}{p}{\sigma'}, n, \sigma),\]
 thus the soundness. We discriminate first on the length of \(\Delta\),
 then case by case on the shape of the configuration
 \(\match{f}{p}{\sigma'}\).
@@ -75,7 +75,7 @@ then case by case on the shape of the configuration
           &\rightarrow
             \match{f}{p}{\sigma'}
             &\textsf{ELIM} \notag\\
-          &\xrightarrow{n} \sigma 
+          &\xrightarrow{n} \sigma
             & (\Delta) \notag\\
             \match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}
           &\xrightarrow{n+1} \sigma \label{f0:sound:ELIM}
@@ -92,8 +92,8 @@ then case by case on the shape of the configuration
         \eqref{f0:sound:n} imply \eqref{f0:sound:ELIM},
         \eqref{f0:sound:6} and \eqref{f0:sound:ELIM:conc}, which,
         together, imply
-        \(\ind{P}(\match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}, n+1,
-        \sigma)\).
+        \[\ind{P}(\match{\cons{l}{f}}{\cons{l\!}{\!p}}{\sigma'}, n+1,
+        \sigma).\]
 
       \item Case where \textsf{UNPAR} extends \(\Delta\).\\ The syntax
         of the rule implies that there exists a sub\hyp{}forest \(f_2\)
@@ -138,8 +138,9 @@ then case by case on the shape of the configuration
         As a conclusion, the induction hypothesis and
         \eqref{f0:sound:n} imply \eqref{f0:sound:UNPAR},
         \eqref{f0:sound:6} and \eqref{f0:sound:8}, which, together,
-        imply \(\ind{P}(\match{\cons{c(f_1)}{f_2}}{\cons{\lpar}{p}}%
-        {\sigma'}, n+1, \sigma)\).
+        imply
+        \[\ind{P}(\match{\cons{c(f_1)}{f_2}}{\cons{\lpar}{p}}%
+        {\sigma'}, n+1, \sigma).\]
 
       \item Case where \textsf{BIND} extends \(\Delta\).\\ The syntax
         of the rule implies that there exists a substitution
@@ -173,7 +174,7 @@ then case by case on the shape of the configuration
         \[
         \forall y \in \dom{\sigma_1 \oplus x \mapsto t}.((\sigma_1
         \oplus x \mapsto t)(y) \!=\! \sigma(y))
-        \] 
+        \]
         By \eqref{model:dom}, \(x \in \dom{\sigma_1 \oplus x \mapsto
           t}\), so the previous equation can be instantiated by taking
         \(y = x\) and we draw \((\sigma_1 \oplus x \mapsto t)(x) =
@@ -195,11 +196,11 @@ then case by case on the shape of the configuration
         As a conclusion, the induction hypothesis and
         \eqref{f0:sound:n} imply \eqref{f0:sound:BIND},
         \eqref{f0:sound:incl2} and \eqref{f0:sound:9}, which,
-        together, imply 
-        \(\ind{P}(\match{\cons{t}{f}}%
+        together, imply
+        \[\ind{P}(\match{\cons{t}{f}}%
                         {\cons{\meta{x}}{p}}%
                         {\sigma_1},%
-                  n+1, \sigma)\). \hfill \(\Box\)
+                  n+1, \sigma).\] \hfill \(\Box\)
 
     \end{enumerate}
 

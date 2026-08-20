@@ -10,7 +10,7 @@ theorem.
 \begin{theorem}[Completeness]\hfill
 \begin{center}
 If   \(\subst{{p}}{\sigma} \sqsubseteq h\)
-then \(\smat{h}{{p}} \twoheadrightarrow \sigma'\) 
+then \(\smat{h}{{p}} \twoheadrightarrow \sigma'\)
 and  \(\sigma' \subseteq \sigma\).
 \end{center}
 \end{theorem}
@@ -57,7 +57,7 @@ case on the kind of rule that can end the derivation.
     that
     \begin{align}
       \subst{{p}}{\sigma} &\triangleq
-      \cons{h_1}{\close{p}} \label{es1:compl:2}\\ 
+      \cons{h_1}{\close{p}} \label{es1:compl:2}\\
       f &\triangleq \cons{h_1}{f'} \label{es1:compl:3}
     \end{align}
     and \(\Delta\) has the shape
@@ -100,8 +100,8 @@ case on the kind of rule that can end the derivation.
         pattern\hyp{}matching rule \textsf{ELIM}
         (figure~\ref{es1_match_def}), whose conclusion is then
         \begin{gather}
-          \smj{\cons{l}{f'}}{\cons{l}{{p}'}}{\sigma'} 
-          \label{es1:compl:8}  
+          \smj{\cons{l}{f'}}{\cons{l}{{p}'}}{\sigma'}
+          \label{es1:compl:8}
         \end{gather}
         By \eqref{es1:compl:3} and \eqref{es1:compl:4},
         \eqref{es1:compl:8} is equivalent to
@@ -206,7 +206,7 @@ case on the kind of rule that can end the derivation.
             \begin{itemize}
 
               \item \(x \not\in \dom{\sigma'}\).\\ Then, by definition
-                of inclusions of substitutions \eqref{model:incl} 
+                of inclusions of substitutions \eqref{model:incl}
                 implies
                 \begin{gather*}
                   \sigma' \subseteq \sigma' \oplus x \mapsto t_1
@@ -273,10 +273,9 @@ case on the kind of rule that can end the derivation.
             due to definition of inclusion \eqref{model:incl}. As a
             conclusion, the induction hypothesis and
             \eqref{es1:compl:1} imply \eqref{es1:compl:24} and
-            \eqref{es1:compl:25}, i.e.,
-            \(\ind{W}(\cons{\meta{x},l}{{p}''},
-            \cons{t_1,l}{f''}, \sigma, \sigma' \oplus x \mapsto t_1)\)
-            holds.
+            \eqref{es1:compl:25}, that is, we have:
+            \[\ind{W}(\cons{\meta{x},l}{{p}''},
+            \cons{t_1,l}{f''}, \sigma, \sigma' \oplus x \mapsto t_1).\]
 
           \item \(f' = \cons{t_2}{f''}\).\\ Then the premise of
             \textsf{EQ} is refined into
@@ -328,9 +327,9 @@ case on the kind of rule that can end the derivation.
     well as a constructor \(c\) and a two forests \(f_1\) and \(f_2\)
     such that
     \begin{align}
-         \subst{{p}}{\sigma} 
+         \subst{{p}}{\sigma}
       &= \cons{\pat{\close{p}_1}}{\close{p}_2} \label{es1:compl:29}\\
-         f 
+         f
       &= \cons{c(f_1)}{f_2} \label{es1:compl:30}
     \end{align}
     Equations \eqref{es1:compl:29} and \((\eqn{4})\) at
@@ -437,7 +436,7 @@ case on the kind of rule that can end the derivation.
     Let us assume that the induction hypothesis holds for the premise
     of \textsf{SUB}, i.e.,
     \begin{align}
-        \smat{f_1 \cdot f_2}{{p}} 
+        \smat{f_1 \cdot f_2}{{p}}
       &\twoheadrightarrow \sigma' \label{es1:compl:40}\\
       \sigma' &\subseteq \sigma \label{es1:compl:41}
     \end{align}
